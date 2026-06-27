@@ -30,6 +30,9 @@
   .calcgrid{display:grid;grid-template-columns:230px 1fr;gap:28px;align-items:start}
   @media(max-width:820px){.calcgrid{grid-template-columns:1fr}}
   .subh{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:14px}
+  .subh-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+  .btn.clear{border-color:#ffd9b8;color:var(--hap);background:#fff7f0}
+  .btn.clear:hover{background:var(--hap);color:#fff;border-color:var(--hap)}
   .vidas{display:flex;flex-direction:column;gap:8px}
   .vcell{display:grid;grid-template-columns:1fr 84px;align-items:center;gap:10px}
   .vcell label{font-size:12.5px;font-weight:700;color:var(--navy)}
@@ -162,7 +165,10 @@
         </div>
         <!-- item 2 -->
         <div>
-          <div class="subh">Seleção de operadoras e planos</div>
+          <div class="subh-row">
+            <div class="subh" style="margin-bottom:0">Seleção de operadoras e planos</div>
+            <button class="btn clear" onclick="novaCotacao()">Nova cotação</button>
+          </div>
           <div class="matrix-wrap"><table class="matrix"><tbody id="matrix"></tbody></table></div>
           <div class="matrix-hint">Para cada plano: escolha o plano, depois a <b>acomodação</b> (enfermaria/apartamento) e a <b>segmentação</b> (coparticipação parcial / sem coparticipação). Quando há só uma opção, ela é preenchida automaticamente. Os valores usam a distribuição de vidas ao lado (vidas × preço por faixa); Valor Total = soma da coluna.</div>
           <div class="cards" id="planCards"></div>
@@ -952,6 +958,7 @@ function buildVidas(){
 function onVida(el){let v=parseInt(el.value||'0',10);if(isNaN(v)||v<0)v=0;el.value=v;vidas[el.dataset.b]=v;refreshTot();recompute();}
 function refreshTot(){document.getElementById('totVidas').textContent=totVidas();}
 function zerar(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);refreshTot();recompute();}
+function novaCotacao(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);OPS.forEach(o=>matrixSel[o.key]=[0,1,2].map(()=>({plano:null,acom:null,seg:null})));refreshTot();recompute();}
 
 function buildMatrix(){
   let html=`<tr><th class="rowlabel">Seleciona Operadora</th>`+
