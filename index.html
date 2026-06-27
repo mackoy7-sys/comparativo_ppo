@@ -235,9 +235,9 @@
       <div class="desc">Compare a rede credenciada (hospitais, maternidades e prontos-socorros) entre o plano Hapvida e o concorrente selecionado.</div>
       <div id="redeStatus" class="empty">Abra esta aba para carregar a rede credenciada…</div>
       <div id="redeControls" style="display:none">
-        <div class="rede-opbar" id="redeOps"></div>
-        <div class="rede-filters">
-          <div class="fgroup"><label>Plano comparado (Hapvida × concorrente)</label><select class="cmp" id="redeCmp"></select></div>
+        <div class="matrix-wrap"><table class="matrix"><tbody id="redeMatrix"></tbody></table></div>
+        <div class="matrix-hint">Selecione o plano de cada operadora que deseja incluir (deixe "— Plano —" para ocultar). A rede credenciada é comparada lado a lado, por hospital.</div>
+        <div class="rede-filters" style="margin-top:16px">
           <div class="fgroup"><label>Região</label><select class="cmp" id="redeReg" style="min-width:200px"></select></div>
           <div class="fgroup" style="flex:1"><label>Buscar hospital</label><input class="search" id="redeSearch" placeholder="nome do hospital…"></div>
         </div>
@@ -1170,86 +1170,110 @@ function renderDetail(){
 
 /* ================= TAB 3: REDE DE ATENDIMENTO ================= */
 let REDE=null, redeInit=false, redeLoading=false;
-let redeState={op:null,arq:null,reg:'Todas',q:'',show:'todos'};
+let redeSel={}; OPS.forEach(o=>redeSel[o.key]=null);
+let redeState={reg:'Todas',q:'',show:'todos'};
 const HAP_PLANS=new Set(CATALOG.filter(c=>c.operadora==='Hapvida').map(c=>c.label));
-const REDE_OPS=[{key:'Amil',color:'#2D6CC0'},{key:'SulAmérica',label:'Sulamérica',color:'#5B9BD5'},{key:'Bradesco',color:'#C8102E'},{key:'Porto Seguro',color:'#0B2A6B'}];
-const CONC_MAP={'Amil':'Amil','SulAmérica':'Sulamérica','Bradesco':'Bradesco Seguros','Porto Seguro':'Porto Seguro'};
-function compsFor(opKey){return DATA.filter(c=>c.concorrente===CONC_MAP[opKey]);}
+const CONC_TO_OP={'Amil':'Amil','Sulamérica':'SulAmérica','Bradesco Seguros':'Bradesco','Porto Seguro':'Porto Seguro'};
 const cov=v=>!!v&&v!=='-';
-function redePlanos(arq){const ps=REDE[arq].planos;const hap=ps.filter(p=>HAP_PLANS.has(p));const conc=ps.filter(p=>!HAP_PLANS.has(p));return {hap,conc,order:[...hap,...conc]};}
+let REDE_HOSP={}, PLAN_COV={}, PLAN_BY_OP={};
+function hkey(n,b){return ((n||'')+'||'+(b||'')).toLowerCase().replace(/\s+/g,' ').trim();}
+function buildRedeIndex(){
+  REDE_HOSP={};PLAN_COV={};PLAN_BY_OP={};
+  const concByArq={};DATA.forEach(c=>concByArq[c.arquivo]=c.concorrente);
+  for(const arq in REDE){
+    const D=REDE[arq];
+    D.hospitais.forEach(h=>{
+      const k=hkey(h.nome,h.bairro);
+      if(!REDE_HOSP[k])REDE_HOSP[k]={nome:h.nome,bairro:h.bairro,regiao:h.regiao};
+      else if(!REDE_HOSP[k].regiao&&h.regiao)REDE_HOSP[k].regiao=h.regiao;
+      D.planos.forEach(p=>{
+        const op=HAP_PLANS.has(p)?'Hapvida':CONC_TO_OP[concByArq[arq]];
+        if(!op)return;
+        const pk=op+'|'+p;
+        (PLAN_BY_OP[op]=PLAN_BY_OP[op]||new Set()).add(p);
+        PLAN_COV[pk]=PLAN_COV[pk]||{};
+        const cur=PLAN_COV[pk][k];
+        if(cur===undefined||cur==='-')PLAN_COV[pk][k]=h.cob[p];
+      });
+    });
+  }
+  for(const op in PLAN_BY_OP)PLAN_BY_OP[op]=[...PLAN_BY_OP[op]].sort();
+}
 function loadRede(){
   if(redeInit||redeLoading)return;
   redeLoading=true;
   const st=document.getElementById('redeStatus');st.style.display='block';st.textContent='Carregando rede credenciada…';
-  fetch('rede.json').then(r=>r.json()).then(d=>{REDE=d;redeInit=true;redeLoading=false;initRede();})
+  fetch('rede.json').then(r=>r.json()).then(d=>{REDE=d;buildRedeIndex();redeInit=true;redeLoading=false;initRede();})
     .catch(()=>{redeLoading=false;st.textContent='Não foi possível carregar a rede credenciada (rede.json).';});
 }
 function initRede(){
-  const bar=document.getElementById('redeOps');
-  bar.innerHTML='<span class="rede-oplabel">Operadora</span>'+
-    `<div class="opbtn base" style="background:#FF6B00">Hapvida<span class="bt">base</span></div>`+
-    REDE_OPS.map(o=>`<button class="opbtn" data-rop="${o.key}" style="background:${o.color}">${o.label||o.key}</button>`).join('');
-  bar.querySelectorAll('[data-rop]').forEach(b=>b.onclick=()=>selectRedeOp(b.dataset.rop));
-  const sel=document.getElementById('redeCmp');
-  sel.onchange=()=>{redeState.arq=sel.value;redeState.reg='Todas';redeState.q='';document.getElementById('redeSearch').value='';buildRegOptions();renderRede();};
+  // default: Hapvida + Amil para já mostrar uma comparação
+  redeSel['Hapvida']=(PLAN_BY_OP['Hapvida']||[])[0]||null;
+  redeSel['Amil']=(PLAN_BY_OP['Amil']||[])[0]||null;
+  buildRedeMatrix();
   document.getElementById('redeSearch').addEventListener('input',e=>{redeState.q=e.target.value.toLowerCase().trim();renderRede();});
-  const shows=[['todos','Todos'],['dif','Só onde diferem'],['exh','Exclusivos Hapvida'],['exc','Exclusivos concorrente']];
+  const shows=[['todos','Todos'],['dif','Só onde diferem'],['exh','Só Hapvida cobre']];
   const sc=document.getElementById('redeShow');
   sc.innerHTML=shows.map(([k,l])=>`<div class="chip ${redeState.show===k?'active':''}" data-sh="${k}">${l}</div>`).join('');
   sc.querySelectorAll('[data-sh]').forEach(e=>e.onclick=()=>{redeState.show=e.dataset.sh;sc.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.sh===redeState.show));renderRede();});
-  document.getElementById('redeLegend').innerHTML='<b>Legenda:</b> <span>H Hospital</span><span>M Maternidade</span><span>PS Pronto-socorro</span><span>PSA PS adulto</span><span>PSP PS infantil</span><span>PA Pronto atend.</span><span>AMB Ambulatório</span><span>¹²³ observações</span><span>— não credenciado</span>';
+  document.getElementById('redeLegend').innerHTML='<b>Legenda:</b> <span>H Hospital</span><span>M Maternidade</span><span>PS Pronto-socorro</span><span>PSA PS adulto</span><span>PSP PS infantil</span><span>PA Pronto atend.</span><span>AMB Ambulatório</span><span>¹²³ observações</span><span>— não credenciado/não listado</span>';
   document.getElementById('redeReg').onchange=e=>{redeState.reg=e.target.value;renderRede();};
   document.getElementById('redeStatus').style.display='none';
   document.getElementById('redeControls').style.display='block';
-  selectRedeOp('Amil');
-}
-function selectRedeOp(opKey){
-  redeState.op=opKey;
-  document.querySelectorAll('#redeOps .opbtn[data-rop]').forEach(b=>b.classList.toggle('active',b.dataset.rop===opKey));
-  const comps=compsFor(opKey);
-  const sel=document.getElementById('redeCmp');
-  sel.innerHTML=comps.map(c=>{const {hap,conc}=redePlanos(c.arquivo);return `<option value="${c.arquivo}">Hapvida ${hap.join('/')} × ${conc.join('/')}</option>`;}).join('');
-  redeState.arq=comps[0].arquivo; sel.value=redeState.arq;
-  redeState.reg='Todas'; redeState.q=''; document.getElementById('redeSearch').value='';
   buildRegOptions(); renderRede();
 }
+function buildRedeMatrix(){
+  let html=`<tr><th class="rowlabel">Operadora</th>`+OPS.map(o=>`<th><div class="ophead" style="background:${o.color}">${o.label}</div></th>`).join('')+`</tr>`;
+  html+=`<tr><th class="rowlabel">Plano</th>`+OPS.map(o=>{const list=PLAN_BY_OP[o.key]||[];const sel=redeSel[o.key];
+    return `<td><select onchange="onRedePlan('${o.key}',this.value)"><option value="">— Plano —</option>`+
+      list.map(p=>`<option ${sel===p?'selected':''}>${p}</option>`).join('')+`</select></td>`;}).join('')+`</tr>`;
+  document.getElementById('redeMatrix').innerHTML=html;
+}
+function onRedePlan(op,v){redeSel[op]=v||null;redeState.reg='Todas';document.getElementById('redeReg').value='Todas';buildRegOptions();renderRede();}
+function redeCols(){return OPS.filter(o=>redeSel[o.key]).map(o=>({op:o.key,label:o.label,color:o.color,plano:redeSel[o.key],key:o.key+'|'+redeSel[o.key],isHap:o.key==='Hapvida'}));}
+function redeKeys(cols){const s=new Set();cols.forEach(c=>{const m=PLAN_COV[c.key]||{};for(const k in m)s.add(k);});return [...s];}
 function buildRegOptions(){
-  const regs=[...new Set(REDE[redeState.arq].hospitais.map(h=>h.regiao).filter(Boolean))];
+  const cols=redeCols();const regs=[...new Set(redeKeys(cols).map(k=>REDE_HOSP[k]&&REDE_HOSP[k].regiao).filter(Boolean))].sort();
   document.getElementById('redeReg').innerHTML=`<option value="Todas">Todas as regiões</option>`+regs.map(r=>`<option value="${r}">${r}</option>`).join('');
 }
 function renderRede(){
-  const arq=redeState.arq;const D=REDE[arq];const {hap,conc,order}=redePlanos(arq);
-  const hapCov=h=>hap.some(p=>cov(h.cob[p])), concCov=h=>conc.some(p=>cov(h.cob[p]));
-  const all=D.hospitais;
-  const kHap=all.filter(hapCov).length, kConc=all.filter(concCov).length;
-  const kExH=all.filter(h=>hapCov(h)&&!concCov(h)).length, kExC=all.filter(h=>!hapCov(h)&&concCov(h)).length;
-  const concNome=conc.join(' / ');
-  document.getElementById('redeKpis').innerHTML=`
-    <div class="kpi"><div class="lbl">Hospitais na praça</div><div class="val">${all.length}</div><div class="foot">unidades listadas no comparativo</div></div>
-    <div class="kpi"><div class="lbl">Cobertura Hapvida</div><div class="val hap">${kHap}</div><div class="foot">${hap.join(' / ')}</div></div>
-    <div class="kpi"><div class="lbl">Cobertura ${D.planos.length>2?'concorrente':concNome}</div><div class="val" style="color:#185fa5">${kConc}</div><div class="foot">${concNome}</div></div>
-    <div class="kpi"><div class="lbl">Exclusivos Hapvida</div><div class="val hap">${kExH}</div><div class="foot">só Hapvida cobre · ${kExC} só concorrente</div></div>`;
-  let rows=all.filter(h=>{
-    if(redeState.reg!=='Todas'&&h.regiao!==redeState.reg)return false;
-    if(redeState.q&&!(h.nome||'').toLowerCase().includes(redeState.q))return false;
-    const hc=hapCov(h),cc=concCov(h);
-    if(redeState.show==='dif'&&hc===cc)return false;
-    if(redeState.show==='exh'&&!(hc&&!cc))return false;
-    if(redeState.show==='exc'&&!(!hc&&cc))return false;
+  const cols=redeCols();
+  const kpiBox=document.getElementById('redeKpis'),tbl=document.getElementById('redeTable'),cnt=document.getElementById('redeCount');
+  if(!cols.length){kpiBox.innerHTML='';cnt.textContent='';tbl.innerHTML='';
+    document.getElementById('redeLegend').style.display='none';
+    cnt.innerHTML='<div class="empty">Selecione o plano de ao menos uma operadora para comparar a rede.</div>';return;}
+  document.getElementById('redeLegend').style.display='flex';
+  const covOf=(c,k)=>{const m=PLAN_COV[c.key]||{};return m[k];};
+  const isCov=(c,k)=>cov(covOf(c,k));
+  // só hospitais cobertos por ao menos um plano selecionado (remove notas/ruído sem cobertura)
+  const keys=redeKeys(cols).filter(k=>cols.some(c=>isCov(c,k)));
+  // KPIs: hospitais comparados + cobertura por plano (até 4)
+  let kp=`<div class="kpi"><div class="lbl">Hospitais comparados</div><div class="val">${keys.length}</div><div class="foot">${cols.length} plano(s) selecionado(s)</div></div>`;
+  cols.slice(0,3).forEach(c=>{const n=keys.filter(k=>isCov(c,k)).length;
+    kp+=`<div class="kpi"><div class="lbl">${c.label}</div><div class="val" style="color:${c.color}">${n}</div><div class="foot">${c.plano} · cobre ${n}/${keys.length}</div></div>`;});
+  const hapCol=cols.find(c=>c.isHap);
+  if(hapCol){const exh=keys.filter(k=>isCov(hapCol,k)&&cols.filter(c=>!c.isHap).every(c=>!isCov(c,k))).length;
+    kp+=`<div class="kpi"><div class="lbl">Só Hapvida cobre</div><div class="val hap">${exh}</div><div class="foot">vs. os demais selecionados</div></div>`;}
+  kpiBox.innerHTML=kp;
+  // rows
+  let rows=keys.map(k=>({k,h:REDE_HOSP[k]||{}})).filter(r=>{
+    if(redeState.reg!=='Todas'&&r.h.regiao!==redeState.reg)return false;
+    if(redeState.q&&!((r.h.nome||'').toLowerCase().includes(redeState.q)))return false;
+    const flags=cols.map(c=>isCov(c,r.k));
+    if(redeState.show==='dif'&&flags.every(f=>f===flags[0]))return false;
+    if(redeState.show==='exh'){if(!hapCol)return false;const hc=isCov(hapCol,r.k);const others=cols.filter(c=>!c.isHap).some(c=>isCov(c,r.k));if(!(hc&&!others))return false;}
     return true;
-  });
-  document.getElementById('redeCount').textContent=`${rows.length} de ${all.length} hospitais exibidos.`;
+  }).sort((a,b)=>(a.h.regiao||'').localeCompare(b.h.regiao||'')||(a.h.nome||'').localeCompare(b.h.nome||''));
+  cnt.textContent=`${rows.length} de ${keys.length} hospitais exibidos.`;
   let head=`<thead><tr><th>Hospital</th><th>Bairro</th><th>Região</th>`+
-    hap.map(p=>`<th class="cov-head hap">${p}</th>`).join('')+
-    conc.map(p=>`<th class="cov-head cc">${p}</th>`).join('')+`</tr></thead>`;
+    cols.map(c=>`<th class="cov-head" style="background:${c.color}">${c.label}<br><span style="font-weight:400;font-size:10px">${c.plano}</span></th>`).join('')+`</tr></thead>`;
   let body='<tbody>';
-  rows.forEach(h=>{
-    body+=`<tr><td class="hname">${h.nome||''}</td><td>${h.bairro||''}</td><td>${h.regiao||''}</td>`+
-      hap.map(p=>{const v=h.cob[p];return cov(v)?`<td class="cov yhap">${v}</td>`:`<td class="cov no">—</td>`;}).join('')+
-      conc.map(p=>{const v=h.cob[p];return cov(v)?`<td class="cov ycc">${v}</td>`:`<td class="cov no">—</td>`;}).join('')+`</tr>`;
+  rows.forEach(r=>{
+    body+=`<tr><td class="hname">${r.h.nome||''}</td><td>${r.h.bairro||''}</td><td>${r.h.regiao||''}</td>`+
+      cols.map(c=>{const v=covOf(c,r.k);return cov(v)?`<td class="cov ${c.isHap?'yhap':'ycc'}">${v}</td>`:`<td class="cov no">—</td>`;}).join('')+`</tr>`;
   });
   body+='</tbody>';
-  document.getElementById('redeTable').innerHTML=head+body;
+  tbl.innerHTML=head+body;
 }
 
 /* init */
