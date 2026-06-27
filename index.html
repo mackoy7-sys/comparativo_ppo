@@ -18,6 +18,7 @@
   header.top h1{font-size:24px;font-weight:600;letter-spacing:.2px}
   header.top .sub{color:#aebfd4;font-size:14px;margin-top:4px}
   .brand-pill{background:var(--hap);color:#fff;font-weight:700;font-size:13px;padding:7px 14px;border-radius:8px;letter-spacing:.5px}
+  .upd{font-size:12px;color:#aebfd4}
   .tabs{display:flex;gap:4px;margin-bottom:22px;border-bottom:1px solid var(--line)}
   .tab{padding:12px 22px;font-size:14.5px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-1px}
   .tab:hover{color:var(--navy)} .tab.active{color:var(--hap);border-bottom-color:var(--hap)}
@@ -131,6 +132,13 @@
   .conv-result{font-size:12.5px;color:var(--muted);margin-top:10px}
   .xclose{cursor:pointer;color:var(--muted);font-size:22px;line-height:1;background:none;border:none}
   /* rede de atendimento */
+  .rede-opbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .rede-oplabel{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-right:6px}
+  .opbtn{border:none;border-radius:9px;padding:11px 20px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;opacity:.5;text-align:center}
+  .opbtn.active{opacity:1;box-shadow:0 0 0 3px rgba(15,39,64,.2)}
+  .opbtn:not(.base):hover{opacity:.85}
+  .opbtn.base{opacity:1;cursor:default}
+  .opbtn.base .bt{display:block;font-size:9px;font-weight:600;letter-spacing:.5px;opacity:.85;text-transform:uppercase;margin-top:1px}
   .rede-filters{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px}
   .rede-filters .search{min-width:200px}
   .legend-rede{font-size:12px;color:var(--muted);margin:12px 0;display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center}
@@ -158,7 +166,10 @@
       <h1>Cotação &amp; Comparativo PPO</h1>
       <div class="sub">Hapvida NotreDame vs Amil · Bradesco · Porto Seguro · SulAmérica — planos PME</div>
     </div>
-    <div class="brand-pill">HAPVIDA · VENDAS DIGITAL</div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <div class="brand-pill">HAPVIDA · VENDAS DIGITAL</div>
+      <div class="upd">Atualizado em 26/06/2026</div>
+    </div>
   </header>
 
   <div class="tabs">
@@ -224,8 +235,9 @@
       <div class="desc">Compare a rede credenciada (hospitais, maternidades e prontos-socorros) entre o plano Hapvida e o concorrente selecionado.</div>
       <div id="redeStatus" class="empty">Abra esta aba para carregar a rede credenciada…</div>
       <div id="redeControls" style="display:none">
+        <div class="rede-opbar" id="redeOps"></div>
         <div class="rede-filters">
-          <div class="fgroup"><label>Comparativo (Hapvida × concorrente)</label><select class="cmp" id="redeCmp"></select></div>
+          <div class="fgroup"><label>Plano comparado (Hapvida × concorrente)</label><select class="cmp" id="redeCmp"></select></div>
           <div class="fgroup"><label>Região</label><select class="cmp" id="redeReg" style="min-width:200px"></select></div>
           <div class="fgroup" style="flex:1"><label>Buscar hospital</label><input class="search" id="redeSearch" placeholder="nome do hospital…"></div>
         </div>
@@ -238,7 +250,7 @@
     </div>
   </div>
 
-  <footer>Cotação e comparativo gerados a partir das tabelas PPO Hapvida · valores sujeitos a condições contratuais e vigência de tabela · uso interno comercial.</footer>
+  <footer>Cotação e comparativo gerados a partir das tabelas PPO Hapvida · valores sujeitos a condições contratuais e vigência de tabela · uso interno comercial · <b>atualizado em 26/06/2026</b>.</footer>
 </div>
 
 <!-- Conversor modal -->
@@ -1158,8 +1170,11 @@ function renderDetail(){
 
 /* ================= TAB 3: REDE DE ATENDIMENTO ================= */
 let REDE=null, redeInit=false, redeLoading=false;
-let redeState={arq:null,reg:'Todas',q:'',show:'todos'};
+let redeState={op:null,arq:null,reg:'Todas',q:'',show:'todos'};
 const HAP_PLANS=new Set(CATALOG.filter(c=>c.operadora==='Hapvida').map(c=>c.label));
+const REDE_OPS=[{key:'Amil',color:'#2D6CC0'},{key:'SulAmérica',label:'Sulamérica',color:'#5B9BD5'},{key:'Bradesco',color:'#C8102E'},{key:'Porto Seguro',color:'#0B2A6B'}];
+const CONC_MAP={'Amil':'Amil','SulAmérica':'Sulamérica','Bradesco':'Bradesco Seguros','Porto Seguro':'Porto Seguro'};
+function compsFor(opKey){return DATA.filter(c=>c.concorrente===CONC_MAP[opKey]);}
 const cov=v=>!!v&&v!=='-';
 function redePlanos(arq){const ps=REDE[arq].planos;const hap=ps.filter(p=>HAP_PLANS.has(p));const conc=ps.filter(p=>!HAP_PLANS.has(p));return {hap,conc,order:[...hap,...conc]};}
 function loadRede(){
@@ -1170,9 +1185,12 @@ function loadRede(){
     .catch(()=>{redeLoading=false;st.textContent='Não foi possível carregar a rede credenciada (rede.json).';});
 }
 function initRede(){
+  const bar=document.getElementById('redeOps');
+  bar.innerHTML='<span class="rede-oplabel">Operadora</span>'+
+    `<div class="opbtn base" style="background:#FF6B00">Hapvida<span class="bt">base</span></div>`+
+    REDE_OPS.map(o=>`<button class="opbtn" data-rop="${o.key}" style="background:${o.color}">${o.label||o.key}</button>`).join('');
+  bar.querySelectorAll('[data-rop]').forEach(b=>b.onclick=()=>selectRedeOp(b.dataset.rop));
   const sel=document.getElementById('redeCmp');
-  sel.innerHTML=DATA.map(c=>`<option value="${c.arquivo}">${c.concorrente} — ${c.id}</option>`).join('');
-  redeState.arq=DATA[0].arquivo; sel.value=redeState.arq;
   sel.onchange=()=>{redeState.arq=sel.value;redeState.reg='Todas';redeState.q='';document.getElementById('redeSearch').value='';buildRegOptions();renderRede();};
   document.getElementById('redeSearch').addEventListener('input',e=>{redeState.q=e.target.value.toLowerCase().trim();renderRede();});
   const shows=[['todos','Todos'],['dif','Só onde diferem'],['exh','Exclusivos Hapvida'],['exc','Exclusivos concorrente']];
@@ -1181,10 +1199,19 @@ function initRede(){
   sc.querySelectorAll('[data-sh]').forEach(e=>e.onclick=()=>{redeState.show=e.dataset.sh;sc.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.sh===redeState.show));renderRede();});
   document.getElementById('redeLegend').innerHTML='<b>Legenda:</b> <span>H Hospital</span><span>M Maternidade</span><span>PS Pronto-socorro</span><span>PSA PS adulto</span><span>PSP PS infantil</span><span>PA Pronto atend.</span><span>AMB Ambulatório</span><span>¹²³ observações</span><span>— não credenciado</span>';
   document.getElementById('redeReg').onchange=e=>{redeState.reg=e.target.value;renderRede();};
-  buildRegOptions();
   document.getElementById('redeStatus').style.display='none';
   document.getElementById('redeControls').style.display='block';
-  renderRede();
+  selectRedeOp('Amil');
+}
+function selectRedeOp(opKey){
+  redeState.op=opKey;
+  document.querySelectorAll('#redeOps .opbtn[data-rop]').forEach(b=>b.classList.toggle('active',b.dataset.rop===opKey));
+  const comps=compsFor(opKey);
+  const sel=document.getElementById('redeCmp');
+  sel.innerHTML=comps.map(c=>{const {hap,conc}=redePlanos(c.arquivo);return `<option value="${c.arquivo}">Hapvida ${hap.join('/')} × ${conc.join('/')}</option>`;}).join('');
+  redeState.arq=comps[0].arquivo; sel.value=redeState.arq;
+  redeState.reg='Todas'; redeState.q=''; document.getElementById('redeSearch').value='';
+  buildRegOptions(); renderRede();
 }
 function buildRegOptions(){
   const regs=[...new Set(REDE[redeState.arq].hospitais.map(h=>h.regiao).filter(Boolean))];
