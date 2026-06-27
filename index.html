@@ -45,8 +45,11 @@
   table.matrix{border-collapse:separate;border-spacing:6px;min-width:720px}
   table.matrix th.rowlabel{text-align:right;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;padding-right:8px;background:none}
   table.matrix .ophead{border-radius:8px;padding:9px 8px;text-align:center;font-size:13.5px;font-weight:700;color:#fff;min-width:128px}
-  table.matrix select{width:100%;min-width:128px;padding:7px 8px;font-size:12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--txt);cursor:pointer}
+  table.matrix select{display:block;width:100%;min-width:128px;padding:7px 8px;font-size:12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--txt);cursor:pointer;margin-bottom:5px}
+  table.matrix select:last-child{margin-bottom:0}
   table.matrix select:focus{outline:none;border-color:var(--hap)}
+  table.matrix select.sub{font-size:11px;color:var(--muted)}
+  table.matrix select:disabled{background:#f4f6fa;color:#aab2bf;cursor:not-allowed}
   table.matrix .valcell{border:1px solid var(--line);border-radius:8px;padding:8px 10px;text-align:right;font-size:13px;background:#fff;color:var(--muted);min-width:128px}
   table.matrix .valcell.has{background:#fffaf4;color:var(--txt);font-weight:600}
   table.matrix tr.totalrow .valcell{font-weight:700;background:#f7f9fc;border-color:var(--navy);color:var(--navy);font-size:14px}
@@ -161,7 +164,7 @@
         <div>
           <div class="subh">Seleção de operadoras e planos</div>
           <div class="matrix-wrap"><table class="matrix"><tbody id="matrix"></tbody></table></div>
-          <div class="matrix-hint">Selecione até 3 planos por operadora. Os valores são calculados com a distribuição de vidas ao lado (vidas × preço por faixa). Valor Total = soma dos planos da coluna.</div>
+          <div class="matrix-hint">Para cada plano: escolha o plano, depois a <b>acomodação</b> (enfermaria/apartamento) e a <b>segmentação</b> (coparticipação parcial / sem coparticipação). Quando há só uma opção, ela é preenchida automaticamente. Os valores usam a distribuição de vidas ao lado (vidas × preço por faixa); Valor Total = soma da coluna.</div>
           <div class="cards" id="planCards"></div>
         </div>
       </div>
@@ -928,11 +931,16 @@ function switchTab(t){
 
 /* ================= TAB 1: CALCULADORA ================= */
 let vidas = Object.fromEntries(BANDS.map(b=>[b,0]));
-let matrixSel = {}; OPS.forEach(o=>matrixSel[o.key]=[null,null,null]);
+let matrixSel = {}; OPS.forEach(o=>matrixSel[o.key]=[0,1,2].map(()=>({plano:null,acom:null,seg:null})));
 let categoria = CATEGORIES[0];
 
 function plansOf(opKey){return CATALOG.filter(c=>c.operadora===opKey && c.categoria===categoria);}
 function planById(id){return CATALOG.find(c=>c.id===id);}
+function planLabels(opKey){const seen=[];plansOf(opKey).forEach(c=>{if(!seen.includes(c.label))seen.push(c.label);});return seen;}
+function acomsFor(opKey,label){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&!s.includes(c.acomodacao))s.push(c.acomodacao);});return s;}
+function segsFor(opKey,label,acom){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&c.acomodacao===acom&&!s.includes(c.coparticipacao))s.push(c.coparticipacao);});return s;}
+function segLabel(s){return s.includes('Sem')?'Sem Coparticipação':'Coparticipação Parcial';}
+function resolved(opKey,slot){const x=matrixSel[opKey][slot];if(x.plano&&x.acom&&x.seg)return CATALOG.find(c=>c.operadora===opKey&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg)||null;return null;}
 function planTotal(c){return BANDS.reduce((s,b)=>s+vidas[b]*(c.precos[b]||0),0);}
 function totVidas(){return BANDS.reduce((s,b)=>s+vidas[b],0);}
 
@@ -951,10 +959,7 @@ function buildMatrix(){
     OPS.map(o=>`<th><div class="ophead" style="background:${o.color}">${o.label}</div></th>`).join('')+`</tr>`;
   for(let s=0;s<3;s++){
     html+=`<tr>`+(s===0?`<th class="rowlabel" rowspan="3">Seleciona Plano</th>`:'')+
-      OPS.map((o,i)=>{const opts=plansOf(o.key);const sel=matrixSel[o.key][s];
-        return `<td><select onchange="onMatrix('${o.key}',${s},this.value)"><option value="">— Plano ${s+1} —</option>`+
-          opts.map(c=>`<option value="${c.id}" ${sel==c.id?'selected':''}>${c.label} · ${c.acomodacao}</option>`).join('')+`</select></td>`;
-      }).join('')+`</tr>`;
+      OPS.map((o,i)=>`<td>${slotCell(o.key,s)}</td>`).join('')+`</tr>`;
   }
   for(let s=0;s<3;s++){
     html+=`<tr><th class="rowlabel">Valor ${s+1}</th>`+OPS.map((o,i)=>`<td><div class="valcell" id="v-${i}-${s}">0,00</div></td>`).join('')+`</tr>`;
@@ -962,15 +967,32 @@ function buildMatrix(){
   html+=`<tr class="totalrow"><th class="rowlabel">Valor Total R$</th>`+OPS.map((o,i)=>`<td><div class="valcell" id="vt-${i}">0,00</div></td>`).join('')+`</tr>`;
   document.getElementById('matrix').innerHTML=html;
 }
-function onMatrix(opKey,slot,val){matrixSel[opKey][slot]=val?+val:null;updateValues();renderCards();calcResult();}
+function slotCell(opKey,slot){
+  const x=matrixSel[opKey][slot];
+  const labels=planLabels(opKey);
+  let h=`<select onchange="onPlano('${opKey}',${slot},this.value)"><option value="">— Plano ${slot+1} —</option>`+
+    labels.map(l=>`<option ${x.plano===l?'selected':''}>${l}</option>`).join('')+`</select>`;
+  const acoms=x.plano?acomsFor(opKey,x.plano):[];
+  h+=`<select class="sub" ${x.plano?'':'disabled'} onchange="onAcom('${opKey}',${slot},this.value)"><option value="">Acomodação</option>`+
+    acoms.map(a=>`<option ${x.acom===a?'selected':''}>${a}</option>`).join('')+`</select>`;
+  const segs=(x.plano&&x.acom)?segsFor(opKey,x.plano,x.acom):[];
+  h+=`<select class="sub" ${x.acom?'':'disabled'} onchange="onSeg('${opKey}',${slot},this.value)"><option value="">Segmentação</option>`+
+    segs.map(g=>`<option value="${g}" ${x.seg===g?'selected':''}>${segLabel(g)}</option>`).join('')+`</select>`;
+  return h;
+}
+function onPlano(opKey,slot,v){const x=matrixSel[opKey][slot];x.plano=v||null;x.acom=null;x.seg=null;
+  if(x.plano){const a=acomsFor(opKey,x.plano);if(a.length===1){x.acom=a[0];const g=segsFor(opKey,x.plano,x.acom);if(g.length===1)x.seg=g[0];}}recompute();}
+function onAcom(opKey,slot,v){const x=matrixSel[opKey][slot];x.acom=v||null;x.seg=null;
+  if(x.acom){const g=segsFor(opKey,x.plano,x.acom);if(g.length===1)x.seg=g[0];}recompute();}
+function onSeg(opKey,slot,v){matrixSel[opKey][slot].seg=v||null;recompute();}
 function updateValues(){
   OPS.forEach((o,i)=>{let tot=0;
-    for(let s=0;s<3;s++){const id=matrixSel[o.key][s];const c=id?planById(id):null;const v=c?planTotal(c):0;tot+=v;
+    for(let s=0;s<3;s++){const c=resolved(o.key,s);const v=c?planTotal(c):0;tot+=v;
       const cell=document.getElementById(`v-${i}-${s}`);if(cell){cell.textContent=fmt(v);cell.classList.toggle('has',v>0);}}
     const tc=document.getElementById(`vt-${i}`);if(tc){tc.textContent=fmt(tot);tc.classList.toggle('has',tot>0);}
   });
 }
-function selectedPlans(){const ids=[];OPS.forEach(o=>matrixSel[o.key].forEach(id=>{if(id&&!ids.includes(id))ids.push(id);}));return ids.map(planById).filter(Boolean);}
+function selectedPlans(){const ids=[];OPS.forEach(o=>{for(let s=0;s<3;s++){const c=resolved(o.key,s);if(c&&!ids.includes(c.id))ids.push(c.id);}});return ids.map(planById).filter(Boolean);}
 function recompute(){buildMatrix();updateValues();renderCards();calcResult();}
 
 function renderCards(){
