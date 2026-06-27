@@ -130,6 +130,23 @@
   .modal tr.tot td{font-weight:700;border-top:2px solid var(--navy);background:#f7f9fc}
   .conv-result{font-size:12.5px;color:var(--muted);margin-top:10px}
   .xclose{cursor:pointer;color:var(--muted);font-size:22px;line-height:1;background:none;border:none}
+  /* rede de atendimento */
+  .rede-filters{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px}
+  .rede-filters .search{min-width:200px}
+  .legend-rede{font-size:12px;color:var(--muted);margin:12px 0;display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center}
+  .legend-rede b{color:var(--navy);font-weight:700}
+  .rede-tbl{width:100%;border-collapse:collapse;font-size:13px}
+  .rede-tbl th,.rede-tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+  .rede-tbl thead th{background:#f7f9fc;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+  .rede-tbl thead th.cov-head{text-align:center;color:#fff;border-radius:7px 7px 0 0}
+  .rede-tbl thead th.cov-head.hap{background:var(--hap)} .rede-tbl thead th.cov-head.cc{background:#2D6CC0}
+  .rede-tbl td.cov{text-align:center;font-weight:600;font-size:12.5px;white-space:nowrap}
+  .rede-tbl td.cov.no{color:#c2c8d2}
+  .rede-tbl td.cov.yhap{background:#fff7f0;color:var(--hap-dark)}
+  .rede-tbl td.cov.ycc{background:#eef5fc;color:#185fa5}
+  .rede-tbl tbody tr:hover{background:#fafbfd}
+  .rede-tbl .hname{font-weight:600;color:var(--navy)}
+  .rede-count{font-size:12.5px;color:var(--muted);margin:4px 0 10px}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
   @media(max-width:680px){.vidas{grid-template-columns:repeat(3,1fr)}.cmp-head{grid-template-columns:1fr}.vs{flex-direction:row}}
 </style>
@@ -147,6 +164,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="calc" onclick="switchTab('calc')">Calculadora de cotação</button>
     <button class="tab" data-tab="comp" onclick="switchTab('comp')">Comparativo de planos</button>
+    <button class="tab" data-tab="rede" onclick="switchTab('rede')">Rede de atendimento</button>
   </div>
 
   <!-- ============ TAB CALCULADORA ============ -->
@@ -196,6 +214,27 @@
       <div class="chart-box"><canvas id="bandChart" role="img" aria-label="Preço por faixa etária"></canvas></div>
       <div style="overflow-x:auto;margin-top:18px"><table class="band" id="bandTable"></table></div>
       <div class="note" id="cmpNote"></div>
+    </div>
+  </div>
+
+  <!-- ============ TAB REDE ============ -->
+  <div class="tabpane" id="pane-rede">
+    <div class="panel">
+      <h2>Rede de atendimento — comparativo</h2>
+      <div class="desc">Compare a rede credenciada (hospitais, maternidades e prontos-socorros) entre o plano Hapvida e o concorrente selecionado.</div>
+      <div id="redeStatus" class="empty">Abra esta aba para carregar a rede credenciada…</div>
+      <div id="redeControls" style="display:none">
+        <div class="rede-filters">
+          <div class="fgroup"><label>Comparativo (Hapvida × concorrente)</label><select class="cmp" id="redeCmp"></select></div>
+          <div class="fgroup"><label>Região</label><select class="cmp" id="redeReg" style="min-width:200px"></select></div>
+          <div class="fgroup" style="flex:1"><label>Buscar hospital</label><input class="search" id="redeSearch" placeholder="nome do hospital…"></div>
+        </div>
+        <div class="chips" id="redeShow" style="margin:8px 0 16px"></div>
+        <div class="kpis" id="redeKpis"></div>
+        <div class="legend-rede" id="redeLegend"></div>
+        <div class="rede-count" id="redeCount"></div>
+        <div style="overflow-x:auto"><table class="rede-tbl" id="redeTable"></table></div>
+      </div>
     </div>
   </div>
 
@@ -932,7 +971,9 @@ function switchTab(t){
   document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
   document.getElementById('pane-calc').classList.toggle('active',t==='calc');
   document.getElementById('pane-comp').classList.toggle('active',t==='comp');
+  document.getElementById('pane-rede').classList.toggle('active',t==='rede');
   if(t==='comp'){if(!compInit){initComp();compInit=true;}else if(bandChart)bandChart.resize();}
+  if(t==='rede'){loadRede();}
 }
 
 /* ================= TAB 1: CALCULADORA ================= */
@@ -1113,6 +1154,75 @@ function renderDetail(){
     note.innerHTML=same?`Mesma regra de coparticipação (${hap.coparticipacao}) e acomodação (${hap.acomodacao}) — comparação direta de mensalidade.`
       :`Atenção: o plano Hapvida (<b>${hap.coparticipacao}</b>) e o concorrente (<b>${conc.coparticipacao}</b>) têm regimes de coparticipação diferentes — o preço cheio não captura a diferença de custo no uso. Acomodação: ${hap.acomodacao}.`;}
   else note.innerHTML='';
+}
+
+/* ================= TAB 3: REDE DE ATENDIMENTO ================= */
+let REDE=null, redeInit=false, redeLoading=false;
+let redeState={arq:null,reg:'Todas',q:'',show:'todos'};
+const HAP_PLANS=new Set(CATALOG.filter(c=>c.operadora==='Hapvida').map(c=>c.label));
+const cov=v=>!!v&&v!=='-';
+function redePlanos(arq){const ps=REDE[arq].planos;const hap=ps.filter(p=>HAP_PLANS.has(p));const conc=ps.filter(p=>!HAP_PLANS.has(p));return {hap,conc,order:[...hap,...conc]};}
+function loadRede(){
+  if(redeInit||redeLoading)return;
+  redeLoading=true;
+  const st=document.getElementById('redeStatus');st.style.display='block';st.textContent='Carregando rede credenciada…';
+  fetch('rede.json').then(r=>r.json()).then(d=>{REDE=d;redeInit=true;redeLoading=false;initRede();})
+    .catch(()=>{redeLoading=false;st.textContent='Não foi possível carregar a rede credenciada (rede.json).';});
+}
+function initRede(){
+  const sel=document.getElementById('redeCmp');
+  sel.innerHTML=DATA.map(c=>`<option value="${c.arquivo}">${c.concorrente} — ${c.id}</option>`).join('');
+  redeState.arq=DATA[0].arquivo; sel.value=redeState.arq;
+  sel.onchange=()=>{redeState.arq=sel.value;redeState.reg='Todas';redeState.q='';document.getElementById('redeSearch').value='';buildRegOptions();renderRede();};
+  document.getElementById('redeSearch').addEventListener('input',e=>{redeState.q=e.target.value.toLowerCase().trim();renderRede();});
+  const shows=[['todos','Todos'],['dif','Só onde diferem'],['exh','Exclusivos Hapvida'],['exc','Exclusivos concorrente']];
+  const sc=document.getElementById('redeShow');
+  sc.innerHTML=shows.map(([k,l])=>`<div class="chip ${redeState.show===k?'active':''}" data-sh="${k}">${l}</div>`).join('');
+  sc.querySelectorAll('[data-sh]').forEach(e=>e.onclick=()=>{redeState.show=e.dataset.sh;sc.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.sh===redeState.show));renderRede();});
+  document.getElementById('redeLegend').innerHTML='<b>Legenda:</b> <span>H Hospital</span><span>M Maternidade</span><span>PS Pronto-socorro</span><span>PSA PS adulto</span><span>PSP PS infantil</span><span>PA Pronto atend.</span><span>AMB Ambulatório</span><span>¹²³ observações</span><span>— não credenciado</span>';
+  document.getElementById('redeReg').onchange=e=>{redeState.reg=e.target.value;renderRede();};
+  buildRegOptions();
+  document.getElementById('redeStatus').style.display='none';
+  document.getElementById('redeControls').style.display='block';
+  renderRede();
+}
+function buildRegOptions(){
+  const regs=[...new Set(REDE[redeState.arq].hospitais.map(h=>h.regiao).filter(Boolean))];
+  document.getElementById('redeReg').innerHTML=`<option value="Todas">Todas as regiões</option>`+regs.map(r=>`<option value="${r}">${r}</option>`).join('');
+}
+function renderRede(){
+  const arq=redeState.arq;const D=REDE[arq];const {hap,conc,order}=redePlanos(arq);
+  const hapCov=h=>hap.some(p=>cov(h.cob[p])), concCov=h=>conc.some(p=>cov(h.cob[p]));
+  const all=D.hospitais;
+  const kHap=all.filter(hapCov).length, kConc=all.filter(concCov).length;
+  const kExH=all.filter(h=>hapCov(h)&&!concCov(h)).length, kExC=all.filter(h=>!hapCov(h)&&concCov(h)).length;
+  const concNome=conc.join(' / ');
+  document.getElementById('redeKpis').innerHTML=`
+    <div class="kpi"><div class="lbl">Hospitais na praça</div><div class="val">${all.length}</div><div class="foot">unidades listadas no comparativo</div></div>
+    <div class="kpi"><div class="lbl">Cobertura Hapvida</div><div class="val hap">${kHap}</div><div class="foot">${hap.join(' / ')}</div></div>
+    <div class="kpi"><div class="lbl">Cobertura ${D.planos.length>2?'concorrente':concNome}</div><div class="val" style="color:#185fa5">${kConc}</div><div class="foot">${concNome}</div></div>
+    <div class="kpi"><div class="lbl">Exclusivos Hapvida</div><div class="val hap">${kExH}</div><div class="foot">só Hapvida cobre · ${kExC} só concorrente</div></div>`;
+  let rows=all.filter(h=>{
+    if(redeState.reg!=='Todas'&&h.regiao!==redeState.reg)return false;
+    if(redeState.q&&!(h.nome||'').toLowerCase().includes(redeState.q))return false;
+    const hc=hapCov(h),cc=concCov(h);
+    if(redeState.show==='dif'&&hc===cc)return false;
+    if(redeState.show==='exh'&&!(hc&&!cc))return false;
+    if(redeState.show==='exc'&&!(!hc&&cc))return false;
+    return true;
+  });
+  document.getElementById('redeCount').textContent=`${rows.length} de ${all.length} hospitais exibidos.`;
+  let head=`<thead><tr><th>Hospital</th><th>Bairro</th><th>Região</th>`+
+    hap.map(p=>`<th class="cov-head hap">${p}</th>`).join('')+
+    conc.map(p=>`<th class="cov-head cc">${p}</th>`).join('')+`</tr></thead>`;
+  let body='<tbody>';
+  rows.forEach(h=>{
+    body+=`<tr><td class="hname">${h.nome||''}</td><td>${h.bairro||''}</td><td>${h.regiao||''}</td>`+
+      hap.map(p=>{const v=h.cob[p];return cov(v)?`<td class="cov yhap">${v}</td>`:`<td class="cov no">—</td>`;}).join('')+
+      conc.map(p=>{const v=h.cob[p];return cov(v)?`<td class="cov ycc">${v}</td>`:`<td class="cov no">—</td>`;}).join('')+`</tr>`;
+  });
+  body+='</tbody>';
+  document.getElementById('redeTable').innerHTML=head+body;
 }
 
 /* init */
