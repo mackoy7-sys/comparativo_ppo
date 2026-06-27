@@ -18,68 +18,72 @@
   header.top h1{font-size:24px;font-weight:600;letter-spacing:.2px}
   header.top .sub{color:#aebfd4;font-size:14px;margin-top:4px}
   .brand-pill{background:var(--hap);color:#fff;font-weight:700;font-size:13px;padding:7px 14px;border-radius:8px;letter-spacing:.5px}
-  /* tabs */
   .tabs{display:flex;gap:4px;margin-bottom:22px;border-bottom:1px solid var(--line)}
-  .tab{padding:12px 22px;font-size:14.5px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:8px}
-  .tab:hover{color:var(--navy)}
-  .tab.active{color:var(--hap);border-bottom-color:var(--hap)}
+  .tab{padding:12px 22px;font-size:14.5px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-1px}
+  .tab:hover{color:var(--navy)} .tab.active{color:var(--hap);border-bottom-color:var(--hap)}
   .tabpane{display:none} .tabpane.active{display:block}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:22px}
   .panel h2{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px}
   .panel .step{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--hap);color:#fff;font-size:13px;font-weight:700;margin-right:4px}
   .panel .desc{font-size:13px;color:var(--muted);margin-bottom:16px}
-  /* vidas grid */
-  .vidas{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
-  .vcell label{display:block;font-size:12px;font-weight:700;color:var(--navy);margin-bottom:5px}
-  .vcell input{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;font-size:16px;text-align:center;color:var(--txt)}
+  /* calc layout */
+  .calcgrid{display:grid;grid-template-columns:330px 1fr;gap:26px;align-items:start}
+  @media(max-width:920px){.calcgrid{grid-template-columns:1fr}}
+  .subh{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:14px}
+  .catsel{width:100%;margin-bottom:18px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;color:var(--txt)}
+  .vidas{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .vcell label{display:block;font-size:11.5px;font-weight:700;color:var(--navy);margin-bottom:4px}
+  .vcell input{width:100%;padding:9px;border:1px solid var(--line);border-radius:9px;font-size:15px;text-align:center;color:var(--txt)}
   .vcell input:focus{outline:none;border-color:var(--hap);box-shadow:0 0 0 3px rgba(255,107,0,.12)}
-  .vbar{display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:10px}
+  .vbar{display:flex;flex-direction:column;gap:10px;margin-top:16px}
   .totvidas{font-size:14px;color:var(--muted)} .totvidas b{font-size:22px;color:var(--navy);margin-left:6px}
   .btn{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s}
   .btn:hover{border-color:var(--hap);color:var(--hap)}
   .btn.solid{background:var(--navy);color:#fff;border-color:var(--navy)} .btn.solid:hover{background:var(--hap);border-color:var(--hap);color:#fff}
-  .btn.ghost{background:transparent;border:none;color:var(--hap);padding:0;font-weight:700;text-decoration:underline}
-  /* plan selector */
-  .selbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-  .chips{display:flex;gap:7px;flex-wrap:wrap}
-  .chip{border:1px solid var(--line);background:#fff;color:var(--txt);padding:6px 13px;border-radius:18px;font-size:12.5px;cursor:pointer;font-weight:500}
-  .chip:hover{border-color:var(--hap)} .chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
-  input.search{flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px}
-  input.search:focus{outline:none;border-color:var(--hap)}
-  .opgroup{margin-bottom:14px}
-  .opgroup .ophead{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:8px 0 8px;display:flex;align-items:center;gap:8px}
-  .opgroup .ophead .selall{font-size:11px;font-weight:600;color:var(--hap);cursor:pointer;text-transform:none;letter-spacing:0}
-  .plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px}
-  .pitem{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:11px;padding:11px 13px;cursor:pointer;transition:.12s;background:#fff}
-  .pitem:hover{border-color:var(--hap)} .pitem.sel{border-color:var(--hap);background:#fff7f0}
-  .pitem input{margin-top:3px;width:16px;height:16px;accent-color:var(--hap);flex-shrink:0}
-  .pitem .pn{font-size:14px;font-weight:600;color:var(--navy)}
-  .pitem .pmeta{font-size:11px;color:var(--muted);margin-top:3px;display:flex;gap:5px;flex-wrap:wrap}
-  .tagb{font-size:10.5px;padding:2px 7px;border-radius:5px;background:#eef1f6;color:#42506a;font-weight:600}
-  .tagb.copart{background:#fff3df;color:#854f0b} .tagb.sem{background:var(--green-bg);color:#0f6e56} .tagb.hapv{background:#fdeee8;color:var(--hap-dark)}
+  /* matrix */
+  .matrix-wrap{overflow-x:auto}
+  table.matrix{border-collapse:separate;border-spacing:6px;min-width:720px}
+  table.matrix th.rowlabel{text-align:right;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;padding-right:8px;background:none}
+  table.matrix .ophead{border-radius:8px;padding:9px 8px;text-align:center;font-size:13.5px;font-weight:700;color:#fff;min-width:128px}
+  table.matrix select{width:100%;min-width:128px;padding:7px 8px;font-size:12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--txt);cursor:pointer}
+  table.matrix select:focus{outline:none;border-color:var(--hap)}
+  table.matrix .valcell{border:1px solid var(--line);border-radius:8px;padding:8px 10px;text-align:right;font-size:13px;background:#fff;color:var(--muted);min-width:128px}
+  table.matrix .valcell.has{background:#fffaf4;color:var(--txt);font-weight:600}
+  table.matrix tr.totalrow .valcell{font-weight:700;background:#f7f9fc;border-color:var(--navy);color:var(--navy);font-size:14px}
+  .matrix-hint{font-size:12px;color:var(--muted);margin-top:8px}
+  /* plan cards */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px;margin-top:22px}
+  .pcard{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff;border-top:3px solid var(--navy)}
+  .pcard .pcop{font-size:13px;font-weight:700}
+  .pcard .pcname{font-size:18px;font-weight:700;color:var(--navy);margin:5px 0 9px}
+  .pcard .pcmeta{font-size:12.5px;color:var(--muted);line-height:1.75}
+  .pcard .pcval{font-size:20px;font-weight:700;color:var(--navy);margin-top:11px}
+  .pcard .pcval small{font-size:12px;color:var(--muted);font-weight:400}
+  .pcard .vd{margin-top:11px;width:100%;font-size:12.5px;padding:7px}
   /* kpis + results */
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
   .kpi{background:#f7f9fc;border-radius:12px;padding:16px 18px}
   .kpi .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
   .kpi .val{font-size:24px;font-weight:700;margin-top:5px;color:var(--navy)} .kpi .val.hap{color:var(--hap)} .kpi .val.green{color:#0f6e56}
   .kpi .foot{font-size:11.5px;color:var(--muted);margin-top:3px}
-  table{width:100%;border-collapse:collapse;font-size:13.5px}
-  th,td{padding:11px 12px;text-align:right;border-bottom:1px solid var(--line)}
-  th:first-child,td:first-child{text-align:left}
-  thead th{background:#f7f9fc;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
-  tbody tr:hover{background:#fafbfd}
+  table.res{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.res th,table.res td{padding:11px 12px;text-align:right;border-bottom:1px solid var(--line)}
+  table.res th:first-child,table.res td:first-child{text-align:left}
+  table.res thead th{background:#f7f9fc;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+  table.res tbody tr:hover{background:#fafbfd}
   tr.best td{background:#f1faf6} tr.haprow td:first-child{box-shadow:inset 3px 0 0 var(--hap)}
   .rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;background:#eef1f6;color:#42506a;margin-right:8px}
   .rank.g{background:var(--green-bg);color:#0f6e56}
   .pn-cell b{font-weight:700;color:var(--navy)} .pn-cell .op{font-size:11.5px;color:var(--muted)}
-  .barwrap{background:#eef1f6;border-radius:6px;height:10px;width:90px;display:inline-block;overflow:hidden;vertical-align:middle;margin-left:8px}
-  .barwrap i{display:block;height:100%;border-radius:6px;background:var(--blue)} .barwrap i.hap{background:var(--hap)}
   .empty{text-align:center;color:var(--muted);padding:36px 10px;font-size:14px}
   .note{font-size:12.5px;color:var(--muted);background:#f7f9fc;border-left:3px solid var(--hap);padding:10px 14px;border-radius:0 8px 8px 0;margin-top:16px}
-  /* comparativo detail */
-  select{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;min-width:300px;color:var(--txt);cursor:pointer}
+  /* comparativo */
+  select.cmp{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;min-width:300px;color:var(--txt);cursor:pointer}
   .fgroup{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
   .fgroup label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:#fff;color:var(--txt);padding:6px 13px;border-radius:18px;font-size:12.5px;cursor:pointer;font-weight:500}
+  .chip:hover{border-color:var(--hap)} .chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
   .cmp-head{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch;margin:6px 0 20px}
   .side{border-radius:14px;padding:18px 20px;border:1px solid var(--line)}
   .side.hapvida{background:#fff7f0;border-color:#ffd9b8} .side.conc{background:#f3f7fc;border-color:#d3e3f5}
@@ -95,11 +99,15 @@
   .diff{font-size:22px;font-weight:800;padding:8px 12px;border-radius:10px;text-align:center}
   .diff.good{background:var(--green-bg);color:#0f6e56} .diff.bad{background:var(--red-bg);color:#a32d2d}
   .diff small{display:block;font-size:11px;font-weight:600;opacity:.8}
+  table.band{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.band th,table.band td{padding:9px 11px;text-align:right;border-bottom:1px solid var(--line)}
+  table.band th:first-child,table.band td:first-child{text-align:left}
+  table.band thead th{background:#f7f9fc;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
   td.win{color:#0f6e56;font-weight:700} td.win::after{content:" ▼";font-size:10px}
   tr.total-row td{font-weight:700;background:#f7f9fc;font-size:14px;border-top:2px solid var(--navy)}
   .cell-hap{background:#fff7f0}
   .chart-box{position:relative;width:100%;height:360px}
-  /* modal */
+  /* modais */
   .overlay{position:fixed;inset:0;background:rgba(15,39,64,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
   .overlay.show{display:flex}
   .modal{background:#fff;border-radius:16px;padding:26px 28px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
@@ -108,6 +116,11 @@
   .modal textarea{width:100%;min-height:130px;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:14px;font-family:inherit;resize:vertical}
   .modal textarea:focus{outline:none;border-color:var(--hap)}
   .modal .mfoot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;flex-wrap:wrap}
+  .modal table{width:100%;border-collapse:collapse;font-size:13px}
+  .modal table th,.modal table td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line)}
+  .modal table th:first-child,.modal table td:first-child{text-align:left}
+  .modal table thead th{color:var(--muted);font-size:11.5px;text-transform:uppercase}
+  .modal tr.tot td{font-weight:700;border-top:2px solid var(--navy);background:#f7f9fc}
   .conv-result{font-size:12.5px;color:var(--muted);margin-top:10px}
   .xclose{cursor:pointer;color:var(--muted);font-size:22px;line-height:1;background:none;border:none}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
@@ -132,35 +145,32 @@
   <!-- ============ TAB CALCULADORA ============ -->
   <div class="tabpane active" id="pane-calc">
     <div class="panel">
-      <h2><span class="step">1</span> Distribuição de vidas</h2>
-      <div class="desc">Informe a quantidade de vidas por faixa etária, ou use o conversor de datas de nascimento.</div>
-      <div class="vidas" id="vidasGrid"></div>
-      <div class="vbar">
-        <div class="totvidas">Total de vidas <b id="totVidas">0</b></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" onclick="openConv()">Conversor de datas de nascimento</button>
-          <button class="btn" onclick="zerar()">Zerar</button>
+      <div class="calcgrid">
+        <!-- item 1 -->
+        <div>
+          <div class="subh">Distribuição de vidas</div>
+          <select class="catsel" id="catSel" onchange="recompute()"></select>
+          <div class="vidas" id="vidasGrid"></div>
+          <div class="vbar">
+            <div class="totvidas">Total de vidas <b id="totVidas">0</b></div>
+            <button class="btn" onclick="openConv()">Conversor de datas de nascimento</button>
+            <button class="btn" onclick="zerar()">Zerar vidas</button>
+          </div>
+        </div>
+        <!-- item 2 -->
+        <div>
+          <div class="subh">Seleção de operadoras e planos</div>
+          <div class="matrix-wrap"><table class="matrix"><tbody id="matrix"></tbody></table></div>
+          <div class="matrix-hint">Selecione até 3 planos por operadora. Os valores são calculados com a distribuição de vidas ao lado (vidas × preço por faixa). Valor Total = soma dos planos da coluna.</div>
+          <div class="cards" id="planCards"></div>
         </div>
       </div>
     </div>
+
     <div class="panel">
-      <h2><span class="step">2</span> Selecione os planos para comparar</h2>
-      <div class="desc">Marque um ou mais planos — pode misturar operadoras. Os planos da Hapvida vêm destacados.</div>
-      <div class="selbar">
-        <input class="search" id="search" placeholder="Buscar plano (ex.: Infinity, Bronze, Direto Nacional)…">
-        <div class="chips" id="opFilter"></div>
-      </div>
-      <div class="selbar" style="margin-bottom:10px">
-        <div class="chips" id="acomFilter"></div>
-        <span style="font-size:12.5px;color:var(--muted)" id="selCount">0 selecionados</span>
-        <button class="btn ghost" onclick="clearSel()">limpar seleção</button>
-      </div>
-      <div id="planList"></div>
-    </div>
-    <div class="panel">
-      <h2><span class="step">3</span> Resultado da cotação</h2>
-      <div class="desc">Custo mensal = soma de (vidas × preço da faixa) para cada plano selecionado.</div>
-      <div id="resultArea"><div class="empty">Informe as vidas e selecione ao menos um plano para ver a cotação.</div></div>
+      <h2>Resultado consolidado</h2>
+      <div class="desc">Ranking dos planos selecionados (todas as operadoras), do menor para o maior custo mensal.</div>
+      <div id="resultArea"><div class="empty">Informe as vidas e selecione ao menos um plano na matriz para ver o ranking.</div></div>
       <div class="note" id="resNote" style="display:none"></div>
     </div>
   </div>
@@ -171,17 +181,11 @@
     <div class="panel">
       <h2>Detalhe do comparativo</h2>
       <div class="desc">Selecione um comparativo para ver metadados, evolução de preço por faixa etária e tabela detalhada.</div>
-      <div class="fgroup">
-        <label>Comparativo</label>
-        <select id="cmpSelect"></select>
-      </div>
-      <div class="fgroup">
-        <label>Acomodação</label>
-        <div class="chips" id="acomCmp"></div>
-      </div>
+      <div class="fgroup"><label>Comparativo</label><select class="cmp" id="cmpSelect"></select></div>
+      <div class="fgroup"><label>Acomodação</label><div class="chips" id="acomCmp"></div></div>
       <div class="cmp-head" id="cmpHead"></div>
       <div class="chart-box"><canvas id="bandChart" role="img" aria-label="Preço por faixa etária"></canvas></div>
-      <div style="overflow-x:auto;margin-top:18px"><table id="bandTable"></table></div>
+      <div style="overflow-x:auto;margin-top:18px"><table class="band" id="bandTable"></table></div>
       <div class="note" id="cmpNote"></div>
     </div>
   </div>
@@ -193,19 +197,24 @@
 <div class="overlay" id="convOverlay">
   <div class="modal">
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
-      <h3>Conversor de datas de nascimento</h3>
-      <button class="xclose" onclick="closeConv()">&times;</button>
+      <h3>Conversor de datas de nascimento</h3><button class="xclose" onclick="closeConv()">&times;</button>
     </div>
     <p>Cole uma data por linha (dd/mm/aaaa ou aaaa-mm-dd). Vamos calcular a idade e distribuir nas faixas etárias.</p>
     <textarea id="convInput" placeholder="15/03/1990&#10;02/11/1975&#10;1998-07-22"></textarea>
     <div class="conv-result" id="convResult"></div>
     <div class="mfoot">
       <span style="font-size:12px;color:var(--muted)">Idade calculada na data de hoje.</span>
-      <div style="display:flex;gap:10px">
-        <button class="btn" onclick="closeConv()">Cancelar</button>
-        <button class="btn solid" onclick="applyConv()">Distribuir nas faixas</button>
-      </div>
+      <div style="display:flex;gap:10px"><button class="btn" onclick="closeConv()">Cancelar</button><button class="btn solid" onclick="applyConv()">Distribuir nas faixas</button></div>
     </div>
+  </div>
+</div>
+<!-- Detalhe do plano modal -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div id="detailHead"></div><button class="xclose" onclick="closeDetail()">&times;</button>
+    </div>
+    <div id="detailBody"></div>
   </div>
 </div>
 
@@ -898,7 +907,15 @@ const DATA = [{"arquivo": "AMIL - HAPVIDA 900.pdf", "n_planos": 2, "planos": [{"
 const BANDS = ["00 a 18","19 a 23","24 a 28","29 a 33","34 a 38","39 a 43","44 a 48","49 a 53","54 a 58","59 ou mais"];
 const fmt = n => (n==null||isNaN(n))?'—':n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmt0 = n => n==null?'—':Math.round(n).toLocaleString('pt-BR');
-const OP_ORDER=['Hapvida','Amil','Bradesco','Porto Seguro','SulAmérica'];
+const OPS=[
+  {key:'Hapvida',label:'Hapvida',color:'#FF6B00'},
+  {key:'Amil',label:'Amil',color:'#2D6CC0'},
+  {key:'SulAmérica',label:'Sulamérica',color:'#5B9BD5'},
+  {key:'Bradesco',label:'Bradesco',color:'#C8102E'},
+  {key:'Porto Seguro',label:'Porto Seguro',color:'#0B2A6B'},
+];
+CATALOG.forEach(c=>{if(!c.categoria)c.categoria='Geral';});
+const CATEGORIES=[...new Set(CATALOG.map(c=>c.categoria))];
 
 /* ===== tabs ===== */
 let compInit=false;
@@ -906,65 +923,101 @@ function switchTab(t){
   document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
   document.getElementById('pane-calc').classList.toggle('active',t==='calc');
   document.getElementById('pane-comp').classList.toggle('active',t==='comp');
-  if(t==='comp'){ if(!compInit){initComp();compInit=true;} else if(bandChart) bandChart.resize(); }
+  if(t==='comp'){if(!compInit){initComp();compInit=true;}else if(bandChart)bandChart.resize();}
 }
 
 /* ================= TAB 1: CALCULADORA ================= */
 let vidas = Object.fromEntries(BANDS.map(b=>[b,0]));
-let selected = new Set();
-let fOp='Todas', fAcom='Todas', q='';
+let matrixSel = {}; OPS.forEach(o=>matrixSel[o.key]=[null,null,null]);
+let categoria = CATEGORIES[0];
+
+function plansOf(opKey){return CATALOG.filter(c=>c.operadora===opKey && c.categoria===categoria);}
+function planById(id){return CATALOG.find(c=>c.id===id);}
+function planTotal(c){return BANDS.reduce((s,b)=>s+vidas[b]*(c.precos[b]||0),0);}
+function totVidas(){return BANDS.reduce((s,b)=>s+vidas[b],0);}
+
+function buildCat(){document.getElementById('catSel').innerHTML=CATEGORIES.map(c=>`<option value="${c}" ${c===categoria?'selected':''}>${c}</option>`).join('');}
 function buildVidas(){
   document.getElementById('vidasGrid').innerHTML = BANDS.map(b=>
     `<div class="vcell"><label>${b}</label><input type="number" min="0" step="1" value="0" data-b="${b}" onchange="onVida(this)" oninput="onVida(this)"></div>`).join('');
 }
-function onVida(el){let v=parseInt(el.value||'0',10);if(isNaN(v)||v<0)v=0;el.value=v;vidas[el.dataset.b]=v;refreshTot();calc();}
-function refreshTot(){document.getElementById('totVidas').textContent=BANDS.reduce((s,b)=>s+vidas[b],0);}
-function zerar(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);refreshTot();calc();}
-function buildFilters(){
-  const ops=['Todas',...OP_ORDER.filter(o=>CATALOG.some(c=>c.operadora===o))];
-  document.getElementById('opFilter').innerHTML=ops.map(o=>`<div class="chip ${fOp===o?'active':''}" data-op="${o}">${o}</div>`).join('');
-  const ac=['Todas','Apartamento','Enfermaria'];
-  document.getElementById('acomFilter').innerHTML=ac.map(a=>`<div class="chip ${fAcom===a?'active':''}" data-ac="${a}">${a}</div>`).join('');
-  document.querySelectorAll('#opFilter [data-op]').forEach(e=>e.onclick=()=>{fOp=e.dataset.op;buildFilters();renderList();});
-  document.querySelectorAll('#acomFilter [data-ac]').forEach(e=>e.onclick=()=>{fAcom=e.dataset.ac;buildFilters();renderList();});
+function onVida(el){let v=parseInt(el.value||'0',10);if(isNaN(v)||v<0)v=0;el.value=v;vidas[el.dataset.b]=v;refreshTot();recompute();}
+function refreshTot(){document.getElementById('totVidas').textContent=totVidas();}
+function zerar(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);refreshTot();recompute();}
+
+function buildMatrix(){
+  categoria=document.getElementById('catSel').value||CATEGORIES[0];
+  let html=`<tr><th class="rowlabel">Seleciona Operadora</th>`+
+    OPS.map(o=>`<th><div class="ophead" style="background:${o.color}">${o.label}</div></th>`).join('')+`</tr>`;
+  for(let s=0;s<3;s++){
+    html+=`<tr>`+(s===0?`<th class="rowlabel" rowspan="3">Seleciona Plano</th>`:'')+
+      OPS.map((o,i)=>{const opts=plansOf(o.key);const sel=matrixSel[o.key][s];
+        return `<td><select onchange="onMatrix('${o.key}',${s},this.value)"><option value="">— Plano ${s+1} —</option>`+
+          opts.map(c=>`<option value="${c.id}" ${sel==c.id?'selected':''}>${c.label} · ${c.acomodacao}</option>`).join('')+`</select></td>`;
+      }).join('')+`</tr>`;
+  }
+  for(let s=0;s<3;s++){
+    html+=`<tr><th class="rowlabel">Valor ${s+1}</th>`+OPS.map((o,i)=>`<td><div class="valcell" id="v-${i}-${s}">0,00</div></td>`).join('')+`</tr>`;
+  }
+  html+=`<tr class="totalrow"><th class="rowlabel">Valor Total R$</th>`+OPS.map((o,i)=>`<td><div class="valcell" id="vt-${i}">0,00</div></td>`).join('')+`</tr>`;
+  document.getElementById('matrix').innerHTML=html;
 }
-function filtered(){return CATALOG.filter(c=>(fOp==='Todas'||c.operadora===fOp)&&(fAcom==='Todas'||c.acomodacao===fAcom)&&(q===''||(c.label+' '+c.operadora).toLowerCase().includes(q)));}
-function renderList(){
-  const list=filtered();const byop={};list.forEach(c=>{(byop[c.operadora]=byop[c.operadora]||[]).push(c)});
-  const ops=OP_ORDER.filter(o=>byop[o]);let html='';
-  ops.forEach(op=>{const isHap=op==='Hapvida';
-    html+=`<div class="opgroup"><div class="ophead">${op} · ${byop[op].length} plano(s) <span class="selall" onclick="selAll('${op}')">selecionar todos</span></div><div class="plist">`;
-    byop[op].forEach(c=>{const cop=c.coparticipacao.includes('Sem')?`<span class="tagb sem">Sem copart.</span>`:`<span class="tagb copart">Coparticipação</span>`;
-      html+=`<label class="pitem ${isHap?'hap':''} ${selected.has(c.id)?'sel':''}" data-id="${c.id}"><input type="checkbox" ${selected.has(c.id)?'checked':''} onchange="toggle(${c.id},this)"><div><div class="pn">${c.label}</div><div class="pmeta"><span class="tagb ${isHap?'hapv':''}">${c.acomodacao}</span>${cop}</div></div></label>`;});
-    html+='</div></div>';});
-  document.getElementById('planList').innerHTML=html||'<div class="empty">Nenhum plano para este filtro.</div>';
+function onMatrix(opKey,slot,val){matrixSel[opKey][slot]=val?+val:null;updateValues();renderCards();calcResult();}
+function updateValues(){
+  OPS.forEach((o,i)=>{let tot=0;
+    for(let s=0;s<3;s++){const id=matrixSel[o.key][s];const c=id?planById(id):null;const v=c?planTotal(c):0;tot+=v;
+      const cell=document.getElementById(`v-${i}-${s}`);if(cell){cell.textContent=fmt(v);cell.classList.toggle('has',v>0);}}
+    const tc=document.getElementById(`vt-${i}`);if(tc){tc.textContent=fmt(tot);tc.classList.toggle('has',tot>0);}
+  });
 }
-function toggle(id,el){if(el.checked)selected.add(id);else selected.delete(id);syncSel();calc();}
-function selAll(op){filtered().filter(c=>c.operadora===op).forEach(c=>selected.add(c.id));renderList();syncSel();calc();}
-function clearSel(){selected.clear();renderList();syncSel();calc();}
-function syncSel(){document.getElementById('selCount').textContent=selected.size+' selecionado'+(selected.size===1?'':'s');
-  document.querySelectorAll('.pitem').forEach(el=>{const id=+el.dataset.id;el.classList.toggle('sel',selected.has(id));const cb=el.querySelector('input');if(cb)cb.checked=selected.has(id);});}
-function planTotal(c){return BANDS.reduce((s,b)=>s+vidas[b]*(c.precos[b]||0),0);}
-function calc(){
-  const tv=BANDS.reduce((s,b)=>s+vidas[b],0);
+function selectedPlans(){const ids=[];OPS.forEach(o=>matrixSel[o.key].forEach(id=>{if(id&&!ids.includes(id))ids.push(id);}));return ids.map(planById).filter(Boolean);}
+function recompute(){buildMatrix();updateValues();renderCards();calcResult();}
+
+function renderCards(){
+  const sel=selectedPlans();const wrap=document.getElementById('planCards');const tv=totVidas();
+  if(!sel.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=sel.map(c=>{const o=OPS.find(x=>x.key===c.operadora);const col=o?o.color:'#0f2740';const v=planTotal(c);
+    const cop=c.coparticipacao.includes('Sem')?'Sem coparticipação':'Coparticipação Parcial';
+    return `<div class="pcard" style="border-top-color:${col}">
+      <div class="pcop" style="color:${col}">${o?o.label:c.operadora}</div>
+      <div class="pcname">${c.label}</div>
+      <div class="pcmeta">Saúde PME<br>${c.acomodacao}<br>${cop}</div>
+      <div class="pcval">R$ ${fmt(v)} <small>/mês · ${tv} vida(s)</small></div>
+      <button class="btn vd" onclick="openDetail(${c.id})">Ver detalhes</button></div>`;}).join('');
+}
+
+function calcResult(){
+  const tv=totVidas();const sel=selectedPlans();
   const area=document.getElementById('resultArea');const note=document.getElementById('resNote');
-  if(selected.size===0||tv===0){area.innerHTML='<div class="empty">Informe as vidas e selecione ao menos um plano para ver a cotação.</div>';note.style.display='none';return;}
-  let rows=[...selected].map(id=>CATALOG.find(c=>c.id===id)).filter(Boolean).map(c=>({c,total:planTotal(c)})).sort((a,b)=>a.total-b.total);
+  if(!sel.length||tv===0){area.innerHTML='<div class="empty">Informe as vidas e selecione ao menos um plano na matriz para ver o ranking.</div>';note.style.display='none';return;}
+  let rows=sel.map(c=>({c,total:planTotal(c)})).sort((a,b)=>a.total-b.total);
   const min=rows[0].total,max=rows[rows.length-1].total;const bestHap=rows.find(r=>r.c.operadora==='Hapvida');const econ=max-min;
-  let kpis=`<div class="kpis"><div class="kpi"><div class="lbl">Total de vidas</div><div class="val">${tv}</div><div class="foot">${selected.size} plano(s) comparados</div></div>
+  let kpis=`<div class="kpis"><div class="kpi"><div class="lbl">Total de vidas</div><div class="val">${tv}</div><div class="foot">${sel.length} plano(s) na comparação</div></div>
     <div class="kpi"><div class="lbl">Menor custo mensal</div><div class="val green">R$ ${fmt(min)}</div><div class="foot">${rows[0].c.operadora} · ${rows[0].c.label}</div></div>`;
   if(bestHap)kpis+=`<div class="kpi"><div class="lbl">Melhor Hapvida</div><div class="val hap">R$ ${fmt(bestHap.total)}</div><div class="foot">${bestHap.c.label} · ${bestHap.c.acomodacao}${bestHap.total>min?` (+R$ ${fmt(bestHap.total-min)} vs menor)`:' (menor preço)'}</div></div>`;
   kpis+=`<div class="kpi"><div class="lbl">Diferença máx. (mês)</div><div class="val">R$ ${fmt(econ)}</div><div class="foot">entre o mais barato e o mais caro</div></div></div>`;
-  let t=`<div style="overflow-x:auto"><table><thead><tr><th>Plano</th><th>Acomodação</th><th>Copart.</th><th>Custo mensal</th><th>R$/vida</th><th>vs menor</th><th></th></tr></thead><tbody>`;
-  rows.forEach((r,i)=>{const isHap=r.c.operadora==='Hapvida';const diff=r.total-min,pct=min?diff/min*100:0;const w=max>0?Math.round(r.total/max*100):0;
+  let t=`<div style="overflow-x:auto"><table class="res"><thead><tr><th>Plano</th><th>Acomodação</th><th>Copart.</th><th>Custo mensal</th><th>R$/vida</th><th>vs menor</th></tr></thead><tbody>`;
+  rows.forEach((r,i)=>{const isHap=r.c.operadora==='Hapvida';const diff=r.total-min,pct=min?diff/min*100:0;
     t+=`<tr class="${i===0?'best':''} ${isHap?'haprow':''}"><td class="pn-cell"><span class="rank ${i===0?'g':''}">${i+1}</span><b>${r.c.label}</b><br><span class="op" style="margin-left:30px">${r.c.operadora}</span></td>
       <td>${r.c.acomodacao}</td><td>${r.c.coparticipacao.includes('Sem')?'Sem':'Parcial'}</td><td><b>R$ ${fmt(r.total)}</b></td><td>R$ ${fmt(r.total/tv)}</td>
-      <td style="color:${diff===0?'#0f6e56':'#a32d2d'}">${diff===0?'—':'+R$ '+fmt(diff)+' ('+pct.toFixed(1)+'%)'}</td>
-      <td><span class="barwrap"><i class="${isHap?'hap':''}" style="width:${w}%"></i></span></td></tr>`;});
+      <td style="color:${diff===0?'#0f6e56':'#a32d2d'}">${diff===0?'—':'+R$ '+fmt(diff)+' ('+pct.toFixed(1)+'%)'}</td></tr>`;});
   t+='</tbody></table></div>';area.innerHTML=kpis+t;
   const hasP=rows.some(r=>!r.c.coparticipacao.includes('Sem')),hasS=rows.some(r=>r.c.coparticipacao.includes('Sem'));
-  if(hasP&&hasS){note.style.display='block';note.innerHTML='Atenção: a comparação mistura planos <b>com coparticipação</b> (Hapvida = Parcial) e <b>sem coparticipação</b>. O custo mensal acima é só a mensalidade — nos planos com coparticipação há custo adicional conforme o uso.';}else note.style.display='none';
+  if(hasP&&hasS){note.style.display='block';note.innerHTML='Atenção: a comparação mistura planos <b>com coparticipação</b> (Hapvida = Parcial) e <b>sem coparticipação</b>. O custo mensal é só a mensalidade — nos planos com coparticipação há custo adicional conforme o uso.';}else note.style.display='none';
 }
+
+/* detalhe do plano */
+function openDetail(id){
+  const c=planById(id);const o=OPS.find(x=>x.key===c.operadora);const col=o?o.color:'#0f2740';
+  document.getElementById('detailHead').innerHTML=`<div style="color:${col};font-weight:700;font-size:13px">${o?o.label:c.operadora}</div><h3 style="margin:2px 0 0">${c.label} · ${c.acomodacao}</h3><p style="margin:4px 0 0">Saúde PME · ${c.coparticipacao}</p>`;
+  let body=`<table><thead><tr><th>Faixa etária</th><th>Vidas</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>`;
+  BANDS.forEach(b=>{const q=vidas[b],p=c.precos[b]||0;body+=`<tr><td>${b}</td><td>${q}</td><td>R$ ${fmt(p)}</td><td>R$ ${fmt(q*p)}</td></tr>`;});
+  body+=`<tr class="tot"><td>Total</td><td>${totVidas()}</td><td></td><td>R$ ${fmt(planTotal(c))}</td></tr></tbody></table>`;
+  document.getElementById('detailBody').innerHTML=body;
+  document.getElementById('detailOverlay').classList.add('show');
+}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('show');}
+
 /* conversor */
 function openConv(){document.getElementById('convOverlay').classList.add('show');}
 function closeConv(){document.getElementById('convOverlay').classList.remove('show');}
@@ -975,12 +1028,11 @@ function ageBand(a){if(a<=18)return"00 a 18";if(a<=23)return"19 a 23";if(a<=28)r
 function applyConv(){const today=new Date();const lines=document.getElementById('convInput').value.split('\n');const dist=Object.fromEntries(BANDS.map(b=>[b,0]));let ok=0,bad=0;
   lines.forEach(l=>{if(!l.trim())return;const dt=parseDate(l);if(!dt){bad++;return;}let age=today.getFullYear()-dt.getFullYear();const md=today.getMonth()-dt.getMonth();if(md<0||(md===0&&today.getDate()<dt.getDate()))age--;if(age<0){bad++;return;}dist[ageBand(age)]++;ok++;});
   if(ok===0){document.getElementById('convResult').innerHTML=`<span style="color:var(--red)">Nenhuma data válida reconhecida.</span>`;return;}
-  BANDS.forEach(b=>{vidas[b]+=dist[b];});document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=vidas[i.dataset.b]);refreshTot();calc();
+  BANDS.forEach(b=>{vidas[b]+=dist[b];});document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=vidas[i.dataset.b]);refreshTot();updateValues();renderCards();calcResult();
   document.getElementById('convResult').innerHTML=`${ok} vida(s) distribuída(s)${bad?`, ${bad} ignorada(s)`:''}. Faixas atualizadas.`;setTimeout(closeConv,900);}
 
 /* ================= TAB 2: COMPARATIVO ================= */
-let cmpState={cmp:null,acom:'Apartamento'};
-let bandChart;
+let cmpState={cmp:null,acom:'Apartamento'};let bandChart;
 DATA.forEach(c=>{c.id=c.arquivo.replace('.pdf','');c.label=c.id;});
 const isHapP=p=>p.operadora.includes('Hapvida');
 function headlinePair(c,a){const haps=c.planos.filter(isHapP),concs=c.planos.filter(p=>!isHapP(p));
@@ -988,17 +1040,14 @@ function headlinePair(c,a){const haps=c.planos.filter(isHapP),concs=c.planos.fil
   return {hap:pk(haps),conc:pk(concs)};}
 function initComp(){
   cmpState.cmp=DATA[0].id;
-  // KPIs
   const ops=[...new Set(DATA.map(c=>c.concorrente))];let wins=0,tot=0;
   DATA.forEach(c=>{const{hap,conc}=headlinePair(c,'Apartamento');if(hap&&conc&&hap.total!=null&&conc.total!=null){tot++;if(hap.total<conc.total)wins++;}});
   const planos=DATA.reduce((s,c)=>s+c.planos.length,0);
   const k=[{lbl:'Comparativos',val:DATA.length,foot:'PDFs analisados'},{lbl:'Operadoras concorrentes',val:ops.length,foot:ops.join(' · ')},
     {lbl:'Planos analisados',val:planos,foot:'incl. enfermaria + apartamento'},{lbl:'Hapvida mais barata',val:wins+'/'+tot,foot:'apartamento · total mensal',hap:true}];
   document.getElementById('kpis').innerHTML=k.map(x=>`<div class="kpi"><div class="lbl">${x.lbl}</div><div class="val ${x.hap?'hap':''}">${x.val}</div><div class="foot">${x.foot}</div></div>`).join('');
-  // select
   const sel=document.getElementById('cmpSelect');sel.innerHTML=DATA.map(c=>`<option value="${c.id}">${c.concorrente} — ${c.label}</option>`).join('');
   sel.value=cmpState.cmp;sel.onchange=()=>{cmpState.cmp=sel.value;renderDetail();};
-  // acom chips
   const ac=['Apartamento','Enfermaria'];
   document.getElementById('acomCmp').innerHTML=ac.map(a=>`<div class="chip ${cmpState.acom===a?'active':''}" data-ac="${a}">${a}</div>`).join('');
   document.querySelectorAll('#acomCmp [data-ac]').forEach(e=>e.onclick=()=>{cmpState.acom=e.dataset.ac;document.querySelectorAll('#acomCmp .chip').forEach(c=>c.classList.toggle('active',c.dataset.ac===cmpState.acom));renderDetail();});
@@ -1014,13 +1063,11 @@ function renderDetail(){
     vs=`<div class="vs"><div class="vtag">VS</div><div class="diff ${good?'good':'bad'}">${good?'−':'+'}R$ ${fmt(Math.abs(d))}<small>${good?'Hapvida mais barata':'Hapvida mais cara'} (${(pct>0?'+':'')+pct.toFixed(1)}%)</small></div></div>`;
   }else vs=`<div class="vs"><div class="vtag">VS</div></div>`;
   document.getElementById('cmpHead').innerHTML=card(hap,'hapvida')+vs+card(conc,'conc');
-  // line chart
   const ctx=document.getElementById('bandChart');if(bandChart)bandChart.destroy();
   bandChart=new Chart(ctx,{type:'line',data:{labels:BANDS,datasets:[
     {label:hap?('Hapvida '+hap.plano):'Hapvida',data:BANDS.map(b=>hap?hap.precos[b]:null),borderColor:'#FF6B00',backgroundColor:'rgba(255,107,0,.08)',borderWidth:2.5,tension:.3,fill:true,pointRadius:3},
     {label:conc?(conc.operadora+' '+conc.plano):'Concorrente',data:BANDS.map(b=>conc?conc.precos[b]:null),borderColor:'#378add',backgroundColor:'rgba(55,138,221,.06)',borderWidth:2.5,tension:.3,fill:true,pointRadius:3,borderDash:[6,4]}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:14,usePointStyle:true}},tooltip:{callbacks:{label:x=>x.dataset.label+': R$ '+fmt(x.raw)}}},scales:{y:{ticks:{callback:v=>'R$ '+fmt0(v)}}}}});
-  // table
   const t=document.getElementById('bandTable');
   let head=`<thead><tr><th>Faixa etária</th>${hap?`<th>Hapvida ${hap.plano}</th>`:''}${conc?`<th>${conc.operadora} ${conc.plano}</th>`:''}<th>Diferença</th><th>%</th></tr></thead>`;
   let body='<tbody>';
@@ -1041,9 +1088,9 @@ function renderDetail(){
 }
 
 /* init */
-buildVidas(); buildFilters(); renderList(); syncSel();
-document.getElementById('search').addEventListener('input',e=>{q=e.target.value.toLowerCase().trim();renderList();});
+buildCat(); buildVidas(); buildMatrix(); recompute();
 document.getElementById('convOverlay').addEventListener('click',e=>{if(e.target.id==='convOverlay')closeConv();});
+document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
 </script>
 </body>
 </html>
