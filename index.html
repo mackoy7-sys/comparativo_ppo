@@ -3,301 +3,1008 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comparativo PPO — Hapvida vs Operadoras</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<title>Cotação PPO — Calculadora Hapvida vs Operadoras</title>
 <style>
   :root{
     --hap:#FF6B00; --hap-dark:#cc5500; --navy:#0f2740; --navy2:#1c3a5e;
     --bg:#f4f6fa; --card:#ffffff; --line:#e6eaf0; --txt:#1a2433; --muted:#69758a;
-    --green:#1d9e75; --green-bg:#e1f5ee; --red:#e24b4a; --red-bg:#fbeaea;
-    --blue:#378add; --blue-bg:#e6f1fb;
+    --green:#1d9e75; --green-bg:#e1f5ee; --red:#e24b4a; --red-bg:#fbeaea; --blue:#378add; --blue-bg:#e6f1fb;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);line-height:1.5;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 70px}
   header.top{background:linear-gradient(100deg,var(--navy),var(--navy2));color:#fff;border-radius:16px;padding:26px 30px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
   header.top h1{font-size:24px;font-weight:600;letter-spacing:.2px}
   header.top .sub{color:#aebfd4;font-size:14px;margin-top:4px}
   .brand-pill{background:var(--hap);color:#fff;font-weight:700;font-size:13px;padding:7px 14px;border-radius:8px;letter-spacing:.5px}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
-  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
-  .kpi .lbl{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
-  .kpi .val{font-size:30px;font-weight:700;margin-top:6px;color:var(--navy)}
-  .kpi .val.hap{color:var(--hap)}
-  .kpi .foot{font-size:12px;color:var(--muted);margin-top:4px}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:22px}
   .panel h2{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .panel .step{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--hap);color:#fff;font-size:13px;font-weight:700;margin-right:4px}
   .panel .desc{font-size:13px;color:var(--muted);margin-bottom:16px}
-  .filters{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px}
-  .fgroup{display:flex;flex-direction:column;gap:6px}
-  .fgroup label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-  .chips{display:flex;gap:8px;flex-wrap:wrap}
-  .chip{border:1px solid var(--line);background:#fff;color:var(--txt);padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer;transition:.15s;font-weight:500}
+  /* vidas grid */
+  .vidas{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .vcell label{display:block;font-size:12px;font-weight:700;color:var(--navy);margin-bottom:5px}
+  .vcell input{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;font-size:16px;text-align:center;color:var(--txt)}
+  .vcell input:focus{outline:none;border-color:var(--hap);box-shadow:0 0 0 3px rgba(255,107,0,.12)}
+  .vbar{display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:10px}
+  .totvidas{font-size:14px;color:var(--muted)}
+  .totvidas b{font-size:22px;color:var(--navy);margin-left:6px}
+  .btn{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:var(--hap);color:var(--hap)}
+  .btn.solid{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .btn.solid:hover{background:var(--hap);border-color:var(--hap);color:#fff}
+  .btn.ghost{background:transparent;border:none;color:var(--hap);padding:0;font-weight:700;text-decoration:underline}
+  /* plan selector */
+  .selbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:#fff;color:var(--txt);padding:6px 13px;border-radius:18px;font-size:12.5px;cursor:pointer;font-weight:500}
   .chip:hover{border-color:var(--hap)}
   .chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
-  select{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;min-width:280px;color:var(--txt);cursor:pointer}
-  .chart-box{position:relative;width:100%;height:360px}
-  .cmp-head{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch;margin-bottom:20px}
-  .side{border-radius:14px;padding:18px 20px;border:1px solid var(--line)}
-  .side.hapvida{background:#fff7f0;border-color:#ffd9b8}
-  .side.conc{background:#f3f7fc;border-color:#d3e3f5}
-  .side .op{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
-  .side.hapvida .op{color:var(--hap)}
-  .side.conc .op{color:var(--blue)}
-  .side .plan{font-size:22px;font-weight:700;color:var(--navy);margin:2px 0 12px}
-  .badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-  .badge{font-size:11.5px;padding:3px 9px;border-radius:6px;background:#eef1f6;color:#42506a;font-weight:600}
-  .badge.copart{background:#fff3df;color:#854f0b}
-  .badge.sem{background:var(--green-bg);color:#0f6e56}
-  .tot{font-size:13px;color:var(--muted)}
-  .tot b{font-size:26px;color:var(--navy);font-weight:700;display:block}
-  .vs{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:90px}
-  .vs .vtag{font-weight:700;color:var(--muted);font-size:13px}
-  .diff{font-size:22px;font-weight:800;padding:8px 12px;border-radius:10px;text-align:center}
-  .diff.good{background:var(--green-bg);color:#0f6e56}
-  .diff.bad{background:var(--red-bg);color:#a32d2d}
-  .diff small{display:block;font-size:11px;font-weight:600;opacity:.8}
+  input.search{flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px}
+  input.search:focus{outline:none;border-color:var(--hap)}
+  .opgroup{margin-bottom:14px}
+  .opgroup .ophead{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:8px 0 8px;display:flex;align-items:center;gap:8px}
+  .opgroup .ophead .selall{font-size:11px;font-weight:600;color:var(--hap);cursor:pointer;text-transform:none;letter-spacing:0}
+  .plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px}
+  .pitem{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:11px;padding:11px 13px;cursor:pointer;transition:.12s;background:#fff}
+  .pitem:hover{border-color:var(--hap)}
+  .pitem.sel{border-color:var(--hap);background:#fff7f0}
+  .pitem.hap.sel{border-color:var(--hap)}
+  .pitem input{margin-top:3px;width:16px;height:16px;accent-color:var(--hap);flex-shrink:0}
+  .pitem .pn{font-size:14px;font-weight:600;color:var(--navy)}
+  .pitem .pmeta{font-size:11px;color:var(--muted);margin-top:3px;display:flex;gap:5px;flex-wrap:wrap}
+  .tagb{font-size:10.5px;padding:2px 7px;border-radius:5px;background:#eef1f6;color:#42506a;font-weight:600}
+  .tagb.copart{background:#fff3df;color:#854f0b}
+  .tagb.sem{background:var(--green-bg);color:#0f6e56}
+  .tagb.hapv{background:#fdeee8;color:var(--hap-dark)}
+  /* results */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
+  .kpi{background:#f7f9fc;border-radius:12px;padding:16px 18px}
+  .kpi .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+  .kpi .val{font-size:24px;font-weight:700;margin-top:5px;color:var(--navy)}
+  .kpi .val.hap{color:var(--hap)} .kpi .val.green{color:#0f6e56}
+  .kpi .foot{font-size:11.5px;color:var(--muted);margin-top:3px}
   table{width:100%;border-collapse:collapse;font-size:13.5px}
-  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line)}
+  th,td{padding:11px 12px;text-align:right;border-bottom:1px solid var(--line)}
   th:first-child,td:first-child{text-align:left}
   thead th{background:#f7f9fc;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
   tbody tr:hover{background:#fafbfd}
-  td.win{color:#0f6e56;font-weight:700}
-  td.win::after{content:" ▼";font-size:10px}
-  tr.total-row td{font-weight:700;background:#f7f9fc;font-size:14px;border-top:2px solid var(--navy)}
-  .cell-hap{background:#fff7f0}
-  .tag-cheaper{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;margin-left:6px}
-  .legend{display:flex;gap:18px;font-size:13px;color:var(--muted);margin:14px 0 0;flex-wrap:wrap}
-  .legend span{display:flex;align-items:center;gap:6px}
-  .dot{width:12px;height:12px;border-radius:3px}
-  .note{font-size:12.5px;color:var(--muted);background:#f7f9fc;border-left:3px solid var(--hap);padding:10px 14px;border-radius:0 8px 8px 0;margin-top:14px}
+  tr.best td{background:#f1faf6}
+  tr.haprow td:first-child{box-shadow:inset 3px 0 0 var(--hap)}
+  .rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;background:#eef1f6;color:#42506a;margin-right:8px}
+  .rank.g{background:var(--green-bg);color:#0f6e56}
+  .pn-cell b{font-weight:700;color:var(--navy)} .pn-cell .op{font-size:11.5px;color:var(--muted)}
+  .barwrap{background:#eef1f6;border-radius:6px;height:10px;width:90px;display:inline-block;overflow:hidden;vertical-align:middle;margin-left:8px}
+  .barwrap i{display:block;height:100%;border-radius:6px;background:var(--blue)}
+  .barwrap i.hap{background:var(--hap)}
+  .empty{text-align:center;color:var(--muted);padding:36px 10px;font-size:14px}
+  .note{font-size:12.5px;color:var(--muted);background:#f7f9fc;border-left:3px solid var(--hap);padding:10px 14px;border-radius:0 8px 8px 0;margin-top:16px}
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(15,39,64,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:16px;padding:26px 28px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+  .modal h3{font-size:18px;font-weight:600;color:var(--navy);margin-bottom:6px}
+  .modal p{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .modal textarea{width:100%;min-height:130px;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:14px;font-family:inherit;resize:vertical}
+  .modal textarea:focus{outline:none;border-color:var(--hap)}
+  .modal .mfoot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;flex-wrap:wrap}
+  .conv-result{font-size:12.5px;color:var(--muted);margin-top:10px}
+  .xclose{cursor:pointer;color:var(--muted);font-size:22px;line-height:1;background:none;border:none}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
-  @media(max-width:760px){.cmp-head{grid-template-columns:1fr}.vs{flex-direction:row}}
+  @media(max-width:680px){.vidas{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>Comparativo PPO — Planos &amp; Operadoras</h1>
-      <div class="sub">Hapvida NotreDame vs Amil · Bradesco · Porto Seguro · SulAmérica — preços PME por faixa etária</div>
+      <h1>Cotação PPO — Calculadora de Planos</h1>
+      <div class="sub">Informe as vidas por faixa etária e compare o custo mensal — Hapvida vs Amil · Bradesco · Porto · SulAmérica</div>
     </div>
     <div class="brand-pill">HAPVIDA · VENDAS DIGITAL</div>
   </header>
 
-  <div class="kpis" id="kpis"></div>
-
+  <!-- STEP 1 -->
   <div class="panel">
-    <h2>Visão geral — total mensal por comparativo</h2>
-    <div class="desc">Soma das 10 faixas etárias (1 vida por faixa). Comparação Hapvida × concorrente na acomodação selecionada.</div>
-    <div class="filters">
-      <div class="fgroup">
-        <label>Operadora concorrente</label>
-        <div class="chips" id="opChips"></div>
-      </div>
-      <div class="fgroup">
-        <label>Acomodação</label>
-        <div class="chips" id="acomChips"></div>
+    <h2><span class="step">1</span> Distribuição de vidas</h2>
+    <div class="desc">Informe a quantidade de vidas por faixa etária, ou use o conversor de datas de nascimento.</div>
+    <div class="vidas" id="vidasGrid"></div>
+    <div class="vbar">
+      <div class="totvidas">Total de vidas <b id="totVidas">0</b></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" onclick="openConv()">Conversor de datas de nascimento</button>
+        <button class="btn" onclick="zerar()">Zerar</button>
       </div>
     </div>
-    <div class="legend">
-      <span><span class="dot" style="background:#FF6B00"></span>Hapvida</span>
-      <span><span class="dot" style="background:#378add"></span>Concorrente</span>
-    </div>
-    <div class="chart-box" style="height:380px;margin-top:10px"><canvas id="overviewChart" role="img" aria-label="Comparação de total mensal Hapvida versus concorrentes"></canvas></div>
   </div>
 
+  <!-- STEP 2 -->
   <div class="panel">
-    <h2>Detalhe do comparativo</h2>
-    <div class="desc">Selecione um comparativo para ver metadados, evolução de preço por faixa etária e tabela detalhada.</div>
-    <div class="fgroup" style="margin-bottom:18px">
-      <label>Comparativo</label>
-      <select id="cmpSelect"></select>
+    <h2><span class="step">2</span> Selecione os planos para comparar</h2>
+    <div class="desc">Marque um ou mais planos — pode misturar operadoras. Os planos da Hapvida vêm destacados.</div>
+    <div class="selbar">
+      <input class="search" id="search" placeholder="Buscar plano (ex.: Infinity, Bronze, Direto Nacional)…">
+      <div class="chips" id="opFilter"></div>
     </div>
-    <div class="cmp-head" id="cmpHead"></div>
-    <div class="chart-box"><canvas id="bandChart" role="img" aria-label="Preço por faixa etária"></canvas></div>
-    <div style="overflow-x:auto;margin-top:18px"><table id="bandTable"></table></div>
-    <div class="note" id="cmpNote"></div>
+    <div class="selbar" style="margin-bottom:10px">
+      <div class="chips" id="acomFilter"></div>
+      <span style="font-size:12.5px;color:var(--muted)" id="selCount">0 selecionados</span>
+      <button class="btn ghost" onclick="clearSel()">limpar seleção</button>
+    </div>
+    <div id="planList"></div>
   </div>
 
-  <footer>Dashboard gerado a partir dos PDFs comparativos · Hapvida NotreDame · valores sujeitos a condições contratuais e vigência de tabela.</footer>
+  <!-- STEP 3 -->
+  <div class="panel">
+    <h2><span class="step">3</span> Resultado da cotação</h2>
+    <div class="desc">Custo mensal = soma de (vidas × preço da faixa) para cada plano selecionado.</div>
+    <div id="resultArea"><div class="empty">Informe as vidas e selecione ao menos um plano para ver a cotação.</div></div>
+    <div class="note" id="resNote" style="display:none"></div>
+  </div>
+
+  <footer>Cotação gerada a partir das tabelas PPO Hapvida · valores sujeitos a condições contratuais e vigência de tabela · uso interno comercial.</footer>
+</div>
+
+<!-- Conversor modal -->
+<div class="overlay" id="convOverlay">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <h3>Conversor de datas de nascimento</h3>
+      <button class="xclose" onclick="closeConv()">&times;</button>
+    </div>
+    <p>Cole uma data por linha (dd/mm/aaaa ou aaaa-mm-dd). Vamos calcular a idade e distribuir nas faixas etárias.</p>
+    <textarea id="convInput" placeholder="15/03/1990&#10;02/11/1975&#10;1998-07-22"></textarea>
+    <div class="conv-result" id="convResult"></div>
+    <div class="mfoot">
+      <span style="font-size:12px;color:var(--muted)">Idade calculada na data de hoje.</span>
+      <div style="display:flex;gap:10px">
+        <button class="btn" onclick="closeConv()">Cancelar</button>
+        <button class="btn solid" onclick="applyConv()">Distribuir nas faixas</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-const DATA = [{"arquivo": "AMIL - HAPVIDA 900.pdf", "n_planos": 2, "planos": [{"plano": "S750 R1", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 603.26, "19 a 23": 705.81, "24 a 28": 861.09, "29 a 33": 1033.31, "34 a 38": 1084.98, "39 a 43": 1193.48, "44 a 48": 1491.85, "49 a 53": 1641.04, "54 a 58": 2051.3, "59 ou mais": 3589.78}, "total": 14255.9}, {"plano": "900", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 637.41, "19 a 23": 745.77, "24 a 28": 909.84, "29 a 33": 1091.81, "34 a 38": 1146.4, "39 a 43": 1261.04, "44 a 48": 1576.3, "49 a 53": 1905.9, "54 a 58": 2383.9, "59 ou mais": 3792.78}, "total": 15451.15}], "concorrente": "Amil"}, {"arquivo": "AMIL - HAPVIDA infinity.pdf", "n_planos": 2, "planos": [{"plano": "S6500 Black R1", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 1348.44, "19 a 23": 1577.67, "24 a 28": 1924.76, "29 a 33": 2309.71, "34 a 38": 2425.2, "39 a 43": 2667.72, "44 a 48": 3334.65, "49 a 53": 3668.12, "54 a 58": 4585.15, "59 ou mais": 8024.01}, "total": 31865.43}, {"plano": "Infinity", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 990.28, "19 a 23": 1158.61, "24 a 28": 1413.5, "29 a 33": 1696.22, "34 a 38": 1781.05, "39 a 43": 1959.15, "44 a 48": 2448.94, "49 a 53": 2960.93, "54 a 58": 3703.65, "59 ou mais": 5892.55}, "total": 24004.88}], "concorrente": "Amil"}, {"arquivo": "BRADESCO - HAPVIDA 900 care.pdf", "n_planos": 3, "planos": [{"plano": "Efetivo Plus", "operadora": "Bradesco Seguros", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 433.34, "19 a 23": 511.34, "24 a 28": 618.72, "29 a 33": 742.47, "34 a 38": 846.41, "39 a 43": 871.8, "44 a 48": 1061.47, "49 a 53": 1248.5, "54 a 58": 1485.72, "59 ou mais": 2599.86}, "total": 10667.62}, {"plano": "Efetivo Plus", "operadora": "Bradesco Seguros", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 468.03, "19 a 23": 552.28, "24 a 28": 668.25, "29 a 33": 801.91, "34 a 38": 914.17, "39 a 43": 941.6, "44 a 48": 1146.45, "49 a 53": 1348.45, "54 a 58": 1604.66, "59 ou mais": 2807.99}, "total": 11521.63}, {"plano": "900 Care", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 605.04, "19 a 23": 707.89, "24 a 28": 863.62, "29 a 33": 1036.36, "34 a 38": 1088.19, "39 a 43": 1197.0, "44 a 48": 1496.25, "49 a 53": 1809.07, "54 a 58": 2262.86, "59 ou mais": 3600.24}, "total": 14666.52}], "concorrente": "Bradesco Seguros"}, {"arquivo": "BRADESCO - HAPVIDA 900.pdf", "n_planos": 2, "planos": [{"plano": "Nacional III", "operadora": "Bradesco Seguros", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 499.45, "19 a 23": 589.35, "24 a 28": 713.11, "29 a 33": 855.74, "34 a 38": 975.54, "39 a 43": 1004.81, "44 a 48": 1223.42, "49 a 53": 1438.99, "54 a 58": 1712.4, "59 ou mais": 2996.53}, "total": 12295.16}, {"plano": "900", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 637.41, "19 a 23": 745.77, "24 a 28": 909.84, "29 a 33": 1091.81, "34 a 38": 1146.4, "39 a 43": 1261.04, "44 a 48": 1576.3, "49 a 53": 1905.9, "54 a 58": 2383.9, "59 ou mais": 3792.78}, "total": 15451.15}], "concorrente": "Bradesco Seguros"}, {"arquivo": "BRADESCO - HAPVIDA infinity.pdf", "n_planos": 2, "planos": [{"plano": "Nacional Plus 4", "operadora": "Bradesco Seguros", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 1433.1, "19 a 23": 1691.06, "24 a 28": 2046.17, "29 a 33": 2455.42, "34 a 38": 2799.15, "39 a 43": 2883.12, "44 a 48": 3510.37, "49 a 53": 4128.9, "54 a 58": 4913.39, "59 ou mais": 8597.94}, "total": 35278.74}, {"plano": "Infinity", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 990.28, "19 a 23": 1158.61, "24 a 28": 1413.5, "29 a 33": 1696.22, "34 a 38": 1781.05, "39 a 43": 1959.15, "44 a 48": 2448.94, "49 a 53": 2960.93, "54 a 58": 3703.65, "59 ou mais": 5892.55}, "total": 24004.88}], "concorrente": "Bradesco Seguros"}, {"arquivo": "HAPVIDA - AMIL 600.pdf", "n_planos": 4, "planos": [{"plano": "Prata", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 338.08, "19 a 23": 395.55, "24 a 28": 482.57, "29 a 33": 579.08, "34 a 38": 608.03, "39 a 43": 668.83, "44 a 48": 836.04, "49 a 53": 919.64, "54 a 58": 1149.55, "59 ou mais": 2011.71}, "total": 7989.08}, {"plano": "Prata", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 375.27, "19 a 23": 439.07, "24 a 28": 535.67, "29 a 33": 642.8, "34 a 38": 674.94, "39 a 43": 742.43, "44 a 48": 928.04, "49 a 53": 1020.84, "54 a 58": 1276.05, "59 ou mais": 2233.09}, "total": 8868.2}, {"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 297.23, "19 a 23": 347.76, "24 a 28": 424.26, "29 a 33": 509.11, "34 a 38": 534.58, "39 a 43": 588.03, "44 a 48": 735.04, "49 a 53": 888.72, "54 a 58": 1111.65, "59 ou mais": 1768.65}, "total": 7205.03}, {"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 329.92, "19 a 23": 386.01, "24 a 28": 470.92, "29 a 33": 565.12, "34 a 38": 593.38, "39 a 43": 652.72, "44 a 48": 815.9, "49 a 53": 986.48, "54 a 58": 1233.92, "59 ou mais": 1963.18}, "total": 7997.55}], "concorrente": "Amil"}, {"arquivo": "HAPVIDA - PORTO 600.pdf", "n_planos": 4, "planos": [{"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 297.23, "19 a 23": 347.76, "24 a 28": 424.26, "29 a 33": 509.11, "34 a 38": 534.58, "39 a 43": 588.03, "44 a 48": 735.04, "49 a 53": 888.72, "54 a 58": 1111.65, "59 ou mais": 1768.65}, "total": 7205.03}, {"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 329.92, "19 a 23": 386.01, "24 a 28": 470.92, "29 a 33": 565.12, "34 a 38": 593.38, "39 a 43": 652.72, "44 a 48": 815.9, "49 a 53": 986.48, "54 a 58": 1233.92, "59 ou mais": 1963.18}, "total": 7997.55}, {"plano": "Prata Pró Q", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 321.9, "19 a 23": 390.37, "24 a 28": 470.92, "29 a 33": 539.12, "34 a 38": 584.14, "39 a 43": 603.27, "44 a 48": 720.62, "49 a 53": 775.78, "54 a 58": 958.53, "59 ou mais": 1611.21}, "total": 7141.89}, {"plano": "Prata Pró E", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 320.41, "19 a 23": 388.56, "24 a 28": 468.74, "29 a 33": 536.63, "34 a 38": 581.44, "39 a 43": 600.48, "44 a 48": 717.28, "49 a 53": 772.19, "54 a 58": 954.09, "59 ou mais": 1603.75}, "total": 7108.83}], "concorrente": "Porto Seguro"}, {"arquivo": "HAPVIDA - SULA 600.pdf", "n_planos": 4, "planos": [{"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 297.23, "19 a 23": 347.76, "24 a 28": 424.26, "29 a 33": 509.11, "34 a 38": 534.58, "39 a 43": 588.03, "44 a 48": 735.04, "49 a 53": 888.72, "54 a 58": 1111.65, "59 ou mais": 1768.65}, "total": 7205.03}, {"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 329.92, "19 a 23": 386.01, "24 a 28": 470.92, "29 a 33": 565.12, "34 a 38": 593.38, "39 a 43": 652.72, "44 a 48": 815.9, "49 a 53": 986.48, "54 a 58": 1233.92, "59 ou mais": 1963.18}, "total": 7997.55}, {"plano": "Direto Nacional", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 341.93, "19 a 23": 427.4, "24 a 28": 529.98, "29 a 33": 588.28, "34 a 38": 629.47, "39 a 43": 730.18, "44 a 48": 872.86, "49 a 53": 1023.0, "54 a 58": 1217.88, "59 ou mais": 2051.53}, "total": 8612.73}, {"plano": "Direto Nacional", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 379.26, "19 a 23": 474.07, "24 a 28": 587.85, "29 a 33": 652.5, "34 a 38": 698.19, "39 a 43": 809.9, "44 a 48": 968.17, "49 a 53": 1134.69, "54 a 58": 1350.84, "59 ou mais": 2275.5}, "total": 9553.05}], "concorrente": "Sulamérica"}, {"arquivo": "PORTO - HAPVIDA 700 (1).pdf", "n_planos": 4, "planos": [{"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 392.6, "19 a 23": 459.34, "24 a 28": 560.39, "29 a 33": 672.48, "34 a 38": 706.12, "39 a 43": 776.73, "44 a 48": 970.92, "49 a 53": 1173.91, "54 a 58": 1468.36, "59 ou mais": 2336.18}, "total": 9517.03}, {"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 435.79, "19 a 23": 509.87, "24 a 28": 622.03, "29 a 33": 746.44, "34 a 38": 783.77, "39 a 43": 862.14, "44 a 48": 1077.69, "49 a 53": 1303.01, "54 a 58": 1629.84, "59 ou mais": 2593.11}, "total": 10563.69}, {"plano": "Bronze Brasil I", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 352.46, "19 a 23": 427.44, "24 a 28": 515.63, "29 a 33": 590.31, "34 a 38": 639.61, "39 a 43": 660.55, "44 a 48": 789.04, "49 a 53": 849.44, "54 a 58": 1049.54, "59 ou mais": 1764.2}, "total": 7820.01}, {"plano": "Bronze Brasil I", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 360.61, "19 a 23": 437.32, "24 a 28": 527.55, "29 a 33": 603.95, "34 a 38": 654.39, "39 a 43": 675.82, "44 a 48": 807.28, "49 a 53": 869.07, "54 a 58": 1073.8, "59 ou mais": 1804.97}, "total": 8000.75}], "concorrente": "Porto Seguro"}, {"arquivo": "PORTO - HAPVIDA 700 (2).pdf", "n_planos": 4, "planos": [{"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 392.6, "19 a 23": 459.34, "24 a 28": 560.39, "29 a 33": 672.48, "34 a 38": 706.12, "39 a 43": 776.73, "44 a 48": 970.92, "49 a 53": 1173.91, "54 a 58": 1468.36, "59 ou mais": 2336.18}, "total": 9517.03}, {"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 435.79, "19 a 23": 509.87, "24 a 28": 622.03, "29 a 33": 746.44, "34 a 38": 783.77, "39 a 43": 862.14, "44 a 48": 1077.69, "49 a 53": 1303.01, "54 a 58": 1629.84, "59 ou mais": 2593.11}, "total": 10563.69}, {"plano": "Direto Nacional", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 341.93, "19 a 23": 427.4, "24 a 28": 529.98, "29 a 33": 588.28, "34 a 38": 629.47, "39 a 43": 730.18, "44 a 48": 872.86, "49 a 53": 1023.0, "54 a 58": 1217.88, "59 ou mais": 2051.53}, "total": 8612.73}, {"plano": "Direto Nacional", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 379.26, "19 a 23": 474.07, "24 a 28": 587.85, "29 a 33": 652.5, "34 a 38": 698.19, "39 a 43": 809.9, "44 a 48": 968.17, "49 a 53": 1134.69, "54 a 58": 1350.84, "59 ou mais": 2275.5}, "total": 9553.05}], "concorrente": "Sulamérica"}, {"arquivo": "PORTO - HAPVIDA 700 (3).pdf", "n_planos": 4, "planos": [{"plano": "Ouro", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 380.87, "19 a 23": 445.62, "24 a 28": 543.66, "29 a 33": 652.39, "34 a 38": 685.01, "39 a 43": 753.51, "44 a 48": 941.89, "49 a 53": 1036.08, "54 a 58": 1295.1, "59 ou mais": 2266.43}, "total": 9000.56}, {"plano": "Ouro", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 422.78, "19 a 23": 494.65, "24 a 28": 603.47, "29 a 33": 724.16, "34 a 38": 760.37, "39 a 43": 836.41, "44 a 48": 1045.51, "49 a 53": 1150.06, "54 a 58": 1437.58, "59 ou mais": 2515.77}, "total": 9990.76}, {"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 392.6, "19 a 23": 459.34, "24 a 28": 560.39, "29 a 33": 672.48, "34 a 38": 706.12, "39 a 43": 776.73, "44 a 48": 970.92, "49 a 53": 1173.91, "54 a 58": 1468.36, "59 ou mais": 2336.18}, "total": 9517.03}, {"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 435.79, "19 a 23": 509.87, "24 a 28": 622.03, "29 a 33": 746.44, "34 a 38": 783.77, "39 a 43": 862.14, "44 a 48": 1077.69, "49 a 53": 1303.01, "54 a 58": 1629.84, "59 ou mais": 2593.11}, "total": 10563.69}], "concorrente": "Amil"}, {"arquivo": "PORTO - HAPVIDA 900 care.pdf", "n_planos": 2, "planos": [{"plano": "900 Care", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 605.04, "19 a 23": 707.89, "24 a 28": 863.62, "29 a 33": 1036.36, "34 a 38": 1088.19, "39 a 43": 1197.0, "44 a 48": 1496.25, "49 a 53": 1809.07, "54 a 58": 2262.86, "59 ou mais": 3600.24}, "total": 14666.52}, {"plano": "Ouro Mais I", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 530.12, "19 a 23": 642.89, "24 a 28": 775.54, "29 a 33": 887.86, "34 a 38": 962.0, "39 a 43": 993.5, "44 a 48": 1186.76, "49 a 53": 1277.59, "54 a 58": 1578.56, "59 ou mais": 2653.43}, "total": 11761.67}], "concorrente": "Porto Seguro"}, {"arquivo": "PORTO - HAPVIDA 900.pdf", "n_planos": 2, "planos": [{"plano": "900", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 637.41, "19 a 23": 745.77, "24 a 28": 909.84, "29 a 33": 1091.81, "34 a 38": 1146.4, "39 a 43": 1261.04, "44 a 48": 1576.3, "49 a 53": 1905.9, "54 a 58": 2383.9, "59 ou mais": 3792.78}, "total": 15451.15}, {"plano": "Ouro Max I", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 641.45, "19 a 23": 777.89, "24 a 28": 938.4, "29 a 33": 1074.3, "34 a 38": 1164.02, "39 a 43": 1202.13, "44 a 48": 1435.97, "49 a 53": 1545.89, "54 a 58": 1910.05, "59 ou mais": 3210.65}, "total": 14231.59}], "concorrente": "Porto Seguro"}, {"arquivo": "PORTO - HAPVIDA infinity.pdf", "n_planos": 2, "planos": [{"plano": "Infinity", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 990.28, "19 a 23": 1158.61, "24 a 28": 1413.5, "29 a 33": 1696.22, "34 a 38": 1781.05, "39 a 43": 1959.15, "44 a 48": 2448.94, "49 a 53": 2960.93, "54 a 58": 3703.65, "59 ou mais": 5892.55}, "total": 24004.88}, {"plano": "Diamante Mais I", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 1625.24, "19 a 23": 1970.96, "24 a 28": 2377.64, "29 a 33": 2721.98, "34 a 38": 2949.29, "39 a 43": 3045.86, "44 a 48": 3638.35, "49 a 53": 3916.84, "54 a 58": 4839.54, "59 ou mais": 8134.88}, "total": 36058.83}], "concorrente": "Porto Seguro"}, {"arquivo": "PORTO PRÓ - HAPVIDA.pdf", "n_planos": 4, "planos": [{"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 297.23, "19 a 23": 347.76, "24 a 28": 424.26, "29 a 33": 509.11, "34 a 38": 534.58, "39 a 43": 588.03, "44 a 48": 735.04, "49 a 53": 888.72, "54 a 58": 1111.65, "59 ou mais": 1768.65}, "total": 7205.03}, {"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 329.92, "19 a 23": 386.01, "24 a 28": 470.92, "29 a 33": 565.12, "34 a 38": 593.38, "39 a 43": 652.72, "44 a 48": 815.9, "49 a 53": 986.48, "54 a 58": 1233.92, "59 ou mais": 1963.18}, "total": 7997.55}, {"plano": "Prata Pró E", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 271.71, "19 a 23": 329.51, "24 a 28": 397.5, "29 a 33": 455.07, "34 a 38": 493.07, "39 a 43": 509.21, "44 a 48": 608.27, "49 a 53": 654.82, "54 a 58": 809.08, "59 ou mais": 1360.01}, "total": 6028.39}, {"plano": "Prata Pró Q", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 275.34, "19 a 23": 333.91, "24 a 28": 402.8, "29 a 33": 461.14, "34 a 38": 499.65, "39 a 43": 516.01, "44 a 48": 616.38, "49 a 53": 663.56, "54 a 58": 819.88, "59 ou mais": 1378.15}, "total": 6108.83}], "concorrente": "Porto Seguro"}, {"arquivo": "SULA - HAPVIDA 900 care.pdf", "n_planos": 2, "planos": [{"plano": "900 Care", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 605.04, "19 a 23": 707.89, "24 a 28": 863.62, "29 a 33": 1036.36, "34 a 38": 1088.19, "39 a 43": 1197.0, "44 a 48": 1496.25, "49 a 53": 1809.07, "54 a 58": 2262.86, "59 ou mais": 3600.24}, "total": 14666.52}, {"plano": "Especial Vital", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 384.14, "19 a 23": 480.17, "24 a 28": 595.41, "29 a 33": 660.91, "34 a 38": 707.16, "39 a 43": 820.32, "44 a 48": 980.6, "49 a 53": 1149.27, "54 a 58": 1368.2, "59 ou mais": 2304.72}, "total": 9675.83}], "concorrente": "Sulamérica"}, {"arquivo": "SULA - HAPVIDA 900.pdf", "n_planos": 2, "planos": [{"plano": "900", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 637.41, "19 a 23": 745.77, "24 a 28": 909.84, "29 a 33": 1091.81, "34 a 38": 1146.4, "39 a 43": 1261.04, "44 a 48": 1576.3, "49 a 53": 1905.9, "54 a 58": 2383.9, "59 ou mais": 3792.78}, "total": 15451.15}, {"plano": "Especial 100 R1", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 449.28, "19 a 23": 561.59, "24 a 28": 696.38, "29 a 33": 772.99, "34 a 38": 827.09, "39 a 43": 959.43, "44 a 48": 1146.91, "49 a 53": 1344.17, "54 a 58": 1600.23, "59 ou mais": 2695.58}, "total": 11316.73}], "concorrente": "Sulamérica"}, {"arquivo": "SULA - HAPVIDA infinity.pdf", "n_planos": 2, "planos": [{"plano": "Infinity", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 990.28, "19 a 23": 1158.61, "24 a 28": 1413.5, "29 a 33": 1696.22, "34 a 38": 1781.05, "39 a 43": 1959.15, "44 a 48": 2448.94, "49 a 53": 2960.93, "54 a 58": 3703.65, "59 ou mais": 5892.55}, "total": 24004.88}, {"plano": "Executivo R1", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 967.26, "19 a 23": 1209.08, "24 a 28": 1499.24, "29 a 33": 1664.16, "34 a 38": 1780.65, "39 a 43": 2065.54, "44 a 48": 2469.15, "49 a 53": 2893.85, "54 a 58": 3445.13, "59 ou mais": 5803.31}, "total": 24363.75}], "concorrente": "Sulamérica"}];
+const CATALOG = [
+ {
+  "id": 25,
+  "operadora": "Amil",
+  "operadora_full": "Amil",
+  "plano": "Ouro",
+  "label": "Ouro",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 422.78,
+   "19 a 23": 494.65,
+   "24 a 28": 603.47,
+   "29 a 33": 724.16,
+   "34 a 38": 760.37,
+   "39 a 43": 836.41,
+   "44 a 48": 1045.51,
+   "49 a 53": 1150.06,
+   "54 a 58": 1437.58,
+   "59 ou mais": 2515.77
+  },
+  "fonte": "PORTO 700 (3)"
+ },
+ {
+  "id": 24,
+  "operadora": "Amil",
+  "operadora_full": "Amil",
+  "plano": "Ouro",
+  "label": "Ouro",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 380.87,
+   "19 a 23": 445.62,
+   "24 a 28": 543.66,
+   "29 a 33": 652.39,
+   "34 a 38": 685.01,
+   "39 a 43": 753.51,
+   "44 a 48": 941.89,
+   "49 a 53": 1036.08,
+   "54 a 58": 1295.1,
+   "59 ou mais": 2266.43
+  },
+  "fonte": "PORTO 700 (3)"
+ },
+ {
+  "id": 11,
+  "operadora": "Amil",
+  "operadora_full": "Amil",
+  "plano": "Prata",
+  "label": "Prata",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 375.27,
+   "19 a 23": 439.07,
+   "24 a 28": 535.67,
+   "29 a 33": 642.8,
+   "34 a 38": 674.94,
+   "39 a 43": 742.43,
+   "44 a 48": 928.04,
+   "49 a 53": 1020.84,
+   "54 a 58": 1276.05,
+   "59 ou mais": 2233.09
+  },
+  "fonte": "AMIL 600"
+ },
+ {
+  "id": 10,
+  "operadora": "Amil",
+  "operadora_full": "Amil",
+  "plano": "Prata",
+  "label": "Prata",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 338.08,
+   "19 a 23": 395.55,
+   "24 a 28": 482.57,
+   "29 a 33": 579.08,
+   "34 a 38": 608.03,
+   "39 a 43": 668.83,
+   "44 a 48": 836.04,
+   "49 a 53": 919.64,
+   "54 a 58": 1149.55,
+   "59 ou mais": 2011.71
+  },
+  "fonte": "AMIL 600"
+ },
+ {
+  "id": 3,
+  "operadora": "Amil",
+  "operadora_full": "Amil",
+  "plano": "S6500 Black R1",
+  "label": "S6500 Black R1",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 1348.44,
+   "19 a 23": 1577.67,
+   "24 a 28": 1924.76,
+   "29 a 33": 2309.71,
+   "34 a 38": 2425.2,
+   "39 a 43": 2667.72,
+   "44 a 48": 3334.65,
+   "49 a 53": 3668.12,
+   "54 a 58": 4585.15,
+   "59 ou mais": 8024.01
+  },
+  "fonte": "AMIL infinity"
+ },
+ {
+  "id": 1,
+  "operadora": "Amil",
+  "operadora_full": "Amil",
+  "plano": "S750 R1",
+  "label": "S750 R1",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 603.26,
+   "19 a 23": 705.81,
+   "24 a 28": 861.09,
+   "29 a 33": 1033.31,
+   "34 a 38": 1084.98,
+   "39 a 43": 1193.48,
+   "44 a 48": 1491.85,
+   "49 a 53": 1641.04,
+   "54 a 58": 2051.3,
+   "59 ou mais": 3589.78
+  },
+  "fonte": "AMIL 900"
+ },
+ {
+  "id": 6,
+  "operadora": "Bradesco",
+  "operadora_full": "Bradesco Seguros",
+  "plano": "Efetivo Plus",
+  "label": "Efetivo Plus",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 468.03,
+   "19 a 23": 552.28,
+   "24 a 28": 668.25,
+   "29 a 33": 801.91,
+   "34 a 38": 914.17,
+   "39 a 43": 941.6,
+   "44 a 48": 1146.45,
+   "49 a 53": 1348.45,
+   "54 a 58": 1604.66,
+   "59 ou mais": 2807.99
+  },
+  "fonte": "BRADESCO 900 care"
+ },
+ {
+  "id": 5,
+  "operadora": "Bradesco",
+  "operadora_full": "Bradesco Seguros",
+  "plano": "Efetivo Plus",
+  "label": "Efetivo Plus",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 433.34,
+   "19 a 23": 511.34,
+   "24 a 28": 618.72,
+   "29 a 33": 742.47,
+   "34 a 38": 846.41,
+   "39 a 43": 871.8,
+   "44 a 48": 1061.47,
+   "49 a 53": 1248.5,
+   "54 a 58": 1485.72,
+   "59 ou mais": 2599.86
+  },
+  "fonte": "BRADESCO 900 care"
+ },
+ {
+  "id": 8,
+  "operadora": "Bradesco",
+  "operadora_full": "Bradesco Seguros",
+  "plano": "Nacional III",
+  "label": "Nacional III",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 499.45,
+   "19 a 23": 589.35,
+   "24 a 28": 713.11,
+   "29 a 33": 855.74,
+   "34 a 38": 975.54,
+   "39 a 43": 1004.81,
+   "44 a 48": 1223.42,
+   "49 a 53": 1438.99,
+   "54 a 58": 1712.4,
+   "59 ou mais": 2996.53
+  },
+  "fonte": "BRADESCO 900"
+ },
+ {
+  "id": 9,
+  "operadora": "Bradesco",
+  "operadora_full": "Bradesco Seguros",
+  "plano": "Nacional Plus 4",
+  "label": "Nacional Plus 4",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 1433.1,
+   "19 a 23": 1691.06,
+   "24 a 28": 2046.17,
+   "29 a 33": 2455.42,
+   "34 a 38": 2799.15,
+   "39 a 43": 2883.12,
+   "44 a 48": 3510.37,
+   "49 a 53": 4128.9,
+   "54 a 58": 4913.39,
+   "59 ou mais": 8597.94
+  },
+  "fonte": "BRADESCO infinity"
+ },
+ {
+  "id": 13,
+  "operadora": "Hapvida",
+  "operadora_full": "Hapvida NotreDame SP/RJ",
+  "plano": "600",
+  "label": "600",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 329.92,
+   "19 a 23": 386.01,
+   "24 a 28": 470.92,
+   "29 a 33": 565.12,
+   "34 a 38": 593.38,
+   "39 a 43": 652.72,
+   "44 a 48": 815.9,
+   "49 a 53": 986.48,
+   "54 a 58": 1233.92,
+   "59 ou mais": 1963.18
+  },
+  "fonte": "AMIL 600"
+ },
+ {
+  "id": 12,
+  "operadora": "Hapvida",
+  "operadora_full": "Hapvida NotreDame SP/RJ",
+  "plano": "600",
+  "label": "600",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 297.23,
+   "19 a 23": 347.76,
+   "24 a 28": 424.26,
+   "29 a 33": 509.11,
+   "34 a 38": 534.58,
+   "39 a 43": 588.03,
+   "44 a 48": 735.04,
+   "49 a 53": 888.72,
+   "54 a 58": 1111.65,
+   "59 ou mais": 1768.65
+  },
+  "fonte": "AMIL 600"
+ },
+ {
+  "id": 21,
+  "operadora": "Hapvida",
+  "operadora_full": "Hapvida NotreDame SP/RJ",
+  "plano": "700",
+  "label": "700",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 435.79,
+   "19 a 23": 509.87,
+   "24 a 28": 622.03,
+   "29 a 33": 746.44,
+   "34 a 38": 783.77,
+   "39 a 43": 862.14,
+   "44 a 48": 1077.69,
+   "49 a 53": 1303.01,
+   "54 a 58": 1629.84,
+   "59 ou mais": 2593.11
+  },
+  "fonte": "PORTO 700 (1)"
+ },
+ {
+  "id": 20,
+  "operadora": "Hapvida",
+  "operadora_full": "Hapvida NotreDame SP/RJ",
+  "plano": "700",
+  "label": "700",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 392.6,
+   "19 a 23": 459.34,
+   "24 a 28": 560.39,
+   "29 a 33": 672.48,
+   "34 a 38": 706.12,
+   "39 a 43": 776.73,
+   "44 a 48": 970.92,
+   "49 a 53": 1173.91,
+   "54 a 58": 1468.36,
+   "59 ou mais": 2336.18
+  },
+  "fonte": "PORTO 700 (1)"
+ },
+ {
+  "id": 2,
+  "operadora": "Hapvida",
+  "operadora_full": "Hapvida NotreDame SP/RJ",
+  "plano": "900",
+  "label": "900",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 637.41,
+   "19 a 23": 745.77,
+   "24 a 28": 909.84,
+   "29 a 33": 1091.81,
+   "34 a 38": 1146.4,
+   "39 a 43": 1261.04,
+   "44 a 48": 1576.3,
+   "49 a 53": 1905.9,
+   "54 a 58": 2383.9,
+   "59 ou mais": 3792.78
+  },
+  "fonte": "AMIL 900"
+ },
+ {
+  "id": 7,
+  "operadora": "Hapvida",
+  "operadora_full": "Hapvida NotreDame SP/RJ",
+  "plano": "900 Care",
+  "label": "900 Care",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 605.04,
+   "19 a 23": 707.89,
+   "24 a 28": 863.62,
+   "29 a 33": 1036.36,
+   "34 a 38": 1088.19,
+   "39 a 43": 1197.0,
+   "44 a 48": 1496.25,
+   "49 a 53": 1809.07,
+   "54 a 58": 2262.86,
+   "59 ou mais": 3600.24
+  },
+  "fonte": "BRADESCO 900 care"
+ },
+ {
+  "id": 4,
+  "operadora": "Hapvida",
+  "operadora_full": "Hapvida NotreDame SP/RJ",
+  "plano": "Infinity",
+  "label": "Infinity",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "precos": {
+   "00 a 18": 990.28,
+   "19 a 23": 1158.61,
+   "24 a 28": 1413.5,
+   "29 a 33": 1696.22,
+   "34 a 38": 1781.05,
+   "39 a 43": 1959.15,
+   "44 a 48": 2448.94,
+   "49 a 53": 2960.93,
+   "54 a 58": 3703.65,
+   "59 ou mais": 5892.55
+  },
+  "fonte": "AMIL infinity"
+ },
+ {
+  "id": 23,
+  "operadora": "Porto Seguro",
+  "operadora_full": "Porto Seguro",
+  "plano": "Bronze Brasil I",
+  "label": "Bronze Brasil I",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 360.61,
+   "19 a 23": 437.32,
+   "24 a 28": 527.55,
+   "29 a 33": 603.95,
+   "34 a 38": 654.39,
+   "39 a 43": 675.82,
+   "44 a 48": 807.28,
+   "49 a 53": 869.07,
+   "54 a 58": 1073.8,
+   "59 ou mais": 1804.97
+  },
+  "fonte": "PORTO 700 (1)"
+ },
+ {
+  "id": 22,
+  "operadora": "Porto Seguro",
+  "operadora_full": "Porto Seguro",
+  "plano": "Bronze Brasil I",
+  "label": "Bronze Brasil I",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 352.46,
+   "19 a 23": 427.44,
+   "24 a 28": 515.63,
+   "29 a 33": 590.31,
+   "34 a 38": 639.61,
+   "39 a 43": 660.55,
+   "44 a 48": 789.04,
+   "49 a 53": 849.44,
+   "54 a 58": 1049.54,
+   "59 ou mais": 1764.2
+  },
+  "fonte": "PORTO 700 (1)"
+ },
+ {
+  "id": 28,
+  "operadora": "Porto Seguro",
+  "operadora_full": "Porto Seguro",
+  "plano": "Diamante Mais I",
+  "label": "Diamante Mais I",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 1625.24,
+   "19 a 23": 1970.96,
+   "24 a 28": 2377.64,
+   "29 a 33": 2721.98,
+   "34 a 38": 2949.29,
+   "39 a 43": 3045.86,
+   "44 a 48": 3638.35,
+   "49 a 53": 3916.84,
+   "54 a 58": 4839.54,
+   "59 ou mais": 8134.88
+  },
+  "fonte": "PORTO infinity"
+ },
+ {
+  "id": 26,
+  "operadora": "Porto Seguro",
+  "operadora_full": "Porto Seguro",
+  "plano": "Ouro Mais I",
+  "label": "Ouro Mais I",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 530.12,
+   "19 a 23": 642.89,
+   "24 a 28": 775.54,
+   "29 a 33": 887.86,
+   "34 a 38": 962.0,
+   "39 a 43": 993.5,
+   "44 a 48": 1186.76,
+   "49 a 53": 1277.59,
+   "54 a 58": 1578.56,
+   "59 ou mais": 2653.43
+  },
+  "fonte": "PORTO 900 care"
+ },
+ {
+  "id": 27,
+  "operadora": "Porto Seguro",
+  "operadora_full": "Porto Seguro",
+  "plano": "Ouro Max I",
+  "label": "Ouro Max I",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 641.45,
+   "19 a 23": 777.89,
+   "24 a 28": 938.4,
+   "29 a 33": 1074.3,
+   "34 a 38": 1164.02,
+   "39 a 43": 1202.13,
+   "44 a 48": 1435.97,
+   "49 a 53": 1545.89,
+   "54 a 58": 1910.05,
+   "59 ou mais": 3210.65
+  },
+  "fonte": "PORTO 900"
+ },
+ {
+  "id": 16,
+  "operadora": "Porto Seguro",
+  "operadora_full": "Porto Seguro",
+  "plano": "Prata Pró E",
+  "label": "Prata Pró E (PORTO 600)",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 320.41,
+   "19 a 23": 388.56,
+   "24 a 28": 468.74,
+   "29 a 33": 536.63,
+   "34 a 38": 581.44,
+   "39 a 43": 600.48,
+   "44 a 48": 717.28,
+   "49 a 53": 772.19,
+   "54 a 58": 954.09,
+   "59 ou mais": 1603.75
+  },
+  "fonte": "PORTO 600"
+ },
+ {
+  "id": 17,
+  "operadora": "Porto Seguro",
+  "operadora_full": "Porto Seguro",
+  "plano": "Prata Pró E",
+  "label": "Prata Pró E (PORTO PRÓ)",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 271.71,
+   "19 a 23": 329.51,
+   "24 a 28": 397.5,
+   "29 a 33": 455.07,
+   "34 a 38": 493.07,
+   "39 a 43": 509.21,
+   "44 a 48": 608.27,
+   "49 a 53": 654.82,
+   "54 a 58": 809.08,
+   "59 ou mais": 1360.01
+  },
+  "fonte": "PORTO PRÓ"
+ },
+ {
+  "id": 14,
+  "operadora": "Porto Seguro",
+  "operadora_full": "Porto Seguro",
+  "plano": "Prata Pró Q",
+  "label": "Prata Pró Q (PORTO 600)",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 321.9,
+   "19 a 23": 390.37,
+   "24 a 28": 470.92,
+   "29 a 33": 539.12,
+   "34 a 38": 584.14,
+   "39 a 43": 603.27,
+   "44 a 48": 720.62,
+   "49 a 53": 775.78,
+   "54 a 58": 958.53,
+   "59 ou mais": 1611.21
+  },
+  "fonte": "PORTO 600"
+ },
+ {
+  "id": 15,
+  "operadora": "Porto Seguro",
+  "operadora_full": "Porto Seguro",
+  "plano": "Prata Pró Q",
+  "label": "Prata Pró Q (PORTO PRÓ)",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 275.34,
+   "19 a 23": 333.91,
+   "24 a 28": 402.8,
+   "29 a 33": 461.14,
+   "34 a 38": 499.65,
+   "39 a 43": 516.01,
+   "44 a 48": 616.38,
+   "49 a 53": 663.56,
+   "54 a 58": 819.88,
+   "59 ou mais": 1378.15
+  },
+  "fonte": "PORTO PRÓ"
+ },
+ {
+  "id": 19,
+  "operadora": "SulAmérica",
+  "operadora_full": "Sulamérica",
+  "plano": "Direto Nacional",
+  "label": "Direto Nacional",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 379.26,
+   "19 a 23": 474.07,
+   "24 a 28": 587.85,
+   "29 a 33": 652.5,
+   "34 a 38": 698.19,
+   "39 a 43": 809.9,
+   "44 a 48": 968.17,
+   "49 a 53": 1134.69,
+   "54 a 58": 1350.84,
+   "59 ou mais": 2275.5
+  },
+  "fonte": "SULA 600"
+ },
+ {
+  "id": 18,
+  "operadora": "SulAmérica",
+  "operadora_full": "Sulamérica",
+  "plano": "Direto Nacional",
+  "label": "Direto Nacional",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 341.93,
+   "19 a 23": 427.4,
+   "24 a 28": 529.98,
+   "29 a 33": 588.28,
+   "34 a 38": 629.47,
+   "39 a 43": 730.18,
+   "44 a 48": 872.86,
+   "49 a 53": 1023.0,
+   "54 a 58": 1217.88,
+   "59 ou mais": 2051.53
+  },
+  "fonte": "SULA 600"
+ },
+ {
+  "id": 30,
+  "operadora": "SulAmérica",
+  "operadora_full": "Sulamérica",
+  "plano": "Especial 100 R1",
+  "label": "Especial 100 R1",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 449.28,
+   "19 a 23": 561.59,
+   "24 a 28": 696.38,
+   "29 a 33": 772.99,
+   "34 a 38": 827.09,
+   "39 a 43": 959.43,
+   "44 a 48": 1146.91,
+   "49 a 53": 1344.17,
+   "54 a 58": 1600.23,
+   "59 ou mais": 2695.58
+  },
+  "fonte": "SULA 900"
+ },
+ {
+  "id": 29,
+  "operadora": "SulAmérica",
+  "operadora_full": "Sulamérica",
+  "plano": "Especial Vital",
+  "label": "Especial Vital",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 384.14,
+   "19 a 23": 480.17,
+   "24 a 28": 595.41,
+   "29 a 33": 660.91,
+   "34 a 38": 707.16,
+   "39 a 43": 820.32,
+   "44 a 48": 980.6,
+   "49 a 53": 1149.27,
+   "54 a 58": 1368.2,
+   "59 ou mais": 2304.72
+  },
+  "fonte": "SULA 900 care"
+ },
+ {
+  "id": 31,
+  "operadora": "SulAmérica",
+  "operadora_full": "Sulamérica",
+  "plano": "Executivo R1",
+  "label": "Executivo R1",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Sem Coparticipação",
+  "precos": {
+   "00 a 18": 967.26,
+   "19 a 23": 1209.08,
+   "24 a 28": 1499.24,
+   "29 a 33": 1664.16,
+   "34 a 38": 1780.65,
+   "39 a 43": 2065.54,
+   "44 a 48": 2469.15,
+   "49 a 53": 2893.85,
+   "54 a 58": 3445.13,
+   "59 ou mais": 5803.31
+  },
+  "fonte": "SULA infinity"
+ }
+];
 const BANDS = ["00 a 18","19 a 23","24 a 28","29 a 33","34 a 38","39 a 43","44 a 48","49 a 53","54 a 58","59 ou mais"];
-const fmt = n => n==null?'—':n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmt0 = n => n==null?'—':Math.round(n).toLocaleString('pt-BR');
-const isHap = p => p.operadora.includes('Hapvida');
+const fmt = n => (n==null||isNaN(n))?'—':n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const OP_ORDER=['Hapvida','Amil','Bradesco','Porto Seguro','SulAmérica'];
 
-// nice label per comparativo
-DATA.forEach(c=>{
-  c.id = c.arquivo.replace('.pdf','');
-  c.label = c.id;
-});
+let vidas = Object.fromEntries(BANDS.map(b=>[b,0]));
+let selected = new Set();
+let fOp='Todas', fAcom='Todas', q='';
 
-let state = { op:'Todas', acom:'Apartamento', cmp:DATA[0].id };
+// ---- step 1: vidas grid ----
+function buildVidas(){
+  document.getElementById('vidasGrid').innerHTML = BANDS.map(b=>
+    `<div class="vcell"><label>${b}</label><input type="number" min="0" step="1" value="0" data-b="${b}" onchange="onVida(this)" oninput="onVida(this)"></div>`).join('');
+}
+function onVida(el){
+  let v=parseInt(el.value||'0',10); if(isNaN(v)||v<0)v=0; el.value=v;
+  vidas[el.dataset.b]=v; refreshTot(); calc();
+}
+function refreshTot(){ document.getElementById('totVidas').textContent = BANDS.reduce((s,b)=>s+vidas[b],0); }
+function zerar(){ BANDS.forEach(b=>vidas[b]=0); document.querySelectorAll('[data-b]').forEach(i=>i.value=0); refreshTot(); calc(); }
 
-// ---- helpers: pick headline pair for a comparativo given acomodacao ----
-function headlinePair(c, acomPref){
-  const haps = c.planos.filter(isHap);
-  const concs = c.planos.filter(p=>!isHap(p));
-  function pick(arr){
-    if(!arr.length) return null;
-    let m = arr.find(p=>p.acomodacao===acomPref);
-    if(m) return m;
-    // fallback: apartamento, else first
-    m = arr.find(p=>p.acomodacao==='Apartamento') || arr[0];
-    return m;
+// ---- step 2: filtros + lista ----
+function buildFilters(){
+  const ops=['Todas',...OP_ORDER.filter(o=>CATALOG.some(c=>c.operadora===o))];
+  document.getElementById('opFilter').innerHTML = ops.map(o=>`<div class="chip ${fOp===o?'active':''}" data-op="${o}">${o}</div>`).join('');
+  const ac=['Todas','Apartamento','Enfermaria'];
+  document.getElementById('acomFilter').innerHTML = ac.map(a=>`<div class="chip ${fAcom===a?'active':''}" data-ac="${a}">${a}</div>`).join('');
+  document.querySelectorAll('[data-op]').forEach(e=>e.onclick=()=>{fOp=e.dataset.op;buildFilters();renderList();});
+  document.querySelectorAll('[data-ac]').forEach(e=>e.onclick=()=>{fAcom=e.dataset.ac;buildFilters();renderList();});
+}
+function filtered(){
+  return CATALOG.filter(c=>
+    (fOp==='Todas'||c.operadora===fOp) &&
+    (fAcom==='Todas'||c.acomodacao===fAcom) &&
+    (q===''||(c.label+' '+c.operadora).toLowerCase().includes(q)));
+}
+function renderList(){
+  const list=filtered();
+  const byop={};
+  list.forEach(c=>{(byop[c.operadora]=byop[c.operadora]||[]).push(c)});
+  const ops=OP_ORDER.filter(o=>byop[o]);
+  let html='';
+  ops.forEach(op=>{
+    const isHap=op==='Hapvida';
+    html+=`<div class="opgroup"><div class="ophead">${op} · ${byop[op].length} plano(s)
+       <span class="selall" onclick="selAll('${op}')">selecionar todos</span></div><div class="plist">`;
+    byop[op].forEach(c=>{
+      const cop = c.coparticipacao.includes('Sem')?`<span class="tagb sem">Sem copart.</span>`:`<span class="tagb copart">Coparticipação</span>`;
+      html+=`<label class="pitem ${isHap?'hap':''} ${selected.has(c.id)?'sel':''}" data-id="${c.id}">
+        <input type="checkbox" ${selected.has(c.id)?'checked':''} onchange="toggle(${c.id},this)">
+        <div><div class="pn">${c.label}</div>
+        <div class="pmeta"><span class="tagb ${isHap?'hapv':''}">${c.acomodacao}</span>${cop}</div></div></label>`;
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('planList').innerHTML = html || '<div class="empty">Nenhum plano para este filtro.</div>';
+}
+function toggle(id,el){ if(el.checked)selected.add(id);else selected.delete(id); syncSel(); calc(); }
+function selAll(op){ filtered().filter(c=>c.operadora===op).forEach(c=>selected.add(c.id)); renderList(); syncSel(); calc(); }
+function clearSel(){ selected.clear(); renderList(); syncSel(); calc(); }
+function syncSel(){
+  document.getElementById('selCount').textContent = selected.size+' selecionado'+(selected.size===1?'':'s');
+  document.querySelectorAll('.pitem').forEach(el=>{const id=+el.dataset.id;el.classList.toggle('sel',selected.has(id));
+    const cb=el.querySelector('input');if(cb)cb.checked=selected.has(id);});
+}
+
+// ---- step 3: cálculo ----
+function planTotal(c){ return BANDS.reduce((s,b)=>s+vidas[b]*(c.precos[b]||0),0); }
+function calc(){
+  const tv=BANDS.reduce((s,b)=>s+vidas[b],0);
+  const area=document.getElementById('resultArea');
+  const note=document.getElementById('resNote');
+  if(selected.size===0 || tv===0){
+    area.innerHTML='<div class="empty">Informe as vidas e selecione ao menos um plano para ver a cotação.</div>';
+    note.style.display='none'; return;
   }
-  return { hap:pick(haps), conc:pick(concs) };
-}
-
-// ---- KPIs ----
-function renderKPIs(){
-  const ops = [...new Set(DATA.map(c=>c.concorrente))];
-  let wins=0, tot=0;
-  DATA.forEach(c=>{
-    const {hap,conc}=headlinePair(c,'Apartamento');
-    if(hap&&conc&&hap.total!=null&&conc.total!=null){tot++; if(hap.total<conc.total)wins++;}
-  });
-  const planos = DATA.reduce((s,c)=>s+c.planos.length,0);
-  const kpis=[
-    {lbl:'Comparativos',val:DATA.length,foot:'PDFs analisados'},
-    {lbl:'Operadoras concorrentes',val:ops.length,foot:ops.join(' · ')},
-    {lbl:'Planos analisados',val:planos,foot:'incl. enfermaria + apartamento'},
-    {lbl:'Hapvida mais barata',val:wins+'/'+tot,foot:'apartamento · total mensal',hap:true},
-  ];
-  document.getElementById('kpis').innerHTML = kpis.map(k=>
-    `<div class="kpi"><div class="lbl">${k.lbl}</div><div class="val ${k.hap?'hap':''}">${k.val}</div><div class="foot">${k.foot}</div></div>`).join('');
-}
-
-// ---- chips ----
-function renderChips(){
-  const ops=['Todas',...new Set(DATA.map(c=>c.concorrente))];
-  document.getElementById('opChips').innerHTML = ops.map(o=>
-    `<div class="chip ${state.op===o?'active':''}" data-op="${o}">${o}</div>`).join('');
-  const acoms=['Apartamento','Enfermaria'];
-  document.getElementById('acomChips').innerHTML = acoms.map(a=>
-    `<div class="chip ${state.acom===a?'active':''}" data-acom="${a}">${a}</div>`).join('');
-  document.querySelectorAll('[data-op]').forEach(el=>el.onclick=()=>{state.op=el.dataset.op;renderChips();renderOverview();});
-  document.querySelectorAll('[data-acom]').forEach(el=>el.onclick=()=>{state.acom=el.dataset.acom;renderChips();renderOverview();renderDetail();});
-}
-
-// ---- overview chart ----
-let overviewChart;
-function renderOverview(){
-  let list = DATA.filter(c=> state.op==='Todas' || c.concorrente===state.op);
-  const rows = list.map(c=>{
-    const {hap,conc}=headlinePair(c,state.acom);
-    return {label:c.concorrente+' — '+ (conc?conc.plano:'?'), id:c.id,
-            hapT:hap?hap.total:null, concT:conc?conc.total:null,
-            hapName:hap?hap.plano:'', concName:conc?conc.plano:''};
-  }).filter(r=>r.hapT!=null||r.concT!=null);
-  const labels = rows.map(r=>r.label);
-  const ctx=document.getElementById('overviewChart');
-  if(overviewChart) overviewChart.destroy();
-  overviewChart=new Chart(ctx,{type:'bar',
-    data:{labels,datasets:[
-      {label:'Hapvida',data:rows.map(r=>r.hapT),backgroundColor:'#FF6B00',borderRadius:4},
-      {label:'Concorrente',data:rows.map(r=>r.concT),backgroundColor:'#378add',borderRadius:4},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      onClick:(e,els)=>{if(els.length){state.cmp=rows[els[0].index].id;document.getElementById('cmpSelect').value=state.cmp;renderDetail();window.scrollTo({top:document.querySelector('#cmpSelect').getBoundingClientRect().top+window.scrollY-80,behavior:'smooth'});}},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': R$ '+fmt(ctx.raw)}}},
-      scales:{x:{ticks:{autoSkip:false,maxRotation:55,minRotation:30,font:{size:11}}},
-              y:{ticks:{callback:v=>'R$ '+fmt0(v)}}}}
-  });
-}
-
-// ---- detail ----
-function renderSelect(){
-  const sel=document.getElementById('cmpSelect');
-  sel.innerHTML=DATA.map(c=>`<option value="${c.id}">${c.concorrente} — ${c.label}</option>`).join('');
-  sel.value=state.cmp;
-  sel.onchange=()=>{state.cmp=sel.value;renderDetail();};
-}
-
-let bandChart;
-function renderDetail(){
-  const c=DATA.find(x=>x.id===state.cmp);
-  const {hap,conc}=headlinePair(c,state.acom);
-  // head cards
-  function card(p,cls){
-    if(!p) return `<div class="side ${cls}"><div class="op">—</div></div>`;
-    const copBadge = p.coparticipacao.includes('Sem')
-      ? `<span class="badge sem">${p.coparticipacao}</span>`
-      : `<span class="badge copart">${p.coparticipacao}</span>`;
-    return `<div class="side ${cls}">
-      <div class="op">${p.operadora}</div>
-      <div class="plan">${p.plano}</div>
-      <div class="badges"><span class="badge">${p.modalidade}</span><span class="badge">${p.acomodacao}</span>${copBadge}</div>
-      <div class="tot">Total mensal (1 vida/faixa)<b>R$ ${fmt(p.total)}</b></div>
-    </div>`;
-  }
-  let vs='';
-  if(hap&&conc&&hap.total!=null&&conc.total!=null){
-    const d=hap.total-conc.total, pct=(d/conc.total*100);
-    const good=d<0;
-    vs=`<div class="vs"><div class="vtag">VS</div>
-      <div class="diff ${good?'good':'bad'}">${good?'−':'+'}R$ ${fmt(Math.abs(d))}<small>${good?'Hapvida mais barata':'Hapvida mais cara'} (${(pct>0?'+':'')+pct.toFixed(1)}%)</small></div></div>`;
-  } else vs=`<div class="vs"><div class="vtag">VS</div></div>`;
-  document.getElementById('cmpHead').innerHTML = card(hap,'hapvida')+vs+card(conc,'conc');
-
-  // band chart
-  const ctx=document.getElementById('bandChart');
-  if(bandChart) bandChart.destroy();
-  bandChart=new Chart(ctx,{type:'line',
-    data:{labels:BANDS,datasets:[
-      {label:hap?('Hapvida '+hap.plano):'Hapvida',data:BANDS.map(b=>hap?hap.precos[b]:null),borderColor:'#FF6B00',backgroundColor:'rgba(255,107,0,.08)',borderWidth:2.5,tension:.3,fill:true,pointRadius:3},
-      {label:conc?(conc.operadora+' '+conc.plano):'Concorrente',data:BANDS.map(b=>conc?conc.precos[b]:null),borderColor:'#378add',backgroundColor:'rgba(55,138,221,.06)',borderWidth:2.5,tension:.3,fill:true,pointRadius:3,borderDash:[6,4]},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'top',labels:{boxWidth:14,usePointStyle:true}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': R$ '+fmt(ctx.raw)}}},
-      scales:{y:{ticks:{callback:v=>'R$ '+fmt0(v)}}}}
-  });
-
+  let rows=[...selected].map(id=>CATALOG.find(c=>c.id===id)).filter(Boolean)
+    .map(c=>({c,total:planTotal(c)})).sort((a,b)=>a.total-b.total);
+  const min=rows[0].total, max=rows[rows.length-1].total;
+  const bestHap=rows.find(r=>r.c.operadora==='Hapvida');
+  // KPIs
+  const econ=max-min;
+  let kpis=`<div class="kpis">
+    <div class="kpi"><div class="lbl">Total de vidas</div><div class="val">${tv}</div><div class="foot">${selected.size} plano(s) comparados</div></div>
+    <div class="kpi"><div class="lbl">Menor custo mensal</div><div class="val green">R$ ${fmt(min)}</div><div class="foot">${rows[0].c.operadora} · ${rows[0].c.label}</div></div>`;
+  if(bestHap) kpis+=`<div class="kpi"><div class="lbl">Melhor Hapvida</div><div class="val hap">R$ ${fmt(bestHap.total)}</div><div class="foot">${bestHap.c.label} · ${bestHap.c.acomodacao}${bestHap.total>min?` (+R$ ${fmt(bestHap.total-min)} vs menor)`:' (menor preço)'}</div></div>`;
+  kpis+=`<div class="kpi"><div class="lbl">Diferença máx. (mês)</div><div class="val">R$ ${fmt(econ)}</div><div class="foot">entre o mais barato e o mais caro</div></div></div>`;
   // table
-  const t=document.getElementById('bandTable');
-  let head=`<thead><tr><th>Faixa etária</th>`+
-    (hap?`<th>Hapvida ${hap.plano}</th>`:'')+
-    (conc?`<th>${conc.operadora} ${conc.plano}</th>`:'')+
-    `<th>Diferença</th><th>%</th></tr></thead>`;
-  let body='<tbody>';
-  BANDS.forEach(b=>{
-    const hv=hap?hap.precos[b]:null, cv=conc?conc.precos[b]:null;
-    const d=(hv!=null&&cv!=null)?hv-cv:null;
-    const pct=(d!=null&&cv)?(d/cv*100):null;
-    const hapWin=d!=null&&d<0;
-    body+=`<tr><td>${b}</td>`+
-      (hap?`<td class="cell-hap ${hapWin?'win':''}">R$ ${fmt(hv)}</td>`:'')+
-      (conc?`<td class="${d!=null&&d>0?'win':''}">R$ ${fmt(cv)}</td>`:'')+
-      `<td style="color:${d!=null?(d<0?'#0f6e56':'#a32d2d'):'inherit'}">${d!=null?((d<0?'−':'+')+'R$ '+fmt(Math.abs(d))):'—'}</td>`+
-      `<td style="color:${pct!=null?(pct<0?'#0f6e56':'#a32d2d'):'inherit'}">${pct!=null?((pct>0?'+':'')+pct.toFixed(1)+'%'):'—'}</td></tr>`;
+  let t=`<div style="overflow-x:auto"><table><thead><tr><th>Plano</th><th>Acomodação</th><th>Copart.</th><th>Custo mensal</th><th>R$/vida</th><th>vs menor</th><th></th></tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    const isHap=r.c.operadora==='Hapvida';
+    const diff=r.total-min, pct=min?diff/min*100:0;
+    const w=max>0?Math.round(r.total/max*100):0;
+    t+=`<tr class="${i===0?'best':''} ${isHap?'haprow':''}">
+      <td class="pn-cell"><span class="rank ${i===0?'g':''}">${i+1}</span><b>${r.c.label}</b><br><span class="op" style="margin-left:30px">${r.c.operadora}</span></td>
+      <td>${r.c.acomodacao}</td>
+      <td>${r.c.coparticipacao.includes('Sem')?'Sem':'Parcial'}</td>
+      <td><b>R$ ${fmt(r.total)}</b></td>
+      <td>R$ ${fmt(r.total/tv)}</td>
+      <td style="color:${diff===0?'#0f6e56':'#a32d2d'}">${diff===0?'—':'+R$ '+fmt(diff)+' ('+pct.toFixed(1)+'%)'}</td>
+      <td><span class="barwrap"><i class="${isHap?'hap':''}" style="width:${w}%"></i></span></td></tr>`;
   });
-  // total
-  const ht=hap?hap.total:null, ct=conc?conc.total:null, dt=(ht!=null&&ct!=null)?ht-ct:null, pt=(dt!=null&&ct)?dt/ct*100:null;
-  body+=`<tr class="total-row"><td>Total mensal</td>`+
-    (hap?`<td class="cell-hap">R$ ${fmt(ht)}</td>`:'')+
-    (conc?`<td>R$ ${fmt(ct)}</td>`:'')+
-    `<td style="color:${dt!=null?(dt<0?'#0f6e56':'#a32d2d'):'inherit'}">${dt!=null?((dt<0?'−':'+')+'R$ '+fmt(Math.abs(dt))):'—'}</td>`+
-    `<td style="color:${pt!=null?(pt<0?'#0f6e56':'#a32d2d'):'inherit'}">${pt!=null?((pt>0?'+':'')+pt.toFixed(1)+'%'):'—'}</td></tr>`;
-  body+='</tbody>';
-  t.innerHTML=head+body;
-
-  // note
-  const note=document.getElementById('cmpNote');
-  let txt='';
-  if(hap&&conc){
-    const sameCop = hap.coparticipacao===conc.coparticipacao;
-    if(!sameCop) txt=`Atenção: o plano Hapvida (<b>${hap.coparticipacao}</b>) e o concorrente (<b>${conc.coparticipacao}</b>) têm regimes de coparticipação diferentes — o preço cheio não captura a diferença de custo no uso. Acomodação: ${hap.acomodacao}.`;
-    else txt=`Mesma regra de coparticipação (${hap.coparticipacao}) e acomodação (${hap.acomodacao}) — comparação direta de mensalidade.`;
-  }
-  note.innerHTML=txt;
+  t+='</tbody></table></div>';
+  area.innerHTML=kpis+t;
+  // note about coparticipação
+  const hasParcial=rows.some(r=>!r.c.coparticipacao.includes('Sem'));
+  const hasSem=rows.some(r=>r.c.coparticipacao.includes('Sem'));
+  if(hasParcial&&hasSem){ note.style.display='block';
+    note.innerHTML='Atenção: a comparação mistura planos <b>com coparticipação</b> (Hapvida = Parcial) e <b>sem coparticipação</b>. O custo mensal acima é só a mensalidade — nos planos com coparticipação há custo adicional conforme o uso.';
+  } else note.style.display='none';
 }
 
-renderKPIs(); renderChips(); renderOverview(); renderSelect(); renderDetail();
+// ---- conversor de datas ----
+function openConv(){document.getElementById('convOverlay').classList.add('show');}
+function closeConv(){document.getElementById('convOverlay').classList.remove('show');}
+function parseDate(s){
+  s=s.trim(); if(!s)return null; let d,m,y;
+  let m1=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+  let m2=s.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+  if(m1){d=+m1[1];m=+m1[2];y=+m1[3];}
+  else if(m2){y=+m2[1];m=+m2[2];d=+m2[3];}
+  else return null;
+  if(m<1||m>12||d<1||d>31||y<1900)return null;
+  return new Date(y,m-1,d);
+}
+function ageBand(age){
+  if(age<=18)return "00 a 18"; if(age<=23)return "19 a 23"; if(age<=28)return "24 a 28";
+  if(age<=33)return "29 a 33"; if(age<=38)return "34 a 38"; if(age<=43)return "39 a 43";
+  if(age<=48)return "44 a 48"; if(age<=53)return "49 a 53"; if(age<=58)return "54 a 58";
+  return "59 ou mais";
+}
+function applyConv(){
+  const today=new Date();
+  const lines=document.getElementById('convInput').value.split('\n');
+  const dist=Object.fromEntries(BANDS.map(b=>[b,0]));
+  let ok=0,bad=0;
+  lines.forEach(l=>{ if(!l.trim())return; const dt=parseDate(l);
+    if(!dt){bad++;return;}
+    let age=today.getFullYear()-dt.getFullYear();
+    const md=today.getMonth()-dt.getMonth(); if(md<0||(md===0&&today.getDate()<dt.getDate()))age--;
+    if(age<0){bad++;return;}
+    dist[ageBand(age)]++; ok++;
+  });
+  if(ok===0){document.getElementById('convResult').innerHTML=`<span style="color:var(--red)">Nenhuma data válida reconhecida.</span>`;return;}
+  // add to existing
+  BANDS.forEach(b=>{vidas[b]+=dist[b];});
+  document.querySelectorAll('[data-b]').forEach(i=>i.value=vidas[i.dataset.b]);
+  refreshTot(); calc();
+  document.getElementById('convResult').innerHTML=`${ok} vida(s) distribuída(s)${bad?`, ${bad} ignorada(s)`:''}. Faixas atualizadas.`;
+  setTimeout(closeConv,900);
+}
+
+// init
+buildVidas(); buildFilters(); renderList(); syncSel();
+document.getElementById('search').addEventListener('input',e=>{q=e.target.value.toLowerCase().trim();renderList();});
+document.getElementById('convOverlay').addEventListener('click',e=>{if(e.target.id==='convOverlay')closeConv();});
 </script>
 </body>
 </html>
