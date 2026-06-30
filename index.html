@@ -155,6 +155,36 @@
   .rede-tbl tbody tr:hover{background:#fafbfd}
   .rede-tbl .hname{font-weight:600;color:var(--navy)}
   .rede-count{font-size:12.5px;color:var(--muted);margin:4px 0 10px}
+  /* folder / proposta */
+  .folder-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .folder-bar input{flex:1;min-width:220px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;color:var(--txt)}
+  .folder-bar input:focus{outline:none;border-color:var(--hap)}
+  #folder{display:none}
+  .fd-head{background:var(--hap);color:#fff;padding:22px 26px;border-radius:12px;display:flex;justify-content:space-between;align-items:flex-start}
+  .fd-head h1{font-size:22px;font-weight:700;margin:0}
+  .fd-head .fsub{font-size:13px;opacity:.92;margin-top:3px}
+  .fd-head .fbrand{font-size:13px;font-weight:700;text-align:right;line-height:1.5}
+  .fd-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:18px 0;font-size:14px}
+  .fd-meta b{color:var(--navy)}
+  .fd-sec{font-size:15px;font-weight:700;color:var(--navy);margin:20px 0 10px;border-bottom:2px solid var(--hap);padding-bottom:5px}
+  .fd-tbl{width:100%;border-collapse:collapse;font-size:13px}
+  .fd-tbl th,.fd-tbl td{border:1px solid #d9dee7;padding:8px 10px;text-align:right}
+  .fd-tbl th:first-child,.fd-tbl td:first-child{text-align:left}
+  .fd-tbl thead th{background:#0f2740;color:#fff;font-weight:600}
+  .fd-tbl tr.best td{background:#fff2e6;font-weight:700}
+  .fd-grid{display:flex;gap:10px;flex-wrap:wrap}
+  .fd-chip{border:1px solid #d9dee7;border-radius:8px;padding:6px 12px;font-size:13px}
+  .fd-chip b{color:var(--hap)}
+  .fd-hi{background:#fff2e6;border:1px solid #ffd9b8;border-radius:10px;padding:14px 18px;margin:14px 0;font-size:14px}
+  .fd-hi .v{font-size:24px;font-weight:800;color:var(--hap)}
+  .fd-foot{margin-top:24px;font-size:11px;color:#666;border-top:1px solid #d9dee7;padding-top:10px;line-height:1.5}
+  @media print{
+    .wrap,.overlay{display:none !important}
+    #folder{display:block !important}
+    body{background:#fff}
+    .fd-head,.fd-tbl thead th,.fd-tbl tr.best td,.fd-hi{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    @page{size:A4;margin:12mm}
+  }
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
   @media(max-width:680px){.vidas{grid-template-columns:repeat(3,1fr)}.cmp-head{grid-template-columns:1fr}.vs{flex-direction:row}}
 </style>
@@ -208,6 +238,10 @@
     <div class="panel">
       <h2>Resultado consolidado</h2>
       <div class="desc">Ranking dos planos selecionados (todas as operadoras), do menor para o maior custo mensal.</div>
+      <div class="folder-bar">
+        <input id="clienteNome" placeholder="Nome do cliente (aparece no folder)">
+        <button class="btn solid" onclick="gerarFolder()"><i></i>Gerar folder (PDF)</button>
+      </div>
       <div id="resultArea"><div class="empty">Informe as vidas e selecione ao menos um plano na matriz para ver o ranking.</div></div>
       <div class="note" id="resNote" style="display:none"></div>
     </div>
@@ -252,6 +286,9 @@
 
   <footer>Cotação e comparativo gerados a partir das tabelas PPO Hapvida · valores sujeitos a condições contratuais e vigência de tabela · uso interno comercial · <b>atualizado em 26/06/2026</b>.</footer>
 </div>
+
+<!-- Folder de cotação (visível só na impressão/PDF) -->
+<div id="folder"></div>
 
 <!-- Conversor modal -->
 <div class="overlay" id="convOverlay">
@@ -1166,6 +1203,40 @@ function renderDetail(){
     note.innerHTML=same?`Mesma regra de coparticipação (${hap.coparticipacao}) e acomodação (${hap.acomodacao}) — comparação direta de mensalidade.`
       :`Atenção: o plano Hapvida (<b>${hap.coparticipacao}</b>) e o concorrente (<b>${conc.coparticipacao}</b>) têm regimes de coparticipação diferentes — o preço cheio não captura a diferença de custo no uso. Acomodação: ${hap.acomodacao}.`;}
   else note.innerHTML='';
+}
+
+/* ===== folder / proposta em PDF ===== */
+function opLabel(k){const o=OPS.find(x=>x.key===k);return o?o.label:k;}
+function gerarFolder(){
+  const sel=selectedPlans(); const tv=totVidas();
+  if(!sel.length||tv===0){alert('Informe as vidas e selecione ao menos um plano na matriz antes de gerar o folder.');return;}
+  const nome=(document.getElementById('clienteNome').value||'').trim();
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  let rows=sel.map(c=>({c,total:planTotal(c)})).sort((a,b)=>a.total-b.total);
+  const min=rows[0];
+  const bestHap=rows.find(r=>r.c.operadora==='Hapvida');
+  // perfil de vidas (faixas não-zero)
+  const chips=BANDS.filter(b=>vidas[b]>0).map(b=>`<div class="fd-chip">${b}: <b>${vidas[b]}</b></div>`).join('');
+  // tabela
+  let trs=rows.map((r,i)=>{const cop=r.c.coparticipacao.includes('Sem')?'Sem coparticipação':'Coparticipação parcial';
+    return `<tr class="${i===0?'best':''}"><td>${i+1}</td><td>${r.c.label}</td><td>${opLabel(r.c.operadora)}</td><td>${r.c.acomodacao}</td><td>${cop}</td><td>R$ ${fmt(r.total)}</td></tr>`;}).join('');
+  let hi=`<div class="fd-hi">Menor mensalidade: <span class="v">R$ ${fmt(min.total)}</span> — ${min.c.label} (${opLabel(min.c.operadora)})`;
+  if(bestHap&&bestHap.c.operadora!==min.c.operadora) hi+=` · Melhor opção Hapvida: <b>R$ ${fmt(bestHap.total)}</b> — ${bestHap.c.label}`;
+  hi+=`</div>`;
+  document.getElementById('folder').innerHTML=`
+    <div class="fd-head"><div><h1>Proposta de Cotação</h1><div class="fsub">Plano de Saúde PME · ${tv} vida(s)</div></div>
+      <div class="fbrand">HAPVIDA NOTREDAME<br>Vendas Digital</div></div>
+    <div class="fd-meta"><div><b>Cliente:</b> ${nome||'—'}</div><div><b>Data:</b> ${hoje}</div></div>
+    <div class="fd-sec">Perfil de vidas</div>
+    <div class="fd-grid">${chips||'<div class="fd-chip">Sem vidas informadas</div>'}</div>
+    <div class="fd-sec">Planos cotados</div>
+    ${hi}
+    <table class="fd-tbl"><thead><tr><th>#</th><th>Plano</th><th>Operadora</th><th>Acomodação</th><th>Coparticipação</th><th>Mensalidade</th></tr></thead><tbody>${trs}</tbody></table>
+    <div class="fd-foot">Mensalidade = soma de (vidas × preço por faixa etária) por plano. Planos Hapvida com coparticipação parcial; concorrentes em geral sem coparticipação — o valor é apenas a mensalidade, sem o custo de uso. Valores referenciais, sujeitos a condições contratuais e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato. Emitido em ${hoje}.</div>`;
+  const t0=document.title;
+  document.title='Cotacao'+(nome?(' - '+nome):'');
+  window.print();
+  setTimeout(()=>{document.title=t0;},500);
 }
 
 /* ================= TAB 3: REDE DE ATENDIMENTO ================= */
