@@ -178,11 +178,17 @@
   .fd-hi{background:#fff2e6;border:1px solid #ffd9b8;border-radius:10px;padding:14px 18px;margin:14px 0;font-size:14px}
   .fd-hi .v{font-size:24px;font-weight:800;color:var(--hap)}
   .fd-foot{margin-top:24px;font-size:11px;color:#666;border-top:1px solid #d9dee7;padding-top:10px;line-height:1.5}
+  .fd-tbl tr.grp td{background:#13315c;color:#fff;font-weight:600;text-align:left;font-size:12px}
+  .fd-rede th,.fd-rede td{font-size:10.5px;padding:5px 7px}
+  .fd-cov{text-align:center} .fd-cov.no{color:#bbb}
+  .fd-note{font-size:11px;color:#666;margin:6px 0 8px}
   @media print{
     .wrap,.overlay{display:none !important}
     #folder{display:block !important}
     body{background:#fff}
-    .fd-head,.fd-tbl thead th,.fd-tbl tr.best td,.fd-hi{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .fd-head,.fd-tbl thead th,.fd-tbl tr.best td,.fd-tbl tr.grp td,.fd-hi{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .fd-sec{page-break-after:avoid}
+    .fd-tbl tr{page-break-inside:avoid}
     @page{size:A4;margin:12mm}
   }
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
@@ -1208,22 +1214,47 @@ function renderDetail(){
 
 /* ===== folder / proposta em PDF ===== */
 function opLabel(k){const o=OPS.find(x=>x.key===k);return o?o.label:k;}
-function gerarFolder(){
+async function gerarFolder(){
   const sel=selectedPlans(); const tv=totVidas();
   if(!sel.length||tv===0){alert('Informe as vidas e selecione ao menos um plano na matriz antes de gerar o folder.');return;}
   const nome=(document.getElementById('clienteNome').value||'').trim();
   const hoje=new Date().toLocaleDateString('pt-BR');
   let rows=sel.map(c=>({c,total:planTotal(c)})).sort((a,b)=>a.total-b.total);
+  const cols=rows.map(r=>r.c);
   const min=rows[0];
   const bestHap=rows.find(r=>r.c.operadora==='Hapvida');
-  // perfil de vidas (faixas não-zero)
   const chips=BANDS.filter(b=>vidas[b]>0).map(b=>`<div class="fd-chip">${b}: <b>${vidas[b]}</b></div>`).join('');
-  // tabela
   let trs=rows.map((r,i)=>{const cop=r.c.coparticipacao.includes('Sem')?'Sem coparticipação':'Coparticipação parcial';
     return `<tr class="${i===0?'best':''}"><td>${i+1}</td><td>${r.c.label}</td><td>${opLabel(r.c.operadora)}</td><td>${r.c.acomodacao}</td><td>${cop}</td><td>R$ ${fmt(r.total)}</td></tr>`;}).join('');
   let hi=`<div class="fd-hi">Menor mensalidade: <span class="v">R$ ${fmt(min.total)}</span> — ${min.c.label} (${opLabel(min.c.operadora)})`;
   if(bestHap&&bestHap.c.operadora!==min.c.operadora) hi+=` · Melhor opção Hapvida: <b>R$ ${fmt(bestHap.total)}</b> — ${bestHap.c.label}`;
   hi+=`</div>`;
+  // Tabela de valores completa (preço por faixa etária)
+  const colHead=cols.map(c=>`<th>${c.label}<br><span style="font-weight:400;font-size:10px">${opLabel(c.operadora)} · ${c.acomodacao}</span></th>`).join('');
+  const priceBody=BANDS.map(b=>`<tr><td>${b}</td>`+cols.map(c=>`<td>R$ ${fmt(c.precos[b]||0)}</td>`).join('')+`</tr>`).join('');
+  const priceTot=`<tr class="best"><td>Total (1 vida/faixa)</td>`+cols.map(c=>`<td>R$ ${fmt(BANDS.reduce((s,b)=>s+(c.precos[b]||0),0))}</td>`).join('')+`</tr>`;
+  const priceQt=`<tr class="grp"><td colspan="${cols.length+1}">Mensalidade para a distribuição de vidas informada (${tv} vida(s))</td></tr><tr class="best"><td>Total mensal</td>`+cols.map(c=>`<td>R$ ${fmt(planTotal(c))}</td>`).join('')+`</tr>`;
+  const priceTbl=`<table class="fd-tbl"><thead><tr><th>Faixa etária</th>${colHead}</tr></thead><tbody>${priceBody}${priceTot}${priceQt}</tbody></table>`;
+  // Rede de atendimento dos planos selecionados
+  let redeHtml='';
+  const okRede=await ensureRede();
+  if(okRede){
+    const rcols=cols.map(c=>({c,key:c.operadora+'|'+c.plano})).filter(x=>PLAN_COV[x.key]);
+    if(rcols.length){
+      const ks=new Set();
+      rcols.forEach(x=>{const m=PLAN_COV[x.key];for(const k in m) if(cov(m[k])) ks.add(k);});
+      const keys=[...ks].map(k=>({k,h:REDE_HOSP[k]||{}})).sort((a,b)=>(a.h.regiao||'').localeCompare(b.h.regiao||'')||(a.h.nome||'').localeCompare(b.h.nome||''));
+      const ncol=2+rcols.length; let body='',curReg=null;
+      keys.forEach(({k,h})=>{
+        if(h.regiao!==curReg){curReg=h.regiao;body+=`<tr class="grp"><td colspan="${ncol}">${curReg||'—'}</td></tr>`;}
+        body+=`<tr><td>${h.nome||''}</td><td>${h.bairro||''}</td>`+rcols.map(x=>{const v=(PLAN_COV[x.key]||{})[k];return cov(v)?`<td class="fd-cov">${v}</td>`:`<td class="fd-cov no">—</td>`;}).join('')+`</tr>`;
+      });
+      const rhead=`<tr><th>Hospital</th><th>Bairro</th>`+rcols.map(x=>`<th>${x.c.label}</th>`).join('')+`</tr>`;
+      redeHtml=`<div class="fd-sec">Rede de atendimento — ${keys.length} unidades</div>
+        <div class="fd-note">Principais hospitais e laboratórios credenciados para o(s) plano(s) selecionado(s). Legenda: H Hospital · M Maternidade · PS Pronto-socorro · PSA/PSP PS adulto/infantil · PA Pronto atend. · AMB Ambulatório · — não credenciado/não listado.</div>
+        <table class="fd-tbl fd-rede"><thead>${rhead}</thead><tbody>${body}</tbody></table>`;
+    }
+  }
   document.getElementById('folder').innerHTML=`
     <div class="fd-head"><div><h1>Proposta de Cotação</h1><div class="fsub">Plano de Saúde PME · ${tv} vida(s)</div></div>
       <div class="fbrand">${LOGO_SVG}<div style="font-size:11px;font-weight:600;margin-top:4px;opacity:.95">NotreDame · Vendas Digital</div></div></div>
@@ -1233,15 +1264,18 @@ function gerarFolder(){
     <div class="fd-sec">Planos cotados</div>
     ${hi}
     <table class="fd-tbl"><thead><tr><th>#</th><th>Plano</th><th>Operadora</th><th>Acomodação</th><th>Coparticipação</th><th>Mensalidade</th></tr></thead><tbody>${trs}</tbody></table>
-    <div class="fd-foot">Mensalidade = soma de (vidas × preço por faixa etária) por plano. Planos Hapvida com coparticipação parcial; concorrentes em geral sem coparticipação — o valor é apenas a mensalidade, sem o custo de uso. Valores referenciais, sujeitos a condições contratuais e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato. Emitido em ${hoje}.</div>`;
+    <div class="fd-sec">Tabela de valores — mensalidade por faixa etária</div>
+    ${priceTbl}
+    ${redeHtml}
+    <div class="fd-foot">Mensalidade = soma de (vidas × preço por faixa etária) por plano. Planos Hapvida com coparticipação parcial; concorrentes em geral sem coparticipação — o valor é apenas a mensalidade, sem o custo de uso. Rede: principais hospitais/laboratórios, podendo haver mais unidades não listadas. Valores referenciais, sujeitos a condições contratuais e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato. Emitido em ${hoje}.</div>`;
   const t0=document.title;
   document.title='Cotacao'+(nome?(' - '+nome):'');
   window.print();
-  setTimeout(()=>{document.title=t0;},500);
+  setTimeout(()=>{document.title=t0;},600);
 }
 
 /* ================= TAB 3: REDE DE ATENDIMENTO ================= */
-let REDE=null, redeInit=false, redeLoading=false;
+let REDE=null, redeInit=false, redeLoading=false, redeIndexBuilt=false;
 let redeSel={}; OPS.forEach(o=>redeSel[o.key]=null);
 let redeState={reg:'Todas',q:'',show:'todos'};
 const HAP_PLANS=new Set(CATALOG.filter(c=>c.operadora==='Hapvida').map(c=>c.label));
@@ -1271,12 +1305,17 @@ function buildRedeIndex(){
   }
   for(const op in PLAN_BY_OP)PLAN_BY_OP[op]=[...PLAN_BY_OP[op]].sort();
 }
+function ensureRede(){
+  return new Promise(res=>{
+    if(REDE){ if(!redeIndexBuilt){buildRedeIndex();redeIndexBuilt=true;} return res(true); }
+    fetch('rede.json').then(r=>r.json()).then(d=>{REDE=d;buildRedeIndex();redeIndexBuilt=true;res(true);}).catch(()=>res(false));
+  });
+}
 function loadRede(){
   if(redeInit||redeLoading)return;
   redeLoading=true;
   const st=document.getElementById('redeStatus');st.style.display='block';st.textContent='Carregando rede credenciada…';
-  fetch('rede.json').then(r=>r.json()).then(d=>{REDE=d;buildRedeIndex();redeInit=true;redeLoading=false;initRede();})
-    .catch(()=>{redeLoading=false;st.textContent='Não foi possível carregar a rede credenciada (rede.json).';});
+  ensureRede().then(ok=>{redeLoading=false;if(!ok){st.textContent='Não foi possível carregar a rede credenciada (rede.json).';return;}redeInit=true;initRede();});
 }
 function initRede(){
   // default: Hapvida + Amil para já mostrar uma comparação
