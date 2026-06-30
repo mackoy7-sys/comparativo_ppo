@@ -1232,9 +1232,8 @@ async function gerarFolder(){
   // Tabela de valores completa (preço por faixa etária)
   const colHead=cols.map(c=>`<th>${c.label}<br><span style="font-weight:400;font-size:10px">${opLabel(c.operadora)} · ${c.acomodacao}</span></th>`).join('');
   const priceBody=BANDS.map(b=>`<tr><td>${b}</td>`+cols.map(c=>`<td>R$ ${fmt(c.precos[b]||0)}</td>`).join('')+`</tr>`).join('');
-  const priceTot=`<tr class="best"><td>Total (1 vida/faixa)</td>`+cols.map(c=>`<td>R$ ${fmt(BANDS.reduce((s,b)=>s+(c.precos[b]||0),0))}</td>`).join('')+`</tr>`;
   const priceQt=`<tr class="grp"><td colspan="${cols.length+1}">Mensalidade para a distribuição de vidas informada (${tv} vida(s))</td></tr><tr class="best"><td>Total mensal</td>`+cols.map(c=>`<td>R$ ${fmt(planTotal(c))}</td>`).join('')+`</tr>`;
-  const priceTbl=`<table class="fd-tbl"><thead><tr><th>Faixa etária</th>${colHead}</tr></thead><tbody>${priceBody}${priceTot}${priceQt}</tbody></table>`;
+  const priceTbl=`<table class="fd-tbl"><thead><tr><th>Faixa etária</th>${colHead}</tr></thead><tbody>${priceBody}${priceQt}</tbody></table>`;
   // Rede de atendimento dos planos selecionados
   let redeHtml='';
   const okRede=await ensureRede();
