@@ -197,8 +197,8 @@
       <div class="sub">Hapvida NotreDame vs Amil · Bradesco · Porto Seguro · SulAmérica — planos PME</div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-      <div class="brand-pill">HAPVIDA · VENDAS DIGITAL</div>
-      <div class="upd">Atualizado em 26/06/2026</div>
+      <span id="brandLogo"></span>
+      <div class="upd">NotreDame · Vendas Digital · atualizado em 26/06/2026</div>
     </div>
   </header>
 
@@ -1013,6 +1013,12 @@ const OPS=[
 ];
 CATALOG.forEach(c=>{if(!c.categoria)c.categoria='Geral';});
 const CATEGORIES=[...new Set(CATALOG.map(c=>c.categoria))];
+const LOGO_COLORS=['#F47920','#FBB034','#E2231A','#D6006E','#7AC143','#00A0DF','#0046AD'];
+function logoSVG(word){
+  const pet=LOGO_COLORS.map((c,i)=>`<ellipse cx="28" cy="13" rx="6.2" ry="13" fill="${c}" transform="rotate(${(360/7*i).toFixed(1)} 28 28)"/>`).join('');
+  return `<svg viewBox="0 0 232 56" width="158" height="38" role="img" aria-label="Hapvida"><g>${pet}<circle cx="28" cy="28" r="4.6" fill="#fff"/></g><text x="64" y="39" font-family="'Segoe UI',Arial,sans-serif" font-size="30" font-weight="800" letter-spacing="-0.5" fill="${word}">Hapvida</text></svg>`;
+}
+const LOGO_SVG=logoSVG('#ffffff');
 
 /* ===== tabs ===== */
 let compInit=false;
@@ -1225,7 +1231,7 @@ function gerarFolder(){
   hi+=`</div>`;
   document.getElementById('folder').innerHTML=`
     <div class="fd-head"><div><h1>Proposta de Cotação</h1><div class="fsub">Plano de Saúde PME · ${tv} vida(s)</div></div>
-      <div class="fbrand">HAPVIDA NOTREDAME<br>Vendas Digital</div></div>
+      <div class="fbrand">${LOGO_SVG}<div style="font-size:11px;font-weight:600;margin-top:4px;opacity:.95">NotreDame · Vendas Digital</div></div></div>
     <div class="fd-meta"><div><b>Cliente:</b> ${nome||'—'}</div><div><b>Data:</b> ${hoje}</div></div>
     <div class="fd-sec">Perfil de vidas</div>
     <div class="fd-grid">${chips||'<div class="fd-chip">Sem vidas informadas</div>'}</div>
@@ -1348,6 +1354,7 @@ function renderRede(){
 }
 
 /* init */
+document.getElementById('brandLogo').innerHTML=LOGO_SVG;
 buildVidas(); buildMatrix(); recompute();
 document.getElementById('convOverlay').addEventListener('click',e=>{if(e.target.id==='convOverlay')closeConv();});
 document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
