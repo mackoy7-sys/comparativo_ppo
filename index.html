@@ -59,6 +59,10 @@
   table.matrix .valcell.has{background:#fffaf4;color:var(--txt);font-weight:600}
   table.matrix tr.totalrow .valcell{font-weight:700;background:#f7f9fc;border-color:var(--navy);color:var(--navy);font-size:14px}
   .matrix-hint{font-size:12px;color:var(--muted);margin-top:8px}
+  .rchips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+  .rchip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--navy);background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:3px 6px 3px 10px}
+  .rchip b{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px;line-height:1}
+  .rchip b:hover{color:var(--red)}
   .mei-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
   .mei-lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
   /* plan cards */
@@ -282,10 +286,11 @@
       <div id="redeStatus" class="empty">Abra esta aba para carregar a rede credenciada…</div>
       <div id="redeControls" style="display:none">
         <div class="matrix-wrap"><table class="matrix"><tbody id="redeMatrix"></tbody></table></div>
-        <div class="matrix-hint">Selecione o plano de cada operadora que deseja incluir (deixe "— Plano —" para ocultar). A rede credenciada é comparada lado a lado, por hospital.</div>
+        <div class="matrix-hint">Selecione um ou mais planos por operadora (use "+ adicionar plano"; clique no × para remover). A rede credenciada é comparada lado a lado, por hospital.</div>
         <div class="rede-filters" style="margin-top:16px">
           <div class="fgroup"><label>Região</label><select class="cmp" id="redeReg" style="min-width:200px"></select></div>
           <div class="fgroup" style="flex:1"><label>Buscar hospital</label><input class="search" id="redeSearch" placeholder="nome do hospital…"></div>
+          <div class="fgroup"><label>&nbsp;</label><button class="btn clear" onclick="clearRede()">Limpar</button></div>
         </div>
         <div class="chips" id="redeShow" style="margin:8px 0 16px"></div>
         <div class="kpis" id="redeKpis"></div>
@@ -2447,7 +2452,7 @@ async function gerarFolder(){
 
 /* ================= TAB 3: REDE DE ATENDIMENTO ================= */
 let REDE=null, redeInit=false, redeLoading=false, redeIndexBuilt=false;
-let redeSel={}; OPS.forEach(o=>redeSel[o.key]=null);
+let redeSel={}; OPS.forEach(o=>redeSel[o.key]=[]);
 let redeState={reg:'Todas',q:'',show:'todos'};
 const HAP_PLANS=new Set(CATALOG.filter(c=>c.operadora==='Hapvida').map(c=>c.label));
 const CONC_TO_OP={'Amil':'Amil','Sulamérica':'SulAmérica','Bradesco Seguros':'Bradesco','Porto Seguro':'Porto Seguro'};
@@ -2490,8 +2495,8 @@ function loadRede(){
 }
 function initRede(){
   // default: Hapvida + Amil para já mostrar uma comparação
-  redeSel['Hapvida']=(PLAN_BY_OP['Hapvida']||[])[0]||null;
-  redeSel['Amil']=(PLAN_BY_OP['Amil']||[])[0]||null;
+  const h0=(PLAN_BY_OP['Hapvida']||[])[0], a0=(PLAN_BY_OP['Amil']||[])[0];
+  redeSel['Hapvida']=h0?[h0]:[]; redeSel['Amil']=a0?[a0]:[];
   buildRedeMatrix();
   document.getElementById('redeSearch').addEventListener('input',e=>{redeState.q=e.target.value.toLowerCase().trim();renderRede();});
   const shows=[['todos','Todos'],['dif','Só onde diferem'],['exh','Só Hapvida cobre']];
@@ -2506,13 +2511,19 @@ function initRede(){
 }
 function buildRedeMatrix(){
   let html=`<tr><th class="rowlabel">Operadora</th>`+OPS.map(o=>`<th><div class="ophead" style="background:${o.color}">${o.label}</div></th>`).join('')+`</tr>`;
-  html+=`<tr><th class="rowlabel">Plano</th>`+OPS.map(o=>{const list=PLAN_BY_OP[o.key]||[];const sel=redeSel[o.key];
-    return `<td><select onchange="onRedePlan('${o.key}',this.value)"><option value="">— Plano —</option>`+
-      list.map(p=>`<option ${sel===p?'selected':''}>${p}</option>`).join('')+`</select></td>`;}).join('')+`</tr>`;
+  html+=`<tr><th class="rowlabel">Planos</th>`+OPS.map(o=>{
+    const sel=redeSel[o.key]||[]; const avail=(PLAN_BY_OP[o.key]||[]).filter(p=>!sel.includes(p));
+    const chips=sel.map(p=>`<span class="rchip" style="border-color:${o.color}">${p}<b onclick="removeRedePlan('${o.key}','${p.replace(/'/g,"\\'")}')">×</b></span>`).join('');
+    const add=`<select onchange="addRedePlan('${o.key}',this.value);this.value=''"><option value="">${sel.length?'+ adicionar plano':'— Plano —'}</option>`+avail.map(p=>`<option>${p}</option>`).join('')+`</select>`;
+    return `<td>${chips?`<div class="rchips">${chips}</div>`:''}${add}</td>`;
+  }).join('')+`</tr>`;
   document.getElementById('redeMatrix').innerHTML=html;
 }
-function onRedePlan(op,v){redeSel[op]=v||null;redeState.reg='Todas';document.getElementById('redeReg').value='Todas';buildRegOptions();renderRede();}
-function redeCols(){return OPS.filter(o=>redeSel[o.key]).map(o=>({op:o.key,label:o.label,color:o.color,plano:redeSel[o.key],key:o.key+'|'+redeSel[o.key],isHap:o.key==='Hapvida'}));}
+function afterRedeSelChange(){redeState.reg='Todas';const rr=document.getElementById('redeReg');if(rr)rr.value='Todas';buildRedeMatrix();buildRegOptions();renderRede();}
+function addRedePlan(op,p){if(!p)return;if(!redeSel[op].includes(p))redeSel[op].push(p);afterRedeSelChange();}
+function removeRedePlan(op,p){redeSel[op]=redeSel[op].filter(x=>x!==p);afterRedeSelChange();}
+function clearRede(){OPS.forEach(o=>redeSel[o.key]=[]);redeState.reg='Todas';redeState.q='';const s=document.getElementById('redeSearch');if(s)s.value='';redeState.show='todos';document.querySelectorAll('#redeShow .chip').forEach(c=>c.classList.toggle('active',c.dataset.sh==='todos'));afterRedeSelChange();}
+function redeCols(){return OPS.flatMap(o=>(redeSel[o.key]||[]).map(p=>({op:o.key,label:o.label,color:o.color,plano:p,key:o.key+'|'+p,isHap:o.key==='Hapvida'})));}
 function redeKeys(cols){const s=new Set();cols.forEach(c=>{const m=PLAN_COV[c.key]||{};for(const k in m)s.add(k);});return [...s];}
 function buildRegOptions(){
   const cols=redeCols();const regs=[...new Set(redeKeys(cols).map(k=>REDE_HOSP[k]&&REDE_HOSP[k].regiao).filter(Boolean))].sort();
