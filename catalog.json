@@ -1,6 +1,6 @@
 [
  {
-  "id": 25,
+  "id": 1,
   "operadora": "Amil",
   "operadora_full": "Amil",
   "plano": "Ouro",
@@ -19,10 +19,12 @@
    "54 a 58": 1437.58,
    "59 ou mais": 2515.77
   },
-  "fonte": "PORTO 700 (3)"
+  "fonte": "PORTO 700 (3)",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 24,
+  "id": 2,
   "operadora": "Amil",
   "operadora_full": "Amil",
   "plano": "Ouro",
@@ -41,10 +43,12 @@
    "54 a 58": 1295.1,
    "59 ou mais": 2266.43
   },
-  "fonte": "PORTO 700 (3)"
+  "fonte": "PORTO 700 (3)",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 11,
+  "id": 3,
   "operadora": "Amil",
   "operadora_full": "Amil",
   "plano": "Prata",
@@ -63,10 +67,12 @@
    "54 a 58": 1276.05,
    "59 ou mais": 2233.09
   },
-  "fonte": "AMIL 600"
+  "fonte": "AMIL 600",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 10,
+  "id": 4,
   "operadora": "Amil",
   "operadora_full": "Amil",
   "plano": "Prata",
@@ -85,10 +91,12 @@
    "54 a 58": 1149.55,
    "59 ou mais": 2011.71
   },
-  "fonte": "AMIL 600"
+  "fonte": "AMIL 600",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 3,
+  "id": 5,
   "operadora": "Amil",
   "operadora_full": "Amil",
   "plano": "S6500 Black R1",
@@ -107,10 +115,12 @@
    "54 a 58": 4585.15,
    "59 ou mais": 8024.01
   },
-  "fonte": "AMIL infinity"
+  "fonte": "AMIL infinity",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 1,
+  "id": 6,
   "operadora": "Amil",
   "operadora_full": "Amil",
   "plano": "S750 R1",
@@ -129,10 +139,12 @@
    "54 a 58": 2051.3,
    "59 ou mais": 3589.78
   },
-  "fonte": "AMIL 900"
+  "fonte": "AMIL 900",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 6,
+  "id": 7,
   "operadora": "Bradesco",
   "operadora_full": "Bradesco Seguros",
   "plano": "Efetivo Plus",
@@ -151,10 +163,12 @@
    "54 a 58": 1604.66,
    "59 ou mais": 2807.99
   },
-  "fonte": "BRADESCO 900 care"
+  "fonte": "BRADESCO 900 care",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 5,
+  "id": 8,
   "operadora": "Bradesco",
   "operadora_full": "Bradesco Seguros",
   "plano": "Efetivo Plus",
@@ -173,10 +187,12 @@
    "54 a 58": 1485.72,
    "59 ou mais": 2599.86
   },
-  "fonte": "BRADESCO 900 care"
+  "fonte": "BRADESCO 900 care",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 8,
+  "id": 9,
   "operadora": "Bradesco",
   "operadora_full": "Bradesco Seguros",
   "plano": "Nacional III",
@@ -195,10 +211,12 @@
    "54 a 58": 1712.4,
    "59 ou mais": 2996.53
   },
-  "fonte": "BRADESCO 900"
+  "fonte": "BRADESCO 900",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 9,
+  "id": 10,
   "operadora": "Bradesco",
   "operadora_full": "Bradesco Seguros",
   "plano": "Nacional Plus 4",
@@ -217,164 +235,12 @@
    "54 a 58": 4913.39,
    "59 ou mais": 8597.94
   },
-  "fonte": "BRADESCO infinity"
+  "fonte": "BRADESCO infinity",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 13,
-  "operadora": "Hapvida",
-  "operadora_full": "Hapvida NotreDame SP/RJ",
-  "plano": "600",
-  "label": "600",
-  "acomodacao": "Apartamento",
-  "coparticipacao": "Parcial",
-  "precos": {
-   "00 a 18": 329.92,
-   "19 a 23": 386.01,
-   "24 a 28": 470.92,
-   "29 a 33": 565.12,
-   "34 a 38": 593.38,
-   "39 a 43": 652.72,
-   "44 a 48": 815.9,
-   "49 a 53": 986.48,
-   "54 a 58": 1233.92,
-   "59 ou mais": 1963.18
-  },
-  "fonte": "AMIL 600"
- },
- {
-  "id": 12,
-  "operadora": "Hapvida",
-  "operadora_full": "Hapvida NotreDame SP/RJ",
-  "plano": "600",
-  "label": "600",
-  "acomodacao": "Enfermaria",
-  "coparticipacao": "Parcial",
-  "precos": {
-   "00 a 18": 297.23,
-   "19 a 23": 347.76,
-   "24 a 28": 424.26,
-   "29 a 33": 509.11,
-   "34 a 38": 534.58,
-   "39 a 43": 588.03,
-   "44 a 48": 735.04,
-   "49 a 53": 888.72,
-   "54 a 58": 1111.65,
-   "59 ou mais": 1768.65
-  },
-  "fonte": "AMIL 600"
- },
- {
-  "id": 21,
-  "operadora": "Hapvida",
-  "operadora_full": "Hapvida NotreDame SP/RJ",
-  "plano": "700",
-  "label": "700",
-  "acomodacao": "Apartamento",
-  "coparticipacao": "Parcial",
-  "precos": {
-   "00 a 18": 435.79,
-   "19 a 23": 509.87,
-   "24 a 28": 622.03,
-   "29 a 33": 746.44,
-   "34 a 38": 783.77,
-   "39 a 43": 862.14,
-   "44 a 48": 1077.69,
-   "49 a 53": 1303.01,
-   "54 a 58": 1629.84,
-   "59 ou mais": 2593.11
-  },
-  "fonte": "PORTO 700 (1)"
- },
- {
-  "id": 20,
-  "operadora": "Hapvida",
-  "operadora_full": "Hapvida NotreDame SP/RJ",
-  "plano": "700",
-  "label": "700",
-  "acomodacao": "Enfermaria",
-  "coparticipacao": "Parcial",
-  "precos": {
-   "00 a 18": 392.6,
-   "19 a 23": 459.34,
-   "24 a 28": 560.39,
-   "29 a 33": 672.48,
-   "34 a 38": 706.12,
-   "39 a 43": 776.73,
-   "44 a 48": 970.92,
-   "49 a 53": 1173.91,
-   "54 a 58": 1468.36,
-   "59 ou mais": 2336.18
-  },
-  "fonte": "PORTO 700 (1)"
- },
- {
-  "id": 2,
-  "operadora": "Hapvida",
-  "operadora_full": "Hapvida NotreDame SP/RJ",
-  "plano": "900",
-  "label": "900",
-  "acomodacao": "Apartamento",
-  "coparticipacao": "Parcial",
-  "precos": {
-   "00 a 18": 637.41,
-   "19 a 23": 745.77,
-   "24 a 28": 909.84,
-   "29 a 33": 1091.81,
-   "34 a 38": 1146.4,
-   "39 a 43": 1261.04,
-   "44 a 48": 1576.3,
-   "49 a 53": 1905.9,
-   "54 a 58": 2383.9,
-   "59 ou mais": 3792.78
-  },
-  "fonte": "AMIL 900"
- },
- {
-  "id": 7,
-  "operadora": "Hapvida",
-  "operadora_full": "Hapvida NotreDame SP/RJ",
-  "plano": "900 Care",
-  "label": "900 Care",
-  "acomodacao": "Apartamento",
-  "coparticipacao": "Parcial",
-  "precos": {
-   "00 a 18": 605.04,
-   "19 a 23": 707.89,
-   "24 a 28": 863.62,
-   "29 a 33": 1036.36,
-   "34 a 38": 1088.19,
-   "39 a 43": 1197.0,
-   "44 a 48": 1496.25,
-   "49 a 53": 1809.07,
-   "54 a 58": 2262.86,
-   "59 ou mais": 3600.24
-  },
-  "fonte": "BRADESCO 900 care"
- },
- {
-  "id": 4,
-  "operadora": "Hapvida",
-  "operadora_full": "Hapvida NotreDame SP/RJ",
-  "plano": "Infinity",
-  "label": "Infinity",
-  "acomodacao": "Apartamento",
-  "coparticipacao": "Parcial",
-  "precos": {
-   "00 a 18": 990.28,
-   "19 a 23": 1158.61,
-   "24 a 28": 1413.5,
-   "29 a 33": 1696.22,
-   "34 a 38": 1781.05,
-   "39 a 43": 1959.15,
-   "44 a 48": 2448.94,
-   "49 a 53": 2960.93,
-   "54 a 58": 3703.65,
-   "59 ou mais": 5892.55
-  },
-  "fonte": "AMIL infinity"
- },
- {
-  "id": 23,
+  "id": 11,
   "operadora": "Porto Seguro",
   "operadora_full": "Porto Seguro",
   "plano": "Bronze Brasil I",
@@ -393,10 +259,12 @@
    "54 a 58": 1073.8,
    "59 ou mais": 1804.97
   },
-  "fonte": "PORTO 700 (1)"
+  "fonte": "PORTO 700 (1)",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 22,
+  "id": 12,
   "operadora": "Porto Seguro",
   "operadora_full": "Porto Seguro",
   "plano": "Bronze Brasil I",
@@ -415,10 +283,12 @@
    "54 a 58": 1049.54,
    "59 ou mais": 1764.2
   },
-  "fonte": "PORTO 700 (1)"
+  "fonte": "PORTO 700 (1)",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 28,
+  "id": 13,
   "operadora": "Porto Seguro",
   "operadora_full": "Porto Seguro",
   "plano": "Diamante Mais I",
@@ -437,10 +307,12 @@
    "54 a 58": 4839.54,
    "59 ou mais": 8134.88
   },
-  "fonte": "PORTO infinity"
+  "fonte": "PORTO infinity",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 26,
+  "id": 14,
   "operadora": "Porto Seguro",
   "operadora_full": "Porto Seguro",
   "plano": "Ouro Mais I",
@@ -459,10 +331,12 @@
    "54 a 58": 1578.56,
    "59 ou mais": 2653.43
   },
-  "fonte": "PORTO 900 care"
+  "fonte": "PORTO 900 care",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 27,
+  "id": 15,
   "operadora": "Porto Seguro",
   "operadora_full": "Porto Seguro",
   "plano": "Ouro Max I",
@@ -481,7 +355,9 @@
    "54 a 58": 1910.05,
    "59 ou mais": 3210.65
   },
-  "fonte": "PORTO 900"
+  "fonte": "PORTO 900",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
   "id": 16,
@@ -503,7 +379,9 @@
    "54 a 58": 954.09,
    "59 ou mais": 1603.75
   },
-  "fonte": "PORTO 600"
+  "fonte": "PORTO 600",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
   "id": 17,
@@ -525,10 +403,12 @@
    "54 a 58": 809.08,
    "59 ou mais": 1360.01
   },
-  "fonte": "PORTO PRÓ"
+  "fonte": "PORTO PRÓ",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 14,
+  "id": 18,
   "operadora": "Porto Seguro",
   "operadora_full": "Porto Seguro",
   "plano": "Prata Pró Q",
@@ -547,10 +427,12 @@
    "54 a 58": 958.53,
    "59 ou mais": 1611.21
   },
-  "fonte": "PORTO 600"
+  "fonte": "PORTO 600",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 15,
+  "id": 19,
   "operadora": "Porto Seguro",
   "operadora_full": "Porto Seguro",
   "plano": "Prata Pró Q",
@@ -569,10 +451,12 @@
    "54 a 58": 819.88,
    "59 ou mais": 1378.15
   },
-  "fonte": "PORTO PRÓ"
+  "fonte": "PORTO PRÓ",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 19,
+  "id": 20,
   "operadora": "SulAmérica",
   "operadora_full": "Sulamérica",
   "plano": "Direto Nacional",
@@ -591,10 +475,12 @@
    "54 a 58": 1350.84,
    "59 ou mais": 2275.5
   },
-  "fonte": "SULA 600"
+  "fonte": "SULA 600",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 18,
+  "id": 21,
   "operadora": "SulAmérica",
   "operadora_full": "Sulamérica",
   "plano": "Direto Nacional",
@@ -613,10 +499,12 @@
    "54 a 58": 1217.88,
    "59 ou mais": 2051.53
   },
-  "fonte": "SULA 600"
+  "fonte": "SULA 600",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 30,
+  "id": 22,
   "operadora": "SulAmérica",
   "operadora_full": "Sulamérica",
   "plano": "Especial 100 R1",
@@ -635,10 +523,12 @@
    "54 a 58": 1600.23,
    "59 ou mais": 2695.58
   },
-  "fonte": "SULA 900"
+  "fonte": "SULA 900",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 29,
+  "id": 23,
   "operadora": "SulAmérica",
   "operadora_full": "Sulamérica",
   "plano": "Especial Vital",
@@ -657,10 +547,12 @@
    "54 a 58": 1368.2,
    "59 ou mais": 2304.72
   },
-  "fonte": "SULA 900 care"
+  "fonte": "SULA 900 care",
+  "mei": false,
+  "categoria": "Geral"
  },
  {
-  "id": 31,
+  "id": 24,
   "operadora": "SulAmérica",
   "operadora_full": "Sulamérica",
   "plano": "Executivo R1",
@@ -679,6 +571,1262 @@
    "54 a 58": 3445.13,
    "59 ou mais": 5803.31
   },
-  "fonte": "SULA infinity"
+  "fonte": "SULA infinity",
+  "mei": false,
+  "categoria": "Geral"
+ },
+ {
+  "id": 25,
+  "operadora": "Hapvida",
+  "plano": "600",
+  "label": "600",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 247.44,
+   "19 a 23": 289.51,
+   "24 a 28": 353.19,
+   "29 a 33": 423.84,
+   "34 a 38": 445.04,
+   "39 a 43": 489.53,
+   "44 a 48": 611.92,
+   "49 a 53": 739.85,
+   "54 a 58": 925.43,
+   "59 ou mais": 1472.37
+  }
+ },
+ {
+  "id": 26,
+  "operadora": "Hapvida",
+  "plano": "600",
+  "label": "600",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 329.92,
+   "19 a 23": 386.01,
+   "24 a 28": 470.92,
+   "29 a 33": 565.12,
+   "34 a 38": 593.38,
+   "39 a 43": 652.72,
+   "44 a 48": 815.9,
+   "49 a 53": 986.48,
+   "54 a 58": 1233.92,
+   "59 ou mais": 1963.18
+  }
+ },
+ {
+  "id": 27,
+  "operadora": "Hapvida",
+  "plano": "600",
+  "label": "600",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 222.92,
+   "19 a 23": 260.82,
+   "24 a 28": 318.19,
+   "29 a 33": 381.83,
+   "34 a 38": 400.92,
+   "39 a 43": 441.01,
+   "44 a 48": 551.25,
+   "49 a 53": 666.51,
+   "54 a 58": 833.69,
+   "59 ou mais": 1326.4
+  }
+ },
+ {
+  "id": 28,
+  "operadora": "Hapvida",
+  "plano": "600",
+  "label": "600",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 297.23,
+   "19 a 23": 347.76,
+   "24 a 28": 424.26,
+   "29 a 33": 509.11,
+   "34 a 38": 534.58,
+   "39 a 43": 588.03,
+   "44 a 48": 735.04,
+   "49 a 53": 888.72,
+   "54 a 58": 1111.65,
+   "59 ou mais": 1768.65
+  }
+ },
+ {
+  "id": 29,
+  "operadora": "Hapvida",
+  "plano": "600",
+  "label": "600",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 214.23,
+   "19 a 23": 250.65,
+   "24 a 28": 305.78,
+   "29 a 33": 366.94,
+   "34 a 38": 385.3,
+   "39 a 43": 423.82,
+   "44 a 48": 529.78,
+   "49 a 53": 640.53,
+   "54 a 58": 801.2,
+   "59 ou mais": 1274.72
+  }
+ },
+ {
+  "id": 30,
+  "operadora": "Hapvida",
+  "plano": "600",
+  "label": "600",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 285.64,
+   "19 a 23": 334.2,
+   "24 a 28": 407.71,
+   "29 a 33": 489.27,
+   "34 a 38": 513.74,
+   "39 a 43": 565.11,
+   "44 a 48": 706.39,
+   "49 a 53": 854.07,
+   "54 a 58": 1068.3,
+   "59 ou mais": 1699.68
+  }
+ },
+ {
+  "id": 31,
+  "operadora": "Hapvida",
+  "plano": "600",
+  "label": "600",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 193.0,
+   "19 a 23": 225.81,
+   "24 a 28": 275.48,
+   "29 a 33": 330.58,
+   "34 a 38": 347.11,
+   "39 a 43": 381.82,
+   "44 a 48": 477.27,
+   "49 a 53": 577.06,
+   "54 a 58": 721.81,
+   "59 ou mais": 1148.4
+  }
+ },
+ {
+  "id": 32,
+  "operadora": "Hapvida",
+  "plano": "600",
+  "label": "600",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 257.33,
+   "19 a 23": 301.08,
+   "24 a 28": 367.31,
+   "29 a 33": 440.77,
+   "34 a 38": 462.82,
+   "39 a 43": 509.09,
+   "44 a 48": 636.36,
+   "49 a 53": 769.41,
+   "54 a 58": 962.41,
+   "59 ou mais": 1531.21
+  }
+ },
+ {
+  "id": 33,
+  "operadora": "Hapvida",
+  "plano": "700",
+  "label": "700",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 326.86,
+   "19 a 23": 382.42,
+   "24 a 28": 466.56,
+   "29 a 33": 559.87,
+   "34 a 38": 587.88,
+   "39 a 43": 646.65,
+   "44 a 48": 808.32,
+   "49 a 53": 977.31,
+   "54 a 58": 1222.46,
+   "59 ou mais": 1944.95
+  }
+ },
+ {
+  "id": 34,
+  "operadora": "Hapvida",
+  "plano": "700",
+  "label": "700",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 435.79,
+   "19 a 23": 509.87,
+   "24 a 28": 622.03,
+   "29 a 33": 746.44,
+   "34 a 38": 783.77,
+   "39 a 43": 862.14,
+   "44 a 48": 1077.69,
+   "49 a 53": 1303.01,
+   "54 a 58": 1629.84,
+   "59 ou mais": 2593.11
+  }
+ },
+ {
+  "id": 35,
+  "operadora": "Hapvida",
+  "plano": "700",
+  "label": "700",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 294.47,
+   "19 a 23": 344.52,
+   "24 a 28": 420.31,
+   "29 a 33": 504.38,
+   "34 a 38": 529.61,
+   "39 a 43": 582.57,
+   "44 a 48": 728.22,
+   "49 a 53": 880.47,
+   "54 a 58": 1101.32,
+   "59 ou mais": 1752.22
+  }
+ },
+ {
+  "id": 36,
+  "operadora": "Hapvida",
+  "plano": "700",
+  "label": "700",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 392.6,
+   "19 a 23": 459.34,
+   "24 a 28": 560.39,
+   "29 a 33": 672.48,
+   "34 a 38": 706.12,
+   "39 a 43": 776.73,
+   "44 a 48": 970.92,
+   "49 a 53": 1173.91,
+   "54 a 58": 1468.36,
+   "59 ou mais": 2336.18
+  }
+ },
+ {
+  "id": 37,
+  "operadora": "Hapvida",
+  "plano": "700",
+  "label": "700",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 282.99,
+   "19 a 23": 331.09,
+   "24 a 28": 403.93,
+   "29 a 33": 484.72,
+   "34 a 38": 508.97,
+   "39 a 43": 559.86,
+   "44 a 48": 699.83,
+   "49 a 53": 846.14,
+   "54 a 58": 1058.39,
+   "59 ou mais": 1683.91
+  }
+ },
+ {
+  "id": 38,
+  "operadora": "Hapvida",
+  "plano": "700",
+  "label": "700",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 377.31,
+   "19 a 23": 441.45,
+   "24 a 28": 538.56,
+   "29 a 33": 646.28,
+   "34 a 38": 678.6,
+   "39 a 43": 746.45,
+   "44 a 48": 933.07,
+   "49 a 53": 1128.15,
+   "54 a 58": 1411.12,
+   "59 ou mais": 2245.12
+  }
+ },
+ {
+  "id": 39,
+  "operadora": "Hapvida",
+  "plano": "700",
+  "label": "700",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 254.95,
+   "19 a 23": 298.29,
+   "24 a 28": 363.91,
+   "29 a 33": 436.7,
+   "34 a 38": 458.55,
+   "39 a 43": 504.4,
+   "44 a 48": 630.51,
+   "49 a 53": 762.33,
+   "54 a 58": 953.55,
+   "59 ou mais": 1517.12
+  }
+ },
+ {
+  "id": 40,
+  "operadora": "Hapvida",
+  "plano": "700",
+  "label": "700",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 339.91,
+   "19 a 23": 397.69,
+   "24 a 28": 485.18,
+   "29 a 33": 582.23,
+   "34 a 38": 611.36,
+   "39 a 43": 672.49,
+   "44 a 48": 840.62,
+   "49 a 53": 1016.37,
+   "54 a 58": 1271.3,
+   "59 ou mais": 2022.66
+  }
+ },
+ {
+  "id": 41,
+  "operadora": "Hapvida",
+  "plano": "900",
+  "label": "900",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 478.03,
+   "19 a 23": 559.29,
+   "24 a 28": 682.34,
+   "29 a 33": 818.81,
+   "34 a 38": 859.75,
+   "39 a 43": 945.72,
+   "44 a 48": 1182.15,
+   "49 a 53": 1429.34,
+   "54 a 58": 1787.82,
+   "59 ou mais": 2844.42
+  }
+ },
+ {
+  "id": 42,
+  "operadora": "Hapvida",
+  "plano": "900",
+  "label": "900",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 637.41,
+   "19 a 23": 745.77,
+   "24 a 28": 909.84,
+   "29 a 33": 1091.81,
+   "34 a 38": 1146.4,
+   "39 a 43": 1261.04,
+   "44 a 48": 1576.3,
+   "49 a 53": 1905.9,
+   "54 a 58": 2383.9,
+   "59 ou mais": 3792.78
+  }
+ },
+ {
+  "id": 43,
+  "operadora": "Hapvida",
+  "plano": "900",
+  "label": "900",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 413.88,
+   "19 a 23": 484.24,
+   "24 a 28": 590.77,
+   "29 a 33": 708.92,
+   "34 a 38": 744.37,
+   "39 a 43": 818.81,
+   "44 a 48": 1023.52,
+   "49 a 53": 1237.54,
+   "54 a 58": 1547.91,
+   "59 ou mais": 2462.72
+  }
+ },
+ {
+  "id": 44,
+  "operadora": "Hapvida",
+  "plano": "900",
+  "label": "900",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 551.87,
+   "19 a 23": 645.69,
+   "24 a 28": 787.74,
+   "29 a 33": 945.29,
+   "34 a 38": 992.55,
+   "39 a 43": 1091.8,
+   "44 a 48": 1364.75,
+   "49 a 53": 1650.12,
+   "54 a 58": 2063.97,
+   "59 ou mais": 3283.77
+  }
+ },
+ {
+  "id": 45,
+  "operadora": "Hapvida",
+  "plano": "900 Care",
+  "label": "900 Care",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 452.85,
+   "19 a 23": 529.83,
+   "24 a 28": 646.38,
+   "29 a 33": 775.66,
+   "34 a 38": 814.45,
+   "39 a 43": 895.89,
+   "44 a 48": 1119.87,
+   "49 a 53": 1354.0,
+   "54 a 58": 1693.63,
+   "59 ou mais": 2694.59
+  }
+ },
+ {
+  "id": 46,
+  "operadora": "Hapvida",
+  "plano": "900 Care",
+  "label": "900 Care",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 605.04,
+   "19 a 23": 707.89,
+   "24 a 28": 863.62,
+   "29 a 33": 1036.36,
+   "34 a 38": 1088.19,
+   "39 a 43": 1197.0,
+   "44 a 48": 1496.25,
+   "49 a 53": 1809.07,
+   "54 a 58": 2262.86,
+   "59 ou mais": 3600.24
+  }
+ },
+ {
+  "id": 47,
+  "operadora": "Hapvida",
+  "plano": "900 Care",
+  "label": "900 Care",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 392.08,
+   "19 a 23": 458.73,
+   "24 a 28": 559.64,
+   "29 a 33": 671.57,
+   "34 a 38": 705.15,
+   "39 a 43": 775.66,
+   "44 a 48": 969.58,
+   "49 a 53": 1172.29,
+   "54 a 58": 1466.34,
+   "59 ou mais": 2332.97
+  }
+ },
+ {
+  "id": 48,
+  "operadora": "Hapvida",
+  "plano": "900 Care",
+  "label": "900 Care",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 523.84,
+   "19 a 23": 612.89,
+   "24 a 28": 747.72,
+   "29 a 33": 897.28,
+   "34 a 38": 942.15,
+   "39 a 43": 1036.36,
+   "44 a 48": 1295.45,
+   "49 a 53": 1566.29,
+   "54 a 58": 1959.18,
+   "59 ou mais": 3117.08
+  }
+ },
+ {
+  "id": 49,
+  "operadora": "Hapvida",
+  "plano": "Infinity",
+  "label": "Infinity",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 990.28,
+   "19 a 23": 1158.61,
+   "24 a 28": 1413.5,
+   "29 a 33": 1696.22,
+   "34 a 38": 1781.05,
+   "39 a 43": 1959.15,
+   "44 a 48": 2448.94,
+   "49 a 53": 2960.93,
+   "54 a 58": 3703.65,
+   "59 ou mais": 5892.55
+  }
+ },
+ {
+  "id": 50,
+  "operadora": "Hapvida",
+  "plano": "Nosso Médico RMSP",
+  "label": "Nosso Médico RMSP",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 118.54,
+   "19 a 23": 160.01,
+   "24 a 28": 189.1,
+   "29 a 33": 189.1,
+   "34 a 38": 189.1,
+   "39 a 43": 224.61,
+   "44 a 48": 291.99,
+   "49 a 53": 379.59,
+   "54 a 58": 493.47,
+   "59 ou mais": 711.23
+  }
+ },
+ {
+  "id": 51,
+  "operadora": "Hapvida",
+  "plano": "Nosso Médico RMSP",
+  "label": "Nosso Médico RMSP",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 158.04,
+   "19 a 23": 213.31,
+   "24 a 28": 252.1,
+   "29 a 33": 252.1,
+   "34 a 38": 252.1,
+   "39 a 43": 299.42,
+   "44 a 48": 389.25,
+   "49 a 53": 506.03,
+   "54 a 58": 657.84,
+   "59 ou mais": 948.13
+  }
+ },
+ {
+  "id": 52,
+  "operadora": "Hapvida",
+  "plano": "Nosso Médico RMSP",
+  "label": "Nosso Médico RMSP",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 94.83,
+   "19 a 23": 128.0,
+   "24 a 28": 151.27,
+   "29 a 33": 151.27,
+   "34 a 38": 151.27,
+   "39 a 43": 179.67,
+   "44 a 48": 233.57,
+   "49 a 53": 303.64,
+   "54 a 58": 394.73,
+   "59 ou mais": 568.92
+  }
+ },
+ {
+  "id": 53,
+  "operadora": "Hapvida",
+  "plano": "Nosso Médico RMSP",
+  "label": "Nosso Médico RMSP",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 126.43,
+   "19 a 23": 170.65,
+   "24 a 28": 201.68,
+   "29 a 33": 201.68,
+   "34 a 38": 201.68,
+   "39 a 43": 239.54,
+   "44 a 48": 311.4,
+   "49 a 53": 404.82,
+   "54 a 58": 526.26,
+   "59 ou mais": 758.49
+  }
+ },
+ {
+  "id": 54,
+  "operadora": "Hapvida",
+  "plano": "Nosso Médico RMSP",
+  "label": "Nosso Médico RMSP",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 99.19,
+   "19 a 23": 133.89,
+   "24 a 28": 158.23,
+   "29 a 33": 158.23,
+   "34 a 38": 158.23,
+   "39 a 43": 187.94,
+   "44 a 48": 244.32,
+   "49 a 53": 317.62,
+   "54 a 58": 412.9,
+   "59 ou mais": 595.11
+  }
+ },
+ {
+  "id": 55,
+  "operadora": "Hapvida",
+  "plano": "Nosso Médico RMSP",
+  "label": "Nosso Médico RMSP",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 132.25,
+   "19 a 23": 178.5,
+   "24 a 28": 210.96,
+   "29 a 33": 210.96,
+   "34 a 38": 210.96,
+   "39 a 43": 250.56,
+   "44 a 48": 325.73,
+   "49 a 53": 423.45,
+   "54 a 58": 550.48,
+   "59 ou mais": 793.4
+  }
+ },
+ {
+  "id": 56,
+  "operadora": "Hapvida",
+  "plano": "Nosso Médico RMSP",
+  "label": "Nosso Médico RMSP",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 79.35,
+   "19 a 23": 107.11,
+   "24 a 28": 126.58,
+   "29 a 33": 126.58,
+   "34 a 38": 126.58,
+   "39 a 43": 150.35,
+   "44 a 48": 195.46,
+   "49 a 53": 254.1,
+   "54 a 58": 330.33,
+   "59 ou mais": 476.1
+  }
+ },
+ {
+  "id": 57,
+  "operadora": "Hapvida",
+  "plano": "Nosso Médico RMSP",
+  "label": "Nosso Médico RMSP",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 105.8,
+   "19 a 23": 142.8,
+   "24 a 28": 168.77,
+   "29 a 33": 168.77,
+   "34 a 38": 168.77,
+   "39 a 43": 200.45,
+   "44 a 48": 260.59,
+   "49 a 53": 338.77,
+   "54 a 58": 440.4,
+   "59 ou mais": 634.74
+  }
+ },
+ {
+  "id": 58,
+  "operadora": "Hapvida",
+  "plano": "Smart Flex",
+  "label": "Smart Flex",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 172.46,
+   "19 a 23": 232.79,
+   "24 a 28": 275.11,
+   "29 a 33": 275.11,
+   "34 a 38": 275.11,
+   "39 a 43": 326.77,
+   "44 a 48": 424.8,
+   "49 a 53": 552.24,
+   "54 a 58": 717.91,
+   "59 ou mais": 1034.71
+  }
+ },
+ {
+  "id": 59,
+  "operadora": "Hapvida",
+  "plano": "Smart Flex",
+  "label": "Smart Flex",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 229.95,
+   "19 a 23": 310.39,
+   "24 a 28": 366.82,
+   "29 a 33": 366.82,
+   "34 a 38": 366.82,
+   "39 a 43": 435.7,
+   "44 a 48": 566.41,
+   "49 a 53": 736.34,
+   "54 a 58": 957.24,
+   "59 ou mais": 1379.65
+  }
+ },
+ {
+  "id": 60,
+  "operadora": "Hapvida",
+  "plano": "Smart Flex",
+  "label": "Smart Flex",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 137.97,
+   "19 a 23": 186.23,
+   "24 a 28": 220.09,
+   "29 a 33": 220.09,
+   "34 a 38": 220.09,
+   "39 a 43": 261.42,
+   "44 a 48": 339.85,
+   "49 a 53": 441.81,
+   "54 a 58": 574.35,
+   "59 ou mais": 827.8
+  }
+ },
+ {
+  "id": 61,
+  "operadora": "Hapvida",
+  "plano": "Smart Flex",
+  "label": "Smart Flex",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 183.96,
+   "19 a 23": 248.31,
+   "24 a 28": 293.45,
+   "29 a 33": 293.45,
+   "34 a 38": 293.45,
+   "39 a 43": 348.55,
+   "44 a 48": 453.12,
+   "49 a 53": 589.06,
+   "54 a 58": 765.78,
+   "59 ou mais": 1103.71
+  }
+ },
+ {
+  "id": 62,
+  "operadora": "Hapvida",
+  "plano": "Smart Flex",
+  "label": "Smart Flex",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 144.33,
+   "19 a 23": 194.83,
+   "24 a 28": 230.26,
+   "29 a 33": 230.26,
+   "34 a 38": 230.26,
+   "39 a 43": 273.46,
+   "44 a 48": 355.5,
+   "49 a 53": 462.16,
+   "54 a 58": 600.82,
+   "59 ou mais": 865.94
+  }
+ },
+ {
+  "id": 63,
+  "operadora": "Hapvida",
+  "plano": "Smart Flex",
+  "label": "Smart Flex",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 192.43,
+   "19 a 23": 259.74,
+   "24 a 28": 306.97,
+   "29 a 33": 306.97,
+   "34 a 38": 306.97,
+   "39 a 43": 364.59,
+   "44 a 48": 473.96,
+   "49 a 53": 616.14,
+   "54 a 58": 800.99,
+   "59 ou mais": 1154.47
+  }
+ },
+ {
+  "id": 64,
+  "operadora": "Hapvida",
+  "plano": "Smart Flex",
+  "label": "Smart Flex",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 115.46,
+   "19 a 23": 155.86,
+   "24 a 28": 184.2,
+   "29 a 33": 184.2,
+   "34 a 38": 184.2,
+   "39 a 43": 218.75,
+   "44 a 48": 284.38,
+   "49 a 53": 369.7,
+   "54 a 58": 480.62,
+   "59 ou mais": 692.7
+  }
+ },
+ {
+  "id": 65,
+  "operadora": "Hapvida",
+  "plano": "Smart Flex",
+  "label": "Smart Flex",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 153.94,
+   "19 a 23": 207.79,
+   "24 a 28": 245.58,
+   "29 a 33": 245.58,
+   "34 a 38": 245.58,
+   "39 a 43": 291.67,
+   "44 a 48": 379.17,
+   "49 a 53": 492.92,
+   "54 a 58": 640.8,
+   "59 ou mais": 923.59
+  }
+ },
+ {
+  "id": 66,
+  "operadora": "Hapvida",
+  "plano": "Smart Prime",
+  "label": "Smart Prime",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 201.87,
+   "19 a 23": 236.19,
+   "24 a 28": 288.15,
+   "29 a 33": 345.78,
+   "34 a 38": 363.07,
+   "39 a 43": 399.38,
+   "44 a 48": 499.22,
+   "49 a 53": 603.61,
+   "54 a 58": 755.0,
+   "59 ou mais": 1201.2
+  }
+ },
+ {
+  "id": 67,
+  "operadora": "Hapvida",
+  "plano": "Smart Prime",
+  "label": "Smart Prime",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 269.16,
+   "19 a 23": 314.92,
+   "24 a 28": 384.2,
+   "29 a 33": 461.04,
+   "34 a 38": 484.09,
+   "39 a 43": 532.5,
+   "44 a 48": 665.63,
+   "49 a 53": 804.81,
+   "54 a 58": 1006.66,
+   "59 ou mais": 1601.6
+  }
+ },
+ {
+  "id": 68,
+  "operadora": "Hapvida",
+  "plano": "Smart Prime",
+  "label": "Smart Prime",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 191.64,
+   "19 a 23": 224.22,
+   "24 a 28": 273.55,
+   "29 a 33": 328.26,
+   "34 a 38": 344.67,
+   "39 a 43": 379.14,
+   "44 a 48": 473.93,
+   "49 a 53": 573.03,
+   "54 a 58": 716.74,
+   "59 ou mais": 1140.33
+  }
+ },
+ {
+  "id": 69,
+  "operadora": "Hapvida",
+  "plano": "Smart Prime",
+  "label": "Smart Prime",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 255.52,
+   "19 a 23": 298.96,
+   "24 a 28": 364.73,
+   "29 a 33": 437.67,
+   "34 a 38": 459.55,
+   "39 a 43": 505.51,
+   "44 a 48": 631.89,
+   "49 a 53": 764.02,
+   "54 a 58": 955.63,
+   "59 ou mais": 1520.41
+  }
+ },
+ {
+  "id": 70,
+  "operadora": "Hapvida",
+  "plano": "Smart Prime",
+  "label": "Smart Prime",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 175.71,
+   "19 a 23": 205.58,
+   "24 a 28": 250.81,
+   "29 a 33": 300.97,
+   "34 a 38": 316.02,
+   "39 a 43": 347.62,
+   "44 a 48": 434.52,
+   "49 a 53": 525.38,
+   "54 a 58": 657.15,
+   "59 ou mais": 1045.52
+  }
+ },
+ {
+  "id": 71,
+  "operadora": "Hapvida",
+  "plano": "Smart Prime",
+  "label": "Smart Prime",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 234.27,
+   "19 a 23": 274.1,
+   "24 a 28": 334.4,
+   "29 a 33": 401.28,
+   "34 a 38": 421.34,
+   "39 a 43": 463.48,
+   "44 a 48": 579.35,
+   "49 a 53": 700.49,
+   "54 a 58": 876.18,
+   "59 ou mais": 1394.01
+  }
+ },
+ {
+  "id": 72,
+  "operadora": "Hapvida",
+  "plano": "Smart Prime",
+  "label": "Smart Prime",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 165.93,
+   "19 a 23": 194.14,
+   "24 a 28": 236.85,
+   "29 a 33": 284.22,
+   "34 a 38": 298.43,
+   "39 a 43": 328.28,
+   "44 a 48": 410.35,
+   "49 a 53": 496.16,
+   "54 a 58": 620.6,
+   "59 ou mais": 987.37
+  }
+ },
+ {
+  "id": 73,
+  "operadora": "Hapvida",
+  "plano": "Smart Prime",
+  "label": "Smart Prime",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 221.24,
+   "19 a 23": 258.85,
+   "24 a 28": 315.8,
+   "29 a 33": 378.96,
+   "34 a 38": 397.91,
+   "39 a 43": 437.71,
+   "44 a 48": 547.14,
+   "49 a 53": 661.55,
+   "54 a 58": 827.46,
+   "59 ou mais": 1316.49
+  }
+ },
+ {
+  "id": 74,
+  "operadora": "Hapvida",
+  "plano": "Smart UP",
+  "label": "Smart UP",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 142.49,
+   "19 a 23": 192.33,
+   "24 a 28": 227.3,
+   "29 a 33": 227.3,
+   "34 a 38": 227.3,
+   "39 a 43": 269.96,
+   "44 a 48": 350.96,
+   "49 a 53": 456.24,
+   "54 a 58": 593.13,
+   "59 ou mais": 854.86
+  }
+ },
+ {
+  "id": 75,
+  "operadora": "Hapvida",
+  "plano": "Smart UP",
+  "label": "Smart UP",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 189.98,
+   "19 a 23": 256.43,
+   "24 a 28": 303.06,
+   "29 a 33": 303.06,
+   "34 a 38": 303.06,
+   "39 a 43": 359.94,
+   "44 a 48": 467.93,
+   "49 a 53": 608.3,
+   "54 a 58": 790.79,
+   "59 ou mais": 1139.78
+  }
+ },
+ {
+  "id": 76,
+  "operadora": "Hapvida",
+  "plano": "Smart UP",
+  "label": "Smart UP",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 113.99,
+   "19 a 23": 153.86,
+   "24 a 28": 181.84,
+   "29 a 33": 181.84,
+   "34 a 38": 181.84,
+   "39 a 43": 215.97,
+   "44 a 48": 280.77,
+   "49 a 53": 364.99,
+   "54 a 58": 474.5,
+   "59 ou mais": 683.89
+  }
+ },
+ {
+  "id": 77,
+  "operadora": "Hapvida",
+  "plano": "Smart UP",
+  "label": "Smart UP",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": true,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 151.98,
+   "19 a 23": 205.14,
+   "24 a 28": 242.45,
+   "29 a 33": 242.45,
+   "34 a 38": 242.45,
+   "39 a 43": 287.95,
+   "44 a 48": 374.34,
+   "49 a 53": 486.64,
+   "54 a 58": 632.63,
+   "59 ou mais": 911.82
+  }
+ },
+ {
+  "id": 78,
+  "operadora": "Hapvida",
+  "plano": "Smart UP",
+  "label": "Smart UP",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 119.23,
+   "19 a 23": 160.95,
+   "24 a 28": 190.21,
+   "29 a 33": 190.21,
+   "34 a 38": 190.21,
+   "39 a 43": 225.89,
+   "44 a 48": 293.66,
+   "49 a 53": 381.76,
+   "54 a 58": 496.3,
+   "59 ou mais": 715.3
+  }
+ },
+ {
+  "id": 79,
+  "operadora": "Hapvida",
+  "plano": "Smart UP",
+  "label": "Smart UP",
+  "acomodacao": "Apartamento",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 158.98,
+   "19 a 23": 214.59,
+   "24 a 28": 253.61,
+   "29 a 33": 253.61,
+   "34 a 38": 253.61,
+   "39 a 43": 301.21,
+   "44 a 48": 391.57,
+   "49 a 53": 509.04,
+   "54 a 58": 661.75,
+   "59 ou mais": 953.79
+  }
+ },
+ {
+  "id": 80,
+  "operadora": "Hapvida",
+  "plano": "Smart UP",
+  "label": "Smart UP",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Completa",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 95.38,
+   "19 a 23": 128.75,
+   "24 a 28": 152.16,
+   "29 a 33": 152.16,
+   "34 a 38": 152.16,
+   "39 a 43": 180.7,
+   "44 a 48": 234.91,
+   "49 a 53": 305.39,
+   "54 a 58": 397.02,
+   "59 ou mais": 572.21
+  }
+ },
+ {
+  "id": 81,
+  "operadora": "Hapvida",
+  "plano": "Smart UP",
+  "label": "Smart UP",
+  "acomodacao": "Enfermaria",
+  "coparticipacao": "Parcial",
+  "mei": false,
+  "categoria": "Geral",
+  "precos": {
+   "00 a 18": 127.18,
+   "19 a 23": 171.67,
+   "24 a 28": 202.89,
+   "29 a 33": 202.89,
+   "34 a 38": 202.89,
+   "39 a 43": 240.97,
+   "44 a 48": 313.26,
+   "49 a 53": 407.24,
+   "54 a 58": 529.41,
+   "59 ou mais": 763.04
+  }
  }
 ]
