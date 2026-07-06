@@ -59,6 +59,17 @@
   table.matrix .valcell.has{background:#fffaf4;color:var(--txt);font-weight:600}
   table.matrix tr.totalrow .valcell{font-weight:700;background:#f7f9fc;border-color:var(--navy);color:var(--navy);font-size:14px}
   .matrix-hint{font-size:12px;color:var(--muted);margin-top:8px}
+  table.matrix td{vertical-align:top}
+  .ccol{display:flex;flex-direction:column;gap:8px}
+  .cslot{border:1px solid var(--line);border-radius:9px;padding:9px;display:flex;flex-direction:column;gap:5px;background:#fff}
+  .cslot-val{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--muted);margin-top:1px}
+  .cslot-val.has{color:var(--txt)}
+  .cslot-val b{cursor:pointer;color:var(--muted);font-weight:700;font-size:16px;line-height:1;padding:0 2px}
+  .cslot-val b:hover{color:var(--red)}
+  .cadd{border:1px dashed var(--line);background:#fff;color:var(--hap);font-weight:600;font-size:12.5px;border-radius:9px;padding:8px;cursor:pointer}
+  .cadd:hover{border-color:var(--hap);background:#fff7f0}
+  .ctot{text-align:right;font-weight:700;font-size:14px;color:var(--navy);border-top:2px solid var(--navy);padding-top:6px}
+  .ctot.has{color:var(--hap-dark)}
   .rchips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
   .rchip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--navy);background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:3px 6px 3px 10px}
   .rchip b{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px;line-height:1}
@@ -245,7 +256,7 @@
             <div class="chips" id="meiChips"></div>
           </div>
           <div class="matrix-wrap"><table class="matrix"><tbody id="matrix"></tbody></table></div>
-          <div class="matrix-hint">Para cada plano: escolha o plano, depois a <b>acomodação</b> (enfermaria/apartamento) e a <b>segmentação</b> (coparticipação parcial / completa; concorrentes: sem coparticipação). Quando há só uma opção, ela é preenchida automaticamente. O seletor <b>Não-MEI / MEI</b> troca a tabela de preços da Hapvida. Valores usam a distribuição de vidas ao lado; Valor Total = soma da coluna.</div>
+          <div class="matrix-hint">Adicione <b>quantos planos quiser</b> por operadora ("+ adicionar plano"; use o × para remover). Em cada plano escolha <b>acomodação</b> e <b>segmentação</b> (coparticipação parcial / completa; concorrentes: sem coparticipação) — quando há só uma opção, é preenchida automaticamente. O seletor <b>Não-MEI / MEI</b> troca a tabela de preços da Hapvida. Valores usam a distribuição de vidas ao lado; Total = soma da coluna.</div>
           <div class="cards" id="planCards"></div>
         </div>
       </div>
@@ -2193,7 +2204,7 @@ function switchTab(t){
 
 /* ================= TAB 1: CALCULADORA ================= */
 let vidas = Object.fromEntries(BANDS.map(b=>[b,0]));
-let matrixSel = {}; OPS.forEach(o=>matrixSel[o.key]=[0,1,2].map(()=>({plano:null,acom:null,seg:null})));
+let matrixSel = {}; OPS.forEach(o=>matrixSel[o.key]=[{plano:null,acom:null,seg:null}]);
 let categoria = CATEGORIES[0];
 let meiMode = false; // false = Não-MEI (padrão), true = MEI. Aplica-se só à Hapvida.
 function meiOk(c){return c.operadora!=='Hapvida' || !!c.mei===meiMode;}
@@ -2215,25 +2226,25 @@ function buildVidas(){
 function onVida(el){let v=parseInt(el.value||'0',10);if(isNaN(v)||v<0)v=0;el.value=v;vidas[el.dataset.b]=v;refreshTot();recompute();}
 function refreshTot(){document.getElementById('totVidas').textContent=totVidas();}
 function zerar(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);refreshTot();recompute();}
-function novaCotacao(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);OPS.forEach(o=>matrixSel[o.key]=[0,1,2].map(()=>({plano:null,acom:null,seg:null})));refreshTot();recompute();}
+function novaCotacao(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);OPS.forEach(o=>matrixSel[o.key]=[{plano:null,acom:null,seg:null}]);refreshTot();recompute();}
 
 function buildMatrix(){
-  let html=`<tr><th class="rowlabel">Seleciona Operadora</th>`+
+  let html=`<tr><th class="rowlabel">Operadora</th>`+
     OPS.map(o=>`<th><div class="ophead" style="background:${o.color}">${o.label}</div></th>`).join('')+`</tr>`;
-  for(let s=0;s<3;s++){
-    html+=`<tr>`+(s===0?`<th class="rowlabel" rowspan="3">Seleciona Plano</th>`:'')+
-      OPS.map((o,i)=>`<td>${slotCell(o.key,s)}</td>`).join('')+`</tr>`;
-  }
-  for(let s=0;s<3;s++){
-    html+=`<tr><th class="rowlabel">Valor ${s+1}</th>`+OPS.map((o,i)=>`<td><div class="valcell" id="v-${i}-${s}">0,00</div></td>`).join('')+`</tr>`;
-  }
-  html+=`<tr class="totalrow"><th class="rowlabel">Valor Total R$</th>`+OPS.map((o,i)=>`<td><div class="valcell" id="vt-${i}">0,00</div></td>`).join('')+`</tr>`;
+  html+=`<tr><th class="rowlabel">Planos</th>`+OPS.map(o=>{
+    let tot=0;
+    const slots=matrixSel[o.key].map((x,s)=>{const c=resolved(o.key,s);const v=c?planTotal(c):0;tot+=v;return slotBlock(o.key,s,x,v);}).join('');
+    const add=`<button class="cadd" onclick="addSlot('${o.key}')">+ adicionar plano</button>`;
+    const tt=`<div class="ctot ${tot>0?'has':''}">Total R$ ${fmt(tot)}</div>`;
+    return `<td><div class="ccol">${slots}${add}${tt}</div></td>`;
+  }).join('')+`</tr>`;
   document.getElementById('matrix').innerHTML=html;
 }
-function slotCell(opKey,slot){
-  const x=matrixSel[opKey][slot];
+function slotBlock(opKey,slot,x,v){
   const labels=planLabels(opKey);
-  let h=`<select onchange="onPlano('${opKey}',${slot},this.value)"><option value="">— Plano ${slot+1} —</option>`+
+  const canRemove=matrixSel[opKey].length>1;
+  let h=`<div class="cslot">`;
+  h+=`<select onchange="onPlano('${opKey}',${slot},this.value)"><option value="">— Plano —</option>`+
     labels.map(l=>`<option ${x.plano===l?'selected':''}>${l}</option>`).join('')+`</select>`;
   const acoms=x.plano?acomsFor(opKey,x.plano):[];
   h+=`<select class="sub" ${x.plano?'':'disabled'} onchange="onAcom('${opKey}',${slot},this.value)"><option value="">Acomodação</option>`+
@@ -2241,22 +2252,18 @@ function slotCell(opKey,slot){
   const segs=(x.plano&&x.acom)?segsFor(opKey,x.plano,x.acom):[];
   h+=`<select class="sub" ${x.acom?'':'disabled'} onchange="onSeg('${opKey}',${slot},this.value)"><option value="">Segmentação</option>`+
     segs.map(g=>`<option value="${g}" ${x.seg===g?'selected':''}>${segLabel(g)}</option>`).join('')+`</select>`;
+  h+=`<div class="cslot-val ${v>0?'has':''}"><span>R$ ${fmt(v)}</span>${canRemove?`<b title="remover" onclick="removeSlot('${opKey}',${slot})">×</b>`:''}</div></div>`;
   return h;
 }
+function addSlot(op){matrixSel[op].push({plano:null,acom:null,seg:null});recompute();}
+function removeSlot(op,slot){matrixSel[op].splice(slot,1);if(!matrixSel[op].length)matrixSel[op].push({plano:null,acom:null,seg:null});recompute();}
 function onPlano(opKey,slot,v){const x=matrixSel[opKey][slot];x.plano=v||null;x.acom=null;x.seg=null;
   if(x.plano){const a=acomsFor(opKey,x.plano);if(a.length===1){x.acom=a[0];const g=segsFor(opKey,x.plano,x.acom);if(g.length===1)x.seg=g[0];}}recompute();}
 function onAcom(opKey,slot,v){const x=matrixSel[opKey][slot];x.acom=v||null;x.seg=null;
   if(x.acom){const g=segsFor(opKey,x.plano,x.acom);if(g.length===1)x.seg=g[0];}recompute();}
 function onSeg(opKey,slot,v){matrixSel[opKey][slot].seg=v||null;recompute();}
-function updateValues(){
-  OPS.forEach((o,i)=>{let tot=0;
-    for(let s=0;s<3;s++){const c=resolved(o.key,s);const v=c?planTotal(c):0;tot+=v;
-      const cell=document.getElementById(`v-${i}-${s}`);if(cell){cell.textContent=fmt(v);cell.classList.toggle('has',v>0);}}
-    const tc=document.getElementById(`vt-${i}`);if(tc){tc.textContent=fmt(tot);tc.classList.toggle('has',tot>0);}
-  });
-}
-function selectedPlans(){const ids=[];OPS.forEach(o=>{for(let s=0;s<3;s++){const c=resolved(o.key,s);if(c&&!ids.includes(c.id))ids.push(c.id);}});return ids.map(planById).filter(Boolean);}
-function recompute(){buildMatrix();updateValues();renderCards();calcResult();}
+function selectedPlans(){const ids=[];OPS.forEach(o=>{matrixSel[o.key].forEach((x,s)=>{const c=resolved(o.key,s);if(c&&!ids.includes(c.id))ids.push(c.id);});});return ids.map(planById).filter(Boolean);}
+function recompute(){buildMatrix();renderCards();calcResult();}
 function buildMeiChips(){
   const opts=[[false,'Não-MEI'],[true,'MEI']];
   const el=document.getElementById('meiChips');
