@@ -194,6 +194,10 @@
   .fd-chip b{color:var(--hap)}
   .fd-hi{background:#fff2e6;border:1px solid #ffd9b8;border-radius:10px;padding:14px 18px;margin:14px 0;font-size:14px}
   .fd-hi .v{font-size:24px;font-weight:800;color:var(--hap)}
+  .fd-hi-t{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px}
+  .fd-hi-item{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:4px 0;border-top:1px solid #ffd9b8}
+  .fd-hi-item:first-of-type{border-top:none}
+  .fd-hi-item b{color:var(--hap-dark);white-space:nowrap}
   .fd-foot{margin-top:24px;font-size:11px;color:#666;border-top:1px solid #d9dee7;padding-top:10px;line-height:1.5}
   .fd-tbl tr.grp td{background:#13315c;color:#fff;font-weight:600;text-align:left;font-size:12px}
   .fd-rede th,.fd-rede td{font-size:10.5px;padding:5px 7px}
@@ -2409,10 +2413,15 @@ async function gerarFolder(){
   const bestHap=rows.find(r=>r.c.operadora==='Hapvida');
   const chips=BANDS.filter(b=>vidas[b]>0).map(b=>`<div class="fd-chip">${b}: <b>${vidas[b]}</b></div>`).join('');
   let trs=rows.map((r,i)=>{const cop=segLabel(r.c.coparticipacao);
-    return `<tr class="${i===0?'best':''}"><td>${i+1}</td><td>${r.c.label}</td><td>${opLabel(r.c.operadora)}</td><td>${r.c.acomodacao}</td><td>${cop}</td><td>R$ ${fmt(r.total)}</td></tr>`;}).join('');
-  let hi=`<div class="fd-hi">Menor mensalidade: <span class="v">R$ ${fmt(min.total)}</span> — ${min.c.label} (${opLabel(min.c.operadora)})`;
-  if(bestHap&&bestHap.c.operadora!==min.c.operadora) hi+=` · Melhor opção Hapvida: <b>R$ ${fmt(bestHap.total)}</b> — ${bestHap.c.label}`;
-  hi+=`</div>`;
+    return `<tr><td>${i+1}</td><td>${r.c.label}</td><td>${opLabel(r.c.operadora)}</td><td>${r.c.acomodacao}</td><td>${cop}</td><td>R$ ${fmt(r.total)}</td></tr>`;}).join('');
+  let hi;
+  if(rows.length===1){
+    const r=rows[0];
+    hi=`<div class="fd-hi">Mensalidade: <span class="v">R$ ${fmt(r.total)}</span> — ${r.c.label} (${opLabel(r.c.operadora)})</div>`;
+  } else {
+    const items=rows.map(r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opLabel(r.c.operadora)} · ${r.c.acomodacao}</span><b>R$ ${fmt(r.total)}</b></div>`).join('');
+    hi=`<div class="fd-hi"><div class="fd-hi-t">${rows.length} opções cotadas</div>${items}</div>`;
+  }
   // Tabela de valores completa (preço por faixa etária)
   const colHead=cols.map(c=>`<th>${c.label}<br><span style="font-weight:400;font-size:10px">${opLabel(c.operadora)} · ${c.acomodacao}</span></th>`).join('');
   const priceBody=BANDS.map(b=>`<tr><td>${b}</td>`+cols.map(c=>`<td>R$ ${fmt(c.precos[b]||0)}</td>`).join('')+`</tr>`).join('');
