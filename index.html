@@ -75,6 +75,7 @@
   .rchip b{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px;line-height:1}
   .rchip b:hover{color:var(--red)}
   .mei-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .vidas-warn{background:#fff3df;border:1px solid #ffd9b8;color:#854f0b;border-radius:9px;padding:9px 13px;font-size:13px;margin-bottom:14px}
   .mei-lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
   /* plan cards */
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px;margin-top:22px}
@@ -261,6 +262,7 @@
             <span class="mei-lbl" style="margin-left:12px">Contrato</span>
             <div class="chips" id="meiChips"></div>
           </div>
+          <div id="vidasWarn" class="vidas-warn" style="display:none">⚠ Informe a <b>Distribuição de vidas</b> (ao lado) para calcular os valores — sem vidas informadas, os preços ficam zerados.</div>
           <div class="matrix-wrap"><table class="matrix"><tbody id="matrix"></tbody></table></div>
           <div class="matrix-hint">Adicione <b>quantos planos quiser</b> por operadora ("+ adicionar plano"; use o × para remover). Em cada plano escolha <b>acomodação</b> e <b>segmentação</b> (coparticipação parcial / completa; concorrentes: sem coparticipação) — quando há só uma opção, é preenchida automaticamente. O seletor <b>Não-MEI / MEI</b> troca a tabela de preços das operadoras que têm MEI (Hapvida, Amil, Porto); as demais mantêm a mesma tabela. Valores usam a distribuição de vidas ao lado; Total = soma da coluna.</div>
           <div class="cards" id="planCards"></div>
@@ -430,7 +432,8 @@ function slotBlock(opKey,slot,x,v){
   const segs=(x.plano&&x.acom)?segsFor(opKey,x.plano,x.acom):[];
   h+=`<select class="sub" ${x.acom?'':'disabled'} onchange="onSeg('${opKey}',${slot},this.value)"><option value="">Segmentação</option>`+
     segs.map(g=>`<option value="${g}" ${x.seg===g?'selected':''}>${segLabel(g)}</option>`).join('')+`</select>`;
-  h+=`<div class="cslot-val ${v>0?'has':''}"><span>R$ ${fmt(v)}</span>${canRemove?`<b title="remover" onclick="removeSlot('${opKey}',${slot})">×</b>`:''}</div></div>`;
+  const noV=totVidas()===0&&!!x.plano&&!!x.acom&&!!x.seg;
+  h+=`<div class="cslot-val ${v>0?'has':''}"><span>${noV?'informe vidas':'R$ '+fmt(v)}</span>${canRemove?`<b title="remover" onclick="removeSlot('${opKey}',${slot})">×</b>`:''}</div></div>`;
   return h;
 }
 function addSlot(op){matrixSel[op].push({plano:null,acom:null,seg:null});recompute();}
@@ -441,7 +444,7 @@ function onAcom(opKey,slot,v){const x=matrixSel[opKey][slot];x.acom=v||null;x.se
   if(x.acom){const g=segsFor(opKey,x.plano,x.acom);if(g.length===1)x.seg=g[0];}recompute();}
 function onSeg(opKey,slot,v){matrixSel[opKey][slot].seg=v||null;recompute();}
 function selectedPlans(){const ids=[];OPS.forEach(o=>{matrixSel[o.key].forEach((x,s)=>{const c=resolved(o.key,s);if(c&&!ids.includes(c.id))ids.push(c.id);});});return ids.map(planById).filter(Boolean);}
-function recompute(){buildMatrix();renderCards();calcResult();}
+function recompute(){buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';}
 function reconcileSel(){
   OPS.forEach(o=>matrixSel[o.key].forEach(x=>{
     if(x.plano&&!planLabels(o.key).includes(x.plano)){x.plano=null;x.acom=null;x.seg=null;}
