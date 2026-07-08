@@ -262,6 +262,8 @@
             <div class="chips" id="prodChips"></div>
             <span class="mei-lbl" style="margin-left:12px">Contrato</span>
             <div class="chips" id="meiChips"></div>
+            <span class="mei-lbl" style="margin-left:12px">Operadoras</span>
+            <div class="chips" id="opChipsCalc"></div>
           </div>
           <div id="vidasWarn" class="vidas-warn" style="display:none">⚠ Informe a <b>Distribuição de vidas</b> (ao lado) para calcular os valores — sem vidas informadas, os preços ficam zerados.</div>
           <div class="matrix-wrap"><table class="matrix"><tbody id="matrix"></tbody></table></div>
@@ -382,7 +384,16 @@ function switchTab(t){
 
 /* ================= TAB 1: CALCULADORA ================= */
 let vidas = Object.fromEntries(BANDS.map(b=>[b,0]));
-let matrixSel = {}; OPS.forEach(o=>matrixSel[o.key]=[{plano:null,acom:null,seg:null}]);
+let opMode='todas'; // 'todas' = Hapvida + concorrentes; 'hapvida' = só Hapvida (colunas)
+let matrixCols=[];
+function emptySlot(){return {plano:null,acom:null,seg:null};}
+function buildCols(){
+  if(opMode==='hapvida') matrixCols=[0,1,2].map(()=>({op:'Hapvida',slots:[emptySlot()]}));
+  else matrixCols=OPS.map(o=>({op:o.key,slots:[emptySlot()]}));
+}
+buildCols();
+function opColor(op){const o=OPS.find(x=>x.key===op);return o?o.color:'#0f2740';}
+function opLabelC(op){const o=OPS.find(x=>x.key===op);return o?o.label:op;}
 let categoria = CATEGORIES[0];
 let meiMode = false; // false = Não-MEI (padrão), true = MEI. Aplica-se só à Hapvida.
 let prodSel = {Empresarial:true, Individual:false}; // filtro de produto (multi)
@@ -395,7 +406,7 @@ function planLabels(opKey){const seen=[];plansOf(opKey).forEach(c=>{if(!seen.inc
 function acomsFor(opKey,label){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&!s.includes(c.acomodacao))s.push(c.acomodacao);});return s;}
 function segsFor(opKey,label,acom){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&c.acomodacao===acom&&!s.includes(c.coparticipacao))s.push(c.coparticipacao);});return s;}
 function segLabel(s){return s.includes('Sem')?'Sem coparticipação':(s.includes('Completa')?'Coparticipação completa':'Coparticipação parcial');}
-function resolved(opKey,slot){const x=matrixSel[opKey][slot];if(x.plano&&x.acom&&x.seg)return CATALOG.find(c=>c.operadora===opKey&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&meiOk(c))||null;return null;}
+function resolved(ci,si){const col=matrixCols[ci];if(!col)return null;const x=col.slots[si];if(x&&x.plano&&x.acom&&x.seg)return CATALOG.find(c=>c.operadora===col.op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&meiOk(c))||null;return null;}
 function planTotal(c){return BANDS.reduce((s,b)=>s+vidas[b]*(c.precos[b]||0),0);}
 function totVidas(){return BANDS.reduce((s,b)=>s+vidas[b],0);}
 
@@ -407,15 +418,22 @@ function buildVidas(){
 function onVida(el){let v=parseInt(el.value||'0',10);if(isNaN(v)||v<0)v=0;el.value=v;vidas[el.dataset.b]=v;refreshTot();recompute();}
 function refreshTot(){document.getElementById('totVidas').textContent=totVidas();}
 function zerar(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);refreshTot();recompute();}
-function novaCotacao(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);OPS.forEach(o=>matrixSel[o.key]=[{plano:null,acom:null,seg:null}]);refreshTot();recompute();}
+function novaCotacao(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);buildCols();refreshTot();recompute();}
+function buildOpChips(){
+  const el=document.getElementById('opChipsCalc');if(!el)return;
+  const opts=[['hapvida','Somente Hapvida'],['todas','Todas']];
+  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${opMode===v?'active':''}" data-opm="${v}">${l}</div>`).join('');
+  el.querySelectorAll('[data-opm]').forEach(e=>e.onclick=()=>setOpMode(e.dataset.opm));
+}
+function setOpMode(m){if(opMode===m)return;opMode=m;buildCols();buildOpChips();recompute();}
 
 function buildMatrix(){
   let html=`<tr><th class="rowlabel">Operadora</th>`+
-    OPS.map(o=>`<th><div class="ophead" style="background:${o.color}">${o.label}</div></th>`).join('')+`</tr>`;
-  html+=`<tr><th class="rowlabel">Planos</th>`+OPS.map(o=>{
+    matrixCols.map(col=>`<th><div class="ophead" style="background:${opColor(col.op)}">${opLabelC(col.op)}</div></th>`).join('')+`</tr>`;
+  html+=`<tr><th class="rowlabel">Planos</th>`+matrixCols.map((col,ci)=>{
     let tot=0;
-    const slots=matrixSel[o.key].map((x,s)=>{const c=resolved(o.key,s);const v=c?planTotal(c):0;tot+=v;return slotBlock(o.key,s,x,v);}).join('');
-    const add=`<button class="cadd" onclick="addSlot('${o.key}')">+ adicionar plano</button>`;
+    const slots=col.slots.map((x,si)=>{const c=resolved(ci,si);const v=c?planTotal(c):0;tot+=v;return slotBlock(ci,si,x,v);}).join('');
+    const add=`<button class="cadd" onclick="addSlot(${ci})">+ adicionar plano</button>`;
     const tt=`<div class="ctot ${tot>0?'has':''}">Total R$ ${fmt(tot)}</div>`;
     return `<td><div class="ccol">${slots}${add}${tt}</div></td>`;
   }).join('')+`</tr>`;
@@ -426,40 +444,41 @@ function planOptGroups(opKey){
   plansOf(opKey).forEach(c=>{if(!seen.includes(c.label)){seen.push(c.label);const t=c.tipo||'Empresarial';if(!groups[t]){groups[t]=[];order.push(t);}groups[t].push(c.label);}});
   return order.map(t=>({tipo:t,labels:groups[t]}));
 }
-function slotBlock(opKey,slot,x,v){
-  const canRemove=matrixSel[opKey].length>1;
+function slotBlock(ci,si,x,v){
+  const col=matrixCols[ci];const op=col.op;
+  const canRemove=col.slots.length>1;
   let h=`<div class="cslot">`;
-  const grp=planOptGroups(opKey);
+  const grp=planOptGroups(op);
   const optHTML=l=>`<option ${x.plano===l?'selected':''}>${l}</option>`;
   let opts;
   if(grp.length>1) opts=grp.map(g=>`<optgroup label="${g.tipo}">`+g.labels.map(optHTML).join('')+`</optgroup>`).join('');
   else opts=(grp[0]?grp[0].labels:[]).map(optHTML).join('');
-  h+=`<select onchange="onPlano('${opKey}',${slot},this.value)"><option value="">— Plano —</option>${opts}</select>`;
-  const acoms=x.plano?acomsFor(opKey,x.plano):[];
-  h+=`<select class="sub" ${x.plano?'':'disabled'} onchange="onAcom('${opKey}',${slot},this.value)"><option value="">Acomodação</option>`+
+  h+=`<select onchange="onPlano(${ci},${si},this.value)"><option value="">— Plano —</option>${opts}</select>`;
+  const acoms=x.plano?acomsFor(op,x.plano):[];
+  h+=`<select class="sub" ${x.plano?'':'disabled'} onchange="onAcom(${ci},${si},this.value)"><option value="">Acomodação</option>`+
     acoms.map(a=>`<option ${x.acom===a?'selected':''}>${a}</option>`).join('')+`</select>`;
-  const segs=(x.plano&&x.acom)?segsFor(opKey,x.plano,x.acom):[];
-  h+=`<select class="sub" ${x.acom?'':'disabled'} onchange="onSeg('${opKey}',${slot},this.value)"><option value="">Segmentação</option>`+
+  const segs=(x.plano&&x.acom)?segsFor(op,x.plano,x.acom):[];
+  h+=`<select class="sub" ${x.acom?'':'disabled'} onchange="onSeg(${ci},${si},this.value)"><option value="">Segmentação</option>`+
     segs.map(g=>`<option value="${g}" ${x.seg===g?'selected':''}>${segLabel(g)}</option>`).join('')+`</select>`;
   const noV=totVidas()===0&&!!x.plano&&!!x.acom&&!!x.seg;
-  h+=`<div class="cslot-val ${v>0?'has':''}"><span>${noV?'informe vidas':'R$ '+fmt(v)}</span>${canRemove?`<b title="remover" onclick="removeSlot('${opKey}',${slot})">×</b>`:''}</div></div>`;
+  h+=`<div class="cslot-val ${v>0?'has':''}"><span>${noV?'informe vidas':'R$ '+fmt(v)}</span>${canRemove?`<b title="remover" onclick="removeSlot(${ci},${si})">×</b>`:''}</div></div>`;
   return h;
 }
-function addSlot(op){matrixSel[op].push({plano:null,acom:null,seg:null});recompute();}
-function removeSlot(op,slot){matrixSel[op].splice(slot,1);if(!matrixSel[op].length)matrixSel[op].push({plano:null,acom:null,seg:null});recompute();}
-function onPlano(opKey,slot,v){const x=matrixSel[opKey][slot];x.plano=v||null;x.acom=null;x.seg=null;
-  if(x.plano){const a=acomsFor(opKey,x.plano);if(a.length===1){x.acom=a[0];const g=segsFor(opKey,x.plano,x.acom);if(g.length===1)x.seg=g[0];}}recompute();}
-function onAcom(opKey,slot,v){const x=matrixSel[opKey][slot];x.acom=v||null;x.seg=null;
-  if(x.acom){const g=segsFor(opKey,x.plano,x.acom);if(g.length===1)x.seg=g[0];}recompute();}
-function onSeg(opKey,slot,v){matrixSel[opKey][slot].seg=v||null;recompute();}
-function selectedPlans(){const ids=[];OPS.forEach(o=>{matrixSel[o.key].forEach((x,s)=>{const c=resolved(o.key,s);if(c&&!ids.includes(c.id))ids.push(c.id);});});return ids.map(planById).filter(Boolean);}
+function addSlot(ci){matrixCols[ci].slots.push(emptySlot());recompute();}
+function removeSlot(ci,si){matrixCols[ci].slots.splice(si,1);if(!matrixCols[ci].slots.length)matrixCols[ci].slots.push(emptySlot());recompute();}
+function onPlano(ci,si,v){const col=matrixCols[ci];const x=col.slots[si];x.plano=v||null;x.acom=null;x.seg=null;
+  if(x.plano){const a=acomsFor(col.op,x.plano);if(a.length===1){x.acom=a[0];const g=segsFor(col.op,x.plano,x.acom);if(g.length===1)x.seg=g[0];}}recompute();}
+function onAcom(ci,si,v){const col=matrixCols[ci];const x=col.slots[si];x.acom=v||null;x.seg=null;
+  if(x.acom){const g=segsFor(col.op,x.plano,x.acom);if(g.length===1)x.seg=g[0];}recompute();}
+function onSeg(ci,si,v){matrixCols[ci].slots[si].seg=v||null;recompute();}
+function selectedPlans(){const ids=[];matrixCols.forEach((col,ci)=>col.slots.forEach((x,si)=>{const c=resolved(ci,si);if(c&&!ids.includes(c.id))ids.push(c.id);}));return ids.map(planById).filter(Boolean);}
 function recompute(){buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';}
 function reconcileSel(){
-  OPS.forEach(o=>matrixSel[o.key].forEach(x=>{
-    if(x.plano&&!planLabels(o.key).includes(x.plano)){x.plano=null;x.acom=null;x.seg=null;}
+  matrixCols.forEach(col=>col.slots.forEach(x=>{
+    if(x.plano&&!planLabels(col.op).includes(x.plano)){x.plano=null;x.acom=null;x.seg=null;}
     else if(x.plano){
-      if(x.acom&&!acomsFor(o.key,x.plano).includes(x.acom)){x.acom=null;x.seg=null;}
-      if(x.acom&&x.seg&&!segsFor(o.key,x.plano,x.acom).includes(x.seg))x.seg=null;
+      if(x.acom&&!acomsFor(col.op,x.plano).includes(x.acom)){x.acom=null;x.seg=null;}
+      if(x.acom&&x.seg&&!segsFor(col.op,x.plano,x.acom).includes(x.seg))x.seg=null;
     }
   }));
 }
@@ -786,7 +805,7 @@ function renderRede(){
 
 /* init */
 document.getElementById('brandLogo').innerHTML=LOGO_SVG;
-buildProdChips(); buildMeiChips(); buildVidas(); buildMatrix(); recompute();
+buildProdChips(); buildMeiChips(); buildOpChips(); buildVidas(); buildMatrix(); recompute();
 document.getElementById('convOverlay').addEventListener('click',e=>{if(e.target.id==='convOverlay')closeConv();});
 document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
 </script>
