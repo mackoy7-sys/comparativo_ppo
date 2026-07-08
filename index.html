@@ -307,6 +307,7 @@
       <div class="desc">Compare a rede credenciada (hospitais, maternidades e prontos-socorros) entre o plano Hapvida e o concorrente selecionado.</div>
       <div id="redeStatus" class="empty">Abra esta aba para carregar a rede credenciada…</div>
       <div id="redeControls" style="display:none">
+        <div class="mei-row"><span class="mei-lbl">Operadoras</span><div class="chips" id="redeOpChips"></div></div>
         <div class="matrix-wrap"><table class="matrix"><tbody id="redeMatrix"></tbody></table></div>
         <div class="matrix-hint">Selecione um ou mais planos por operadora (use "+ adicionar plano"; clique no × para remover). A rede credenciada é comparada lado a lado, por hospital.</div>
         <div class="rede-filters" style="margin-top:16px">
@@ -690,6 +691,8 @@ async function gerarFolder(){
 let REDE=null, redeInit=false, redeLoading=false, redeIndexBuilt=false;
 let redeSel={}; OPS.forEach(o=>redeSel[o.key]=[]);
 let redeState={reg:'Todas',q:'',show:'todos'};
+let redeOpMode='todas'; // 'todas' = todas operadoras; 'hapvida' = só Hapvida
+function redeVisibleOps(){return redeOpMode==='hapvida'?OPS.filter(o=>o.key==='Hapvida'):OPS;}
 const HAP_PLANS=new Set(CATALOG.filter(c=>c.operadora==='Hapvida').map(c=>c.label));
 const CONC_TO_OP={'Amil':'Amil','Sulamérica':'SulAmérica','Bradesco Seguros':'Bradesco','Porto Seguro':'Porto Seguro'};
 const cov=v=>!!v&&v!=='-';
@@ -727,6 +730,7 @@ function initRede(){
   // default: Hapvida + Amil para já mostrar uma comparação
   const h0=(PLAN_BY_OP['Hapvida']||[])[0], a0=(PLAN_BY_OP['Amil']||[])[0];
   redeSel['Hapvida']=h0?[h0]:[]; redeSel['Amil']=a0?[a0]:[];
+  buildRedeOpChips();
   buildRedeMatrix();
   document.getElementById('redeSearch').addEventListener('input',e=>{redeState.q=e.target.value.toLowerCase().trim();renderRede();});
   const shows=[['todos','Todos'],['dif','Só onde diferem'],['exh','Só Hapvida cobre']];
@@ -744,8 +748,9 @@ const HAP_ORD=['Nosso Médico RMSP','Smart UP','Smart Flex','Smart Prime','600',
 function pdisp(op,p){return op==='Hapvida'?(HAP_DISP[p]||p):p;}
 function pordList(op,list){if(op!=='Hapvida')return list;const r=p=>{const i=HAP_ORD.indexOf(p);return i<0?99:i;};return list.slice().sort((a,b)=>r(a)-r(b));}
 function buildRedeMatrix(){
-  let html=`<tr><th class="rowlabel">Operadora</th>`+OPS.map(o=>`<th><div class="ophead" style="background:${o.color}">${o.label}</div></th>`).join('')+`</tr>`;
-  html+=`<tr><th class="rowlabel">Planos</th>`+OPS.map(o=>{
+  const vops=redeVisibleOps();
+  let html=`<tr><th class="rowlabel">Operadora</th>`+vops.map(o=>`<th><div class="ophead" style="background:${o.color}">${o.label}</div></th>`).join('')+`</tr>`;
+  html+=`<tr><th class="rowlabel">Planos</th>`+vops.map(o=>{
     const sel=redeSel[o.key]||[]; const avail=pordList(o.key,(PLAN_BY_OP[o.key]||[]).filter(p=>!sel.includes(p)));
     const chips=sel.map(p=>`<span class="rchip" style="border-color:${o.color}">${pdisp(o.key,p)}<b onclick="removeRedePlan('${o.key}','${p.replace(/'/g,"\\'")}')">×</b></span>`).join('');
     const add=`<select onchange="addRedePlan('${o.key}',this.value);this.value=''"><option value="">${sel.length?'+ adicionar plano':'— Plano —'}</option>`+avail.map(p=>`<option value="${p}">${pdisp(o.key,p)}</option>`).join('')+`</select>`;
@@ -757,7 +762,14 @@ function afterRedeSelChange(){redeState.reg='Todas';const rr=document.getElement
 function addRedePlan(op,p){if(!p)return;if(!redeSel[op].includes(p))redeSel[op].push(p);afterRedeSelChange();}
 function removeRedePlan(op,p){redeSel[op]=redeSel[op].filter(x=>x!==p);afterRedeSelChange();}
 function clearRede(){OPS.forEach(o=>redeSel[o.key]=[]);redeState.reg='Todas';redeState.q='';const s=document.getElementById('redeSearch');if(s)s.value='';redeState.show='todos';document.querySelectorAll('#redeShow .chip').forEach(c=>c.classList.toggle('active',c.dataset.sh==='todos'));afterRedeSelChange();}
-function redeCols(){return OPS.flatMap(o=>(redeSel[o.key]||[]).map(p=>({op:o.key,label:o.label,color:o.color,plano:p,key:o.key+'|'+p,isHap:o.key==='Hapvida'})));}
+function redeCols(){return redeVisibleOps().flatMap(o=>(redeSel[o.key]||[]).map(p=>({op:o.key,label:o.label,color:o.color,plano:p,key:o.key+'|'+p,isHap:o.key==='Hapvida'})));}
+function buildRedeOpChips(){
+  const el=document.getElementById('redeOpChips');if(!el)return;
+  const opts=[['hapvida','Somente Hapvida'],['todas','Todas']];
+  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${redeOpMode===v?'active':''}" data-rom="${v}">${l}</div>`).join('');
+  el.querySelectorAll('[data-rom]').forEach(e=>e.onclick=()=>setRedeOpMode(e.dataset.rom));
+}
+function setRedeOpMode(m){if(redeOpMode===m)return;redeOpMode=m;buildRedeOpChips();afterRedeSelChange();}
 function redeKeys(cols){const s=new Set();cols.forEach(c=>{const m=PLAN_COV[c.key]||{};for(const k in m)s.add(k);});return [...s];}
 function buildRegOptions(){
   const cols=redeCols();const regs=[...new Set(redeKeys(cols).map(k=>REDE_HOSP[k]&&REDE_HOSP[k].regiao).filter(Boolean))].sort();
