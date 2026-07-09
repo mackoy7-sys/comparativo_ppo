@@ -623,6 +623,23 @@ function renderDetail(){
 
 /* ===== folder / proposta em PDF ===== */
 function opLabel(k){const o=OPS.find(x=>x.key===k);return o?o.label:k;}
+const COP_COLS=[
+  {tier:'Rede Própria',planos:'Nosso Médico / Smart Up'},
+  {tier:'Maior Abrangência',planos:'Smart Flex / Prime'},
+  {tier:'Livre Escolha',planos:'Advance 600/700'},
+  {tier:'Livre Escolha',planos:'Premium 900/Care'},
+  {tier:'Livre Escolha',planos:'Infinity'}
+];
+const COP_ROWS=[
+  ['Consultas eletivas','30% limitado a R$ 20,00','30% limitado a R$ 30,00','30% limitado a R$ 30,00','30% limitado a R$ 55,00','30% limitado a R$ 166,00'],
+  ['Consultas de urgência','30% limitado a R$ 55,00','30% limitado a R$ 80,00','30% limitado a R$ 90,00','30% limitado a R$ 165,00','30% limitado a R$ 355,00'],
+  ['Exames simples','30% limitado a R$ 15,00','30% limitado a R$ 20,00','30% limitado a R$ 25,00','30% limitado a R$ 35,00','30% limitado a R$ 84,00'],
+  ['Exames complexos','30% limitado a R$ 55,00','30% limitado a R$ 100,00','30% limitado a R$ 110,00','30% limitado a R$ 130,00','30% limitado a R$ 150,00'],
+  ['Terapias especiais','Valor fixo R$ 79,00','Valor fixo R$ 79,00','Valor fixo R$ 79,00','Valor fixo R$ 129,00','Valor fixo R$ 129,00'],
+  ['Demais terapias','Valor fixo R$ 42,00','Valor fixo R$ 42,00','Valor fixo R$ 42,00','Valor fixo R$ 66,00','Valor fixo R$ 66,00'],
+  ['Internações','Isento','Valor fixo R$ 180,00','Valor fixo R$ 220,00','Valor fixo R$ 400,00','Valor fixo R$ 570,00']
+];
+const COP_IDX={'Nosso Médico RMSP':0,'Smart UP':0,'Smart Flex':1,'Smart Prime':1,'600':2,'700':2,'900':3,'900 Care':3,'Infinity':4};
 async function gerarFolder(){
   const sel=selectedPlans(); const tv=totVidas();
   if(!sel.length||tv===0){alert('Informe as vidas e selecione ao menos um plano na matriz antes de gerar o folder.');return;}
@@ -648,6 +665,16 @@ async function gerarFolder(){
   const priceBody=BANDS.map(b=>`<tr class="${vidas[b]>0?'used':''}"><td>${b}${vidas[b]>0?` <span style="color:#5f5e5a;font-weight:400">(${vidas[b]} vida${vidas[b]>1?'s':''})</span>`:''}</td>`+cols.map(c=>`<td>R$ ${fmt(c.precos[b]||0)}</td>`).join('')+`</tr>`).join('');
   const priceQt=`<tr class="grp"><td colspan="${cols.length+1}">Mensalidade para a distribuição de vidas informada (${tv} vida(s))</td></tr><tr class="best"><td>Total mensal</td>`+cols.map(c=>`<td>R$ ${fmt(planTotal(c))}</td>`).join('')+`</tr>`;
   const priceTbl=`<table class="fd-tbl"><thead><tr><th>Faixa etária</th>${colHead}</tr></thead><tbody>${priceBody}${priceQt}</tbody></table>`;
+  // Tabela de coparticipação (só planos Hapvida presentes na cotação)
+  let copHtml='';
+  const copIdx=[...new Set(cols.filter(c=>c.operadora==='Hapvida').map(c=>COP_IDX[c.plano]).filter(i=>i!==undefined))].sort((a,b)=>a-b);
+  if(copIdx.length){
+    const chead=`<tr><th>Procedimento</th>`+copIdx.map(i=>`<th>${COP_COLS[i].tier}<br><span style="font-weight:400;font-size:10px">${COP_COLS[i].planos}</span></th>`).join('')+`</tr>`;
+    const cbody=COP_ROWS.map(r=>`<tr><td>${r[0]}</td>`+copIdx.map(i=>`<td>${r[i+1]}</td>`).join('')+`</tr>`).join('');
+    copHtml=`<div class="fd-sec">Tabela de coparticipação (Hapvida)</div>
+      <div class="fd-note">Coparticipação por procedimento, conforme o plano cotado. Consultas/exames: percentual limitado ao teto indicado; terapias e internações: valor fixo. Referencial — sujeito às condições contratuais e vigência.</div>
+      <table class="fd-tbl"><thead>${chead}</thead><tbody>${cbody}</tbody></table>`;
+  }
   // Rede de atendimento dos planos selecionados
   let redeHtml='';
   const okRede=await ensureRede();
@@ -679,6 +706,7 @@ async function gerarFolder(){
     <table class="fd-tbl"><thead><tr><th>#</th><th>Plano</th><th>Operadora</th><th>Produto</th><th>Acomodação</th><th>Coparticipação</th><th>Mensalidade</th></tr></thead><tbody>${trs}</tbody></table>
     <div class="fd-sec">Tabela de valores — mensalidade por faixa etária</div>
     ${priceTbl}
+    ${copHtml}
     ${redeHtml}
     <div class="fd-foot">Mensalidade = soma de (vidas × preço por faixa etária) por plano. Planos Hapvida com coparticipação parcial; concorrentes em geral sem coparticipação — o valor é apenas a mensalidade, sem o custo de uso. Rede: principais hospitais/laboratórios, podendo haver mais unidades não listadas. Valores referenciais, sujeitos a condições contratuais e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato. Emitido em ${hoje}.</div>`;
   const t0=document.title;
