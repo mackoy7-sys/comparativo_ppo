@@ -124,6 +124,14 @@
   .vs .vtag{font-weight:700;color:var(--muted);font-size:13px}
   .diff{font-size:22px;font-weight:800;padding:8px 12px;border-radius:10px;text-align:center}
   .diff.good{background:var(--green-bg);color:#0f6e56} .diff.bad{background:var(--red-bg);color:#a32d2d}
+  .diff-year{font-size:15px;font-weight:800;padding:6px 12px;border-radius:9px;text-align:center;line-height:1.15}
+  .diff-year small{display:block;font-size:10px;font-weight:600;opacity:.85;margin-top:2px;letter-spacing:.2px}
+  .diff-year.good{background:var(--green-bg);color:#0f6e56} .diff-year.bad{background:var(--red-bg);color:#a32d2d}
+  .year-box{display:flex;align-items:center;gap:13px;background:linear-gradient(90deg,#eef7f2,#f8fbfa);
+    border:1px solid #cde9dd;border-left:5px solid #0f6e56;border-radius:12px;padding:14px 18px;margin:0 0 20px;
+    font-size:15px;color:#0f3b2e;line-height:1.35}
+  .year-box b{color:#0f6e56} .year-box b.big{font-size:18px}
+  .year-box .yi{font-size:24px;flex:0 0 auto}
   .diff small{display:block;font-size:11px;font-weight:600;opacity:.8}
   table.band{width:100%;border-collapse:collapse;font-size:13.5px}
   table.band th,table.band td{padding:9px 11px;text-align:right;border-bottom:1px solid var(--line)}
@@ -529,13 +537,17 @@ function calcResult(){
   let kpis=`<div class="kpis"><div class="kpi"><div class="lbl">Total de vidas</div><div class="val">${tv}</div><div class="foot">${sel.length} plano(s) na comparação</div></div>
     <div class="kpi"><div class="lbl">Menor custo mensal</div><div class="val green">R$ ${fmt(min)}</div><div class="foot">${rows[0].c.operadora} · ${rows[0].c.label}</div></div>`;
   if(bestHap)kpis+=`<div class="kpi"><div class="lbl">Melhor Hapvida</div><div class="val hap">R$ ${fmt(bestHap.total)}</div><div class="foot">${bestHap.c.label} · ${bestHap.c.acomodacao}${bestHap.total>min?` (+R$ ${fmt(bestHap.total-min)} vs menor)`:' (menor preço)'}</div></div>`;
-  kpis+=`<div class="kpi"><div class="lbl">Diferença máx. (mês)</div><div class="val">R$ ${fmt(econ)}</div><div class="foot">entre o mais barato e o mais caro</div></div></div>`;
+  kpis+=`<div class="kpi"><div class="lbl">Diferença máx. (mês)</div><div class="val">R$ ${fmt(econ)}</div><div class="foot">entre o mais barato e o mais caro</div></div>`;
+  kpis+=`<div class="kpi"><div class="lbl">Ganho em 12 meses</div><div class="val green">R$ ${fmt(econ*12)}</div><div class="foot">diferença anual (mensal × 12)</div></div></div>`;
   let t=`<div style="overflow-x:auto"><table class="res"><thead><tr><th>Plano</th><th>Produto</th><th>Acomodação</th><th>Copart.</th><th>Custo mensal</th><th>R$/vida</th><th>vs menor</th></tr></thead><tbody>`;
   rows.forEach((r,i)=>{const isHap=r.c.operadora==='Hapvida';const diff=r.total-min,pct=min?diff/min*100:0;const prod=(r.c.tipo==='Individual')?'Individual (PF)':'Empresarial (PME)';
     t+=`<tr class="${i===0?'best':''} ${isHap?'haprow':''}"><td class="pn-cell"><span class="rank ${i===0?'g':''}">${i+1}</span><b>${r.c.label}</b><br><span class="op" style="margin-left:30px">${r.c.operadora}</span></td>
       <td>${prod}</td><td>${r.c.acomodacao}</td><td>${r.c.coparticipacao.includes('Sem')?'Sem':(r.c.coparticipacao.includes('Completa')?'Completa':'Parcial')}</td><td><b>R$ ${fmt(r.total)}</b></td><td>R$ ${fmt(r.total/tv)}</td>
       <td style="color:${diff===0?'#0f6e56':'#a32d2d'}">${diff===0?'—':'+R$ '+fmt(diff)+' ('+pct.toFixed(1)+'%)'}</td></tr>`;});
-  t+='</tbody></table></div>';area.innerHTML=kpis+t;
+  t+='</tbody></table></div>';
+  const hapCheapest=rows[0].c.operadora==='Hapvida';
+  const yearBox=(rows.length>1&&econ>0)?`<div class="year-box"><span class="yi">💰</span><div>Em <b>12 meses</b>, a diferença entre o plano mais barato e o mais caro chega a <b class="big">R$ ${fmt(econ*12)}</b>${hapCheapest?' — e a opção mais econômica é da <b>Hapvida</b>.':'.'}</div></div>`:'';
+  area.innerHTML=kpis+yearBox+t;
   const hasP=rows.some(r=>!r.c.coparticipacao.includes('Sem')),hasS=rows.some(r=>r.c.coparticipacao.includes('Sem'));
   if(hasP&&hasS){note.style.display='block';note.innerHTML='Atenção: a comparação mistura planos <b>com coparticipação</b> (Hapvida = Parcial) e <b>sem coparticipação</b>. O custo mensal é só a mensalidade — nos planos com coparticipação há custo adicional conforme o uso.';}else note.style.display='none';
 }
@@ -594,7 +606,7 @@ function renderDetail(){
     return `<div class="side ${cls}"><div class="op">${p.operadora}</div><div class="plan">${p.plano}</div><div class="badges"><span class="badge">${p.modalidade}</span><span class="badge">${p.acomodacao}</span>${cb}</div><div class="tot">Total mensal (1 vida/faixa)<b>R$ ${fmt(p.total)}</b></div></div>`;};
   let vs='';
   if(hap&&conc&&hap.total!=null&&conc.total!=null){const d=hap.total-conc.total,pct=d/conc.total*100,good=d<0;
-    vs=`<div class="vs"><div class="vtag">VS</div><div class="diff ${good?'good':'bad'}">${good?'−':'+'}R$ ${fmt(Math.abs(d))}<small>${good?'Hapvida mais barata':'Hapvida mais cara'} (${(pct>0?'+':'')+pct.toFixed(1)}%)</small></div></div>`;
+    vs=`<div class="vs"><div class="vtag">VS</div><div class="diff ${good?'good':'bad'}">${good?'−':'+'}R$ ${fmt(Math.abs(d))}<small>${good?'Hapvida mais barata':'Hapvida mais cara'} (${(pct>0?'+':'')+pct.toFixed(1)}%)</small></div><div class="diff-year ${good?'good':'bad'}">R$ ${fmt(Math.abs(d)*12)}<small>${good?'economia em 12 meses':'a mais em 12 meses'}</small></div></div>`;
   }else vs=`<div class="vs"><div class="vtag">VS</div></div>`;
   document.getElementById('cmpHead').innerHTML=card(hap,'hapvida')+vs+card(conc,'conc');
   const ctx=document.getElementById('bandChart');if(bandChart)bandChart.destroy();
