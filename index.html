@@ -64,6 +64,7 @@
   .cslot{border:1px solid var(--line);border-radius:9px;padding:9px;display:flex;flex-direction:column;gap:5px;background:#fff}
   .cslot-val{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--muted);margin-top:1px}
   .cslot-val.has{color:var(--txt)}
+  .cslot-val.warn{color:#a35a00;font-weight:700;font-size:11.5px}
   .cslot-val b{cursor:pointer;color:var(--muted);font-weight:700;font-size:16px;line-height:1;padding:0 2px}
   .cslot-val b:hover{color:var(--red)}
   .cadd{border:1px dashed var(--line);background:#fff;color:var(--hap);font-weight:600;font-size:12.5px;border-radius:9px;padding:8px;cursor:pointer}
@@ -486,8 +487,14 @@ function slotBlock(ci,si,x,v){
   const done=!!x.plano&&!!x.acom&&!!x.seg;
   const noV=totVidas()===0&&done;
   const badTier=done&&totVidas()>0&&!resolved(ci,si);
-  const disp=noV?'informe vidas':(badTier?'porte fora da faixa':'R$ '+fmt(v));
-  h+=`<div class="cslot-val ${v>0?'has':''} ${badTier?'warn':''}"><span>${disp}</span>${canRemove?`<b title="remover" onclick="removeSlot(${ci},${si})">×</b>`:''}</div></div>`;
+  let disp;
+  if(noV) disp='informe vidas';
+  else if(badTier){
+    const rr=CATALOG.filter(c=>c.operadora===op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&c.vmin!=null);
+    const ranges=[...new Set(rr.map(c=>c.vmin+'–'+c.vmax))].join(' ou ');
+    disp = ranges ? ('requer '+ranges+' vidas') : 'indisponível';
+  } else disp='R$ '+fmt(v);
+  h+=`<div class="cslot-val ${v>0&&!badTier?'has':''} ${badTier?'warn':''}"><span>${disp}</span>${canRemove?`<b title="remover" onclick="removeSlot(${ci},${si})">×</b>`:''}</div></div>`;
   return h;
 }
 function addSlot(ci){matrixCols[ci].slots.push(emptySlot());recompute();}
