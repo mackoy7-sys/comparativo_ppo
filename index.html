@@ -487,14 +487,19 @@ function slotBlock(ci,si,x,v){
   const done=!!x.plano&&!!x.acom&&!!x.seg;
   const noV=totVidas()===0&&done;
   const badTier=done&&totVidas()>0&&!resolved(ci,si);
-  let disp;
+  let disp, tip='';
   if(noV) disp='informe vidas';
   else if(badTier){
     const rr=CATALOG.filter(c=>c.operadora===op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&c.vmin!=null);
     const ranges=[...new Set(rr.map(c=>c.vmin+'–'+c.vmax))].join(' ou ');
     disp = ranges ? ('requer '+ranges+' vidas') : 'indisponível';
+    const isOdo=/\+\s*Odonto/i.test(x.plano||'');
+    if(isOdo){const base=x.plano.replace(/\s*\+\s*Odonto.*$/i,'');
+      tip=`O desconto na mensalidade médica por contratar o odonto junto só existe no porte PME (${ranges} vidas). Para menos vidas, use "${base}" — o preço do médico é o mesmo (o desconto, nesse porte, incide no plano odontológico, contratado à parte).`;}
+    else tip=`Este plano tem tabela apenas para ${ranges} vidas.`;
   } else disp='R$ '+fmt(v);
-  h+=`<div class="cslot-val ${v>0&&!badTier?'has':''} ${badTier?'warn':''}"><span>${disp}</span>${canRemove?`<b title="remover" onclick="removeSlot(${ci},${si})">×</b>`:''}</div></div>`;
+  const tipAttr=tip?` title="${tip.replace(/"/g,'&quot;')}"`:'';
+  h+=`<div class="cslot-val ${v>0&&!badTier?'has':''} ${badTier?'warn':''}"${tipAttr}><span>${disp}${badTier?' &#9432;':''}</span>${canRemove?`<b title="remover" onclick="removeSlot(${ci},${si})">×</b>`:''}</div></div>`;
   return h;
 }
 function addSlot(ci){matrixCols[ci].slots.push(emptySlot());recompute();}
