@@ -267,9 +267,15 @@
             <button class="btn clear" onclick="novaCotacao()">Nova cotação</button>
           </div>
           <div class="mei-row">
+            <span class="mei-lbl">Filial</span>
+            <div class="chips" id="filialChips"></div>
+          </div>
+          <div class="mei-row">
             <span class="mei-lbl">Praça</span>
             <div class="chips" id="pracaChips"></div>
-            <span class="mei-lbl" style="margin-left:12px">Produto</span>
+          </div>
+          <div class="mei-row">
+            <span class="mei-lbl">Produto</span>
             <div class="chips" id="prodChips"></div>
             <span class="mei-lbl" style="margin-left:12px">Contrato</span>
             <div class="chips" id="meiChips"></div>
@@ -396,7 +402,7 @@ function switchTab(t){
 
 /* ================= TAB 1: CALCULADORA ================= */
 let vidas = Object.fromEntries(BANDS.map(b=>[b,0]));
-let opMode='todas'; // 'todas' = Hapvida + concorrentes; 'hapvida' = só Hapvida (colunas)
+let opMode='hapvida'; // default: só Hapvida (colunas). 'todas' = Hapvida + concorrentes
 let matrixCols=[];
 function emptySlot(){return {plano:null,acom:null,seg:null};}
 function buildCols(){
@@ -409,14 +415,35 @@ function opLabelC(op){const o=OPS.find(x=>x.key===op);return o?o.label:op;}
 let categoria=null;
 let PRACAS=[];
 let pracaSel=null;
+/* ===== Filial (região de venda) — agrupa as praças p/ evitar lista gigante ===== */
+const UF_REG={AC:'Norte',AP:'Norte',AM:'Norte',PA:'Norte',RO:'Norte',RR:'Norte',TO:'Norte',
+  MA:'Nordeste',PI:'Nordeste',CE:'Nordeste',RN:'Nordeste',PB:'Nordeste',PE:'Nordeste',AL:'Nordeste',SE:'Nordeste',BA:'Nordeste',
+  MT:'Centro-Oeste',MS:'Centro-Oeste',GO:'Centro-Oeste',DF:'Centro-Oeste',
+  SP:'Sudeste',RJ:'Sudeste',MG:'Sudeste',ES:'Sudeste', PR:'Sul',SC:'Sul',RS:'Sul'};
+const REG_ORDER=['Sudeste','Nordeste','Centro-Oeste','Norte','Sul','Outras'];
+function ufOf(p){const m=(p||'').match(/-\s*([A-Z]{2})\s*$/);return m?m[1]:'SP';}
+function pracaRegiao(p){return UF_REG[ufOf(p)]||'Outras';}
+let FILIAIS=[]; let filialSel=null;
+function pracasDaFilial(){return PRACAS.filter(p=>pracaRegiao(p)===filialSel);}
+function buildFilialChips(){
+  const el=document.getElementById('filialChips'); if(!el) return;
+  el.innerHTML=FILIAIS.map(f=>{const n=PRACAS.filter(p=>pracaRegiao(p)===f).length;
+    return `<div class="chip ${filialSel===f?'active':''}" data-fil="${f}">${f} <small style="opacity:.6">(${n})</small></div>`;}).join('');
+  el.querySelectorAll('[data-fil]').forEach(e=>e.onclick=()=>setFilial(e.dataset.fil));
+}
+function setFilial(f){ if(filialSel===f) return; filialSel=f;
+  const list=pracasDaFilial();
+  if(!list.includes(pracaSel)){ pracaSel=list[0]||pracaSel; reconcileSel(); }
+  buildFilialChips(); buildPracaChips(); recompute();
+}
 function buildPracaChips(){
   const el=document.getElementById('pracaChips'); if(!el) return;
-  el.innerHTML=PRACAS.map(p=>`<div class="chip ${pracaSel===p?'active':''}" data-praca="${p}">${p}</div>`).join('');
+  el.innerHTML=pracasDaFilial().map(p=>`<div class="chip ${pracaSel===p?'active':''}" data-praca="${p}">${p}</div>`).join('');
   el.querySelectorAll('[data-praca]').forEach(e=>e.onclick=()=>setPraca(e.dataset.praca));
 }
 function setPraca(p){ if(pracaSel===p) return; pracaSel=p; reconcileSel(); buildPracaChips(); recompute(); }
 let meiMode = false; // false = Não-MEI (padrão), true = MEI. Aplica-se só à Hapvida.
-let prodSel = {Empresarial:true, Individual:false}; // filtro de produto (multi)
+let prodSel = {Empresarial:true, Individual:true}; // filtro de produto (multi) — default ambos
 function hasMeiVariant(c){return CATALOG.some(x=>x.operadora===c.operadora&&x.label===c.label&&x.acomodacao===c.acomodacao&&x.coparticipacao===c.coparticipacao&&(x.categoria||'Geral')===(c.categoria||'Geral')&&(!!x.mei)!==(!!c.mei));}
 function meiOk(c){return (!!c.mei===meiMode) || !hasMeiVariant(c);}
 function tipoOk(c){return !!prodSel[c.tipo||'Empresarial'];}
@@ -891,7 +918,9 @@ function boot(){
   categoria=CATEGORIES[0];
   PRACAS=[...new Set(CATALOG.map(c=>c.praca||'SP / RMSP'))];
   pracaSel=PRACAS.includes('SP / RMSP')?'SP / RMSP':PRACAS[0];
-  buildPracaChips(); buildProdChips(); buildMeiChips(); buildOpChips(); buildVidas(); buildMatrix(); recompute();
+  FILIAIS=REG_ORDER.filter(r=>PRACAS.some(p=>pracaRegiao(p)===r));
+  filialSel=pracaRegiao(pracaSel);
+  buildFilialChips(); buildPracaChips(); buildProdChips(); buildMeiChips(); buildOpChips(); buildVidas(); buildMatrix(); recompute();
 }
 document.getElementById('convOverlay').addEventListener('click',e=>{if(e.target.id==='convOverlay')closeConv();});
 document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
