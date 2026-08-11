@@ -420,6 +420,8 @@ function opColor(op){const o=OPS.find(x=>x.key===op);return o?o.color:'#0f2740';
 function opLabelC(op){const o=OPS.find(x=>x.key===op);return o?o.label:op;}
 function isPPO(c){return /^(Adv|Advance|Premium|Infinity)/i.test((c&&c.label)||'');}
 function opDisp(c){return isPPO(c)?'NotreDame Saúde':opLabelC(c.operadora);}
+function opColorFor(c){return isPPO(c)?'#1e2a5c':opColor(c.operadora);}
+function colIsPPO(ci){const col=matrixCols[ci];return !!(col&&col.slots.some((x,si)=>{const rc=resolved(ci,si);return rc&&isPPO(rc);}));}
 let categoria=null;
 let PRACAS=[];
 let pracaSel=null;
@@ -488,7 +490,7 @@ function setOpMode(m){if(opMode===m)return;opMode=m;buildCols();buildOpChips();r
 
 function buildMatrix(){
   let html=`<tr><th class="rowlabel">Operadora</th>`+
-    matrixCols.map(col=>`<th><div class="ophead" style="background:${opColor(col.op)}">${opLabelC(col.op)}</div></th>`).join('')+`</tr>`;
+    matrixCols.map((col,ci)=>{const ppo=colIsPPO(ci);return `<th><div class="ophead" style="background:${ppo?'#1e2a5c':opColor(col.op)}">${ppo?'NotreDame Saúde':opLabelC(col.op)}</div></th>`;}).join('')+`</tr>`;
   html+=`<tr><th class="rowlabel">Planos</th>`+matrixCols.map((col,ci)=>{
     let tot=0;
     const slots=col.slots.map((x,si)=>{const c=resolved(ci,si);const v=c?planTotal(c):0;tot+=v;return slotBlock(ci,si,x,v);}).join('');
@@ -582,7 +584,7 @@ function setMei(v){
 function renderCards(){
   const sel=selectedPlans();const wrap=document.getElementById('planCards');const tv=totVidas();
   if(!sel.length){wrap.innerHTML='';return;}
-  wrap.innerHTML=sel.map(c=>{const o=OPS.find(x=>x.key===c.operadora);const col=o?o.color:'#0f2740';const v=planTotal(c);
+  wrap.innerHTML=sel.map(c=>{const o=OPS.find(x=>x.key===c.operadora);const col=opColorFor(c);const v=planTotal(c);
     const cop=segLabel(c.coparticipacao);
     return `<div class="pcard" style="border-top-color:${col}">
       <div class="pcop" style="color:${col}">${opDisp(c)}</div>
@@ -618,7 +620,7 @@ function calcResult(){
 
 /* detalhe do plano */
 function openDetail(id){
-  const c=planById(id);const o=OPS.find(x=>x.key===c.operadora);const col=o?o.color:'#0f2740';
+  const c=planById(id);const o=OPS.find(x=>x.key===c.operadora);const col=opColorFor(c);
   document.getElementById('detailHead').innerHTML=`<div style="color:${col};font-weight:700;font-size:13px">${opDisp(c)}</div><h3 style="margin:2px 0 0">${c.label} · ${c.acomodacao}</h3><p style="margin:4px 0 0">${c.tipo==='Individual'?'Saúde PF':'Saúde PME'} · ${c.coparticipacao}</p>`;
   let body=`<table><thead><tr><th>Faixa etária</th><th>Vidas</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>`;
   BANDS.forEach(b=>{const q=vidas[b],p=c.precos[b]||0;body+=`<tr><td>${b}</td><td>${q}</td><td>R$ ${fmt(p)}</td><td>R$ ${fmt(q*p)}</td></tr>`;});
