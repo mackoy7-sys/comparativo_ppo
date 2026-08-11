@@ -197,6 +197,12 @@
   #folder.ppo .fd-hi{background:#eef1fa;border-color:#c9d3ee}
   #folder.ppo .fd-chip b, #folder.ppo .fd-hi .v, #folder.ppo .fd-hi-item b{color:var(--ndblue)}
   #folder.ppo .fd-hi-item{border-top-color:#c9d3ee}
+  /* Cotação mista (Hapvida + NotreDame Saúde) — cabeçalho navy, 2 marcas mesmo tamanho */
+  #folder.mixed .fd-head{background:var(--navy)}
+  #folder.mixed .fd-sec{border-bottom-color:var(--navy)}
+  .fd-head .fbrand .dual{display:flex;align-items:center;justify-content:flex-end;gap:16px}
+  .fd-head .fbrand .dual img{background:#fff;border-radius:6px;padding:3px 6px}
+  .fd-head .fbrand img,.fd-head .fbrand svg{height:30px;width:auto;display:block}
   .fd-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:18px 0;font-size:14px}
   .fd-meta b{color:var(--navy)}
   .fd-sec{font-size:15px;font-weight:700;color:var(--navy);margin:20px 0 10px;border-bottom:2px solid var(--hap);padding-bottom:5px}
@@ -778,10 +784,14 @@ async function gerarFolder(){
         <table class="fd-tbl fd-rede"><thead>${rhead}</thead><tbody>${body}</tbody></table>`;
     }
   }
-  const ppo=isPPOsel(sel);
-  const fdLogo=ppo?NOTRE_LOGO_SVG:LOGO_SVG;
-  const fdSub=ppo?'NotreDame Saúde · Vendas Digital':'NotreDame · Vendas Digital';
-  const fel=document.getElementById('folder'); fel.className=ppo?'ppo':'';
+  const ppoAny=sel.some(isPPO);
+  const hapAny=sel.some(c=>!isPPO(c));
+  const mixed=ppoAny&&hapAny;
+  let fdLogo,fdSub,fcls;
+  if(mixed){ fdLogo=`<span class="dual">${LOGO_SVG}${NOTRE_LOGO_SVG}</span>`; fdSub='Hapvida · NotreDame Saúde · Vendas Digital'; fcls='mixed'; }
+  else if(ppoAny){ fdLogo=NOTRE_LOGO_SVG; fdSub='NotreDame Saúde · Vendas Digital'; fcls='ppo'; }
+  else { fdLogo=LOGO_SVG; fdSub='NotreDame · Vendas Digital'; fcls=''; }
+  const fel=document.getElementById('folder'); fel.className=fcls;
   fel.innerHTML=`
     <div class="fd-head"><div><h1>Proposta de Cotação</h1><div class="fsub">Plano de Saúde · ${tv} vida(s)</div></div>
       <div class="fbrand">${fdLogo}<div style="font-size:11px;font-weight:600;margin-top:4px;opacity:.95">${fdSub}</div></div></div>
