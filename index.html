@@ -200,8 +200,9 @@
   /* Cotação mista (Hapvida + NotreDame Saúde) — cabeçalho navy, 2 marcas mesmo tamanho */
   #folder.mixed .fd-head{background:var(--navy)}
   #folder.mixed .fd-sec{border-bottom-color:var(--navy)}
-  .fd-head .fbrand .dual{display:flex;align-items:center;justify-content:flex-end;gap:16px}
-  .fd-head .fbrand .dual img{background:#fff;border-radius:6px;padding:3px 6px}
+  .fd-head .fbrand .dual{display:flex;align-items:center;justify-content:flex-end;gap:14px}
+  .fd-head .fbrand .dual img{height:24px;background:#fff;border-radius:5px;padding:2px 5px}
+  .fd-head .fbrand .dual svg{height:26px}
   .fd-head .fbrand img,.fd-head .fbrand svg{height:30px;width:auto;display:block}
   .fd-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:18px 0;font-size:14px}
   .fd-meta b{color:var(--navy)}
@@ -724,9 +725,9 @@ const COP_ROWS=[
   ['Internações','Isento','Valor fixo R$ 180,00','Valor fixo R$ 220,00','Valor fixo R$ 400,00','Valor fixo R$ 570,00']
 ];
 const COP_IDX={'Nosso Médico RMSP':0,'Smart UP':0,'Smart Flex':1,'Smart Prime':1,'600':2,'700':2,'900':3,'900 Care':3,'Infinity':4};
-const NOTRE_LOGO_SVG=`<svg height="30" viewBox="0 0 214 76" xmlns="http://www.w3.org/2000/svg" style="display:block">
-  <text x="2" y="42" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="35" fill="#e9edd9" letter-spacing="-1">NotreDame</text>
-  <text x="4" y="66" font-family="Arial,Helvetica,sans-serif" font-weight="600" font-size="18" fill="#7fa0cf" letter-spacing="7">Saúde</text>
+const NOTRE_LOGO_SVG=`<svg height="30" viewBox="0 0 232 58" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <text x="1" y="34" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="41" fill="#e9edd9" letter-spacing="-1">NotreDame</text>
+  <text x="3" y="54" font-family="Arial,Helvetica,sans-serif" font-weight="600" font-size="18" fill="#7fa0cf" letter-spacing="7">Saúde</text>
 </svg>`;
 function isPPOsel(sel){return sel.some(c=>/^(Adv|Advance|Premium|Infinity)/i.test(c.label||''));}
 async function gerarFolder(){
