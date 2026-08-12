@@ -806,6 +806,8 @@ async function gerarFolder(){
     <div class="fd-foot">Mensalidade = soma de (vidas × preço por faixa etária) por plano. Planos Hapvida com coparticipação parcial; concorrentes em geral sem coparticipação — o valor é apenas a mensalidade, sem o custo de uso. Rede: principais hospitais/laboratórios, podendo haver mais unidades não listadas. Valores referenciais, sujeitos a condições contratuais e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato. Emitido em ${hoje}.</div>`;
   const t0=document.title;
   document.title='Cotacao'+(nome?(' - '+nome):'');
+  // garante que os logos (data-URI) estejam decodificados antes do print — senão saem em branco no PDF
+  try{await Promise.all([...document.querySelectorAll('#folder img')].map(i=>i.decode()));}catch(e){}
   window.print();
   setTimeout(()=>{document.title=t0;},600);
 }
@@ -940,6 +942,8 @@ function renderRede(){
 
 /* init */
 document.getElementById('brandLogo').innerHTML=LOGO_SVG;
+// pré-carrega o logo NotreDame (data-URI) para o print/PDF não pegá-lo sem decodificar
+{const pre=document.createElement('div');pre.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;opacity:0';pre.innerHTML=NOTRE_LOGO_SVG;document.body.appendChild(pre);}
 function boot(){
   CATEGORIES=[...new Set(CATALOG.map(c=>c.categoria))];
   categoria=CATEGORIES[0];
