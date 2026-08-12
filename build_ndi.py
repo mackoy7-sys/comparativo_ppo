@@ -346,7 +346,19 @@ def entries_from_page(page, kind, praca, page_copart='Completa'):
                 continue  # quadro so de reembolso parcial
             codes = tb.get('codes') or []
             if not codes:
-                print(f'  !! {praca}: tabela sem codigos ANS — pulada'); continue
+                # fallback: identificar produtos pelo cabecalho (SS 1 Vida nao imprime registros)
+                for prod, acom, ci in assign_columns(tb):
+                    pn = norm_product(prod)
+                    if pn in SKIP_PRODUCTS: continue
+                    if pn not in NAME_MAP:
+                        print(f'  !! produto desconhecido: "{pn}" em {praca} — pulado'); continue
+                    plano, label = NAME_MAP[pn]
+                    key = (label, acom)
+                    if key in seen: continue
+                    seen.add(key)
+                    out.append(dict(plano=plano, label=label, acomodacao=acom,
+                                    coparticipacao=page_copart, precos=col_prices(tb, ci)))
+                continue
             for code, cx in codes:
                 info = ANS_EMP.get(code, 'MISS')
                 if info == 'MISS':
@@ -354,7 +366,16 @@ def entries_from_page(page, kind, praca, page_copart='Completa'):
                 if info is None: continue
                 plano, label, acom = info
                 key = (label, acom)
-                if key in seen: continue  # 2a ocorrencia = grupo reembolso parcial
+                if key in seen:
+                    # codigo repetido: ou grupo reembolso parcial (pular) ou typo no PDF
+                    # (mesmo codigo em coluna de outra acomodacao — ex.: Santos SS1 NM)
+                    ai = min(range(len(tb['cols'])), key=lambda i: abs(tb['cols'][i] - cx))
+                    row_acom = tb['acoms'][ai] if abs(tb['cols'][ai] - cx) < 55 else acom
+                    if row_acom == acom: continue
+                    acom = row_acom
+                    key = (label, acom)
+                    if key in seen: continue
+                    print(f'  ⚠ {praca}: codigo {code} repetido em coluna {acom} (typo no PDF — usando acomodacao da coluna)')
                 seen.add(key)
                 # precos por proximidade do x do codigo
                 pr = {}
@@ -375,20 +396,31 @@ def load_all():
     files = {
         'ss_demais': ('20260801 a 20260831 - Super Simples 2 a 29 vidas - Demais Empresas.pdf', 'emp', dict(mei=False, vmin=2, vmax=29, tipo='Empresarial')),
         'ss_mei':    ('20260801 a 20260930 - Super Simples 2 a 29 vidas - MEI.pdf', 'emp', dict(mei=True, vmin=2, vmax=29, tipo='Empresarial')),
-        'pme_comp':  ('20260801 a 20260831 - PME - Compulsório.pdf', 'emp', dict(mei=False, vmin=30, vmax=99, tipo='Empresarial')),
+        'pme_comp':  ('20260801 a 20260831 - PME - Compulsório.pdf', 'emp', dict(mei=False, vmin=30, vmax=99, tipo='Empresarial', contratacao='Compulsório')),
+        'pme_adesao':('20260801 a 20260831 - PME - Adesão.pdf', 'emp', dict(mei=False, vmin=30, vmax=99, tipo='Empresarial', contratacao='Adesão')),
+        'ss_1vida':  ('20260801 a 20260831 - Super Simples 1 Vida.pdf', 'emp', dict(mei=False, vmin=1, vmax=1, tipo='Empresarial')),
         'ind':       ('20260701 a 20260930 - Individual - NDI Sede - Sem Desconto.pdf', 'ind', dict(mei=False, tipo='Individual')),
         'amb':       ('20260701 a 20260930 - Individual Ambulatorial - NDI Sede - Sem Desconto.pdf', 'amb', dict(mei=False, tipo='Individual')),
     }
     result = {}  # praca -> list of entries
     for tag, (fn, kind, meta) in files.items():
         pdf = pdfplumber.open(D + fn)
+        seen_pages = {}
         for page in pdf.pages:
             c = city_of(page)
             if not c: continue
             txt = page.extract_text() or ''
             if 'REAJUSTE POR MUDANÇA' in txt[:600]: continue
             top = deacc(txt[:400]).upper().replace(' ', '')
-            page_copart = 'Parcial' if 'COMCOPARTICIPACAOPARCIAL' in top else 'Completa'
+            hdr_copart = 'Parcial' if 'COMCOPARTICIPACAOPARCIAL' in top else 'Completa'
+            if kind == 'emp':
+                # ordem fixa por cidade: 1a pagina de preco = Parcial, 2a = Total
+                n = seen_pages.get(c, 0); seen_pages[c] = n + 1
+                page_copart = 'Parcial' if n == 0 else 'Completa'
+                if page_copart != hdr_copart:
+                    print(f'  ⚠ {tag} {c}: cabecalho diz {hdr_copart} mas ordem indica {page_copart} (typo no PDF — usando ordem)')
+            else:
+                page_copart = hdr_copart
             ents = entries_from_page(page, kind, c, page_copart)
             if not ents: continue
             for e in ents:

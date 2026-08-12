@@ -294,6 +294,8 @@
             <div class="chips" id="meiChips"></div>
             <span class="mei-lbl" style="margin-left:12px">Operadoras</span>
             <div class="chips" id="opChipsCalc"></div>
+            <span class="mei-lbl" style="margin-left:12px" title="Modalidade de contratação das tabelas PME de 30 a 99 vidas">PME 30-99</span>
+            <div class="chips" id="contratChips"></div>
           </div>
           <div id="vidasWarn" class="vidas-warn" style="display:none">⚠ Informe a <b>Distribuição de vidas</b> (ao lado) para calcular os valores — sem vidas informadas, os preços ficam zerados.</div>
           <div class="matrix-wrap"><table class="matrix"><tbody id="matrix"></tbody></table></div>
@@ -460,12 +462,14 @@ function buildPracaChips(){
 }
 function setPraca(p){ if(pracaSel===p) return; pracaSel=p; reconcileSel(); buildPracaChips(); recompute(); }
 let meiMode = false; // false = Não-MEI (padrão), true = MEI. Aplica-se só à Hapvida.
+let contratMode = 'Compulsório'; // modalidade das tabelas PME 30-99 (Compulsório | Adesão)
+function contratOk(c){return !c.contratacao || c.contratacao===contratMode;}
 let prodSel = {Empresarial:true, Individual:true}; // filtro de produto (multi) — default ambos
 function hasMeiVariant(c){return CATALOG.some(x=>x.operadora===c.operadora&&x.label===c.label&&x.acomodacao===c.acomodacao&&x.coparticipacao===c.coparticipacao&&(x.categoria||'Geral')===(c.categoria||'Geral')&&(!!x.mei)!==(!!c.mei));}
 function meiOk(c){return (!!c.mei===meiMode) || !hasMeiVariant(c);}
 function tipoOk(c){return !!prodSel[c.tipo||'Empresarial'];}
 function pracaOk(c){return (c.praca||'SP / RMSP')===pracaSel;}
-function plansOf(opKey){return CATALOG.filter(c=>c.operadora===opKey && c.categoria===categoria && pracaOk(c) && tipoOk(c) && meiOk(c));}
+function plansOf(opKey){return CATALOG.filter(c=>c.operadora===opKey && c.categoria===categoria && pracaOk(c) && tipoOk(c) && meiOk(c) && contratOk(c));}
 function planById(id){return CATALOG.find(c=>c.id===id);}
 function planLabels(opKey){const seen=[];plansOf(opKey).forEach(c=>{if(!seen.includes(c.label))seen.push(c.label);});return seen;}
 function acomsFor(opKey,label){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&!s.includes(c.acomodacao))s.push(c.acomodacao);});return s;}
@@ -473,7 +477,7 @@ function segsFor(opKey,label,acom){const s=[];plansOf(opKey).forEach(c=>{if(c.la
 function segLabel(s){return s.includes('Sem')?'Sem coparticipação':(s.includes('Completa')?'Coparticipação completa':'Coparticipação parcial');}
 function vidasOk(c){ if(c.vmin==null&&c.vmax==null) return true; const tv=totVidas(); if(tv===0) return true; return tv>=(c.vmin||0) && tv<=(c.vmax||1e9); }
 function resolved(ci,si){const col=matrixCols[ci];if(!col)return null;const x=col.slots[si];if(!(x&&x.plano&&x.acom&&x.seg))return null;
-  const ms=CATALOG.filter(c=>c.operadora===col.op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c));
+  const ms=CATALOG.filter(c=>c.operadora===col.op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c));
   return ms.find(vidasOk)||null;}
 function planTotal(c){return BANDS.reduce((s,b)=>s+vidas[b]*(c.precos[b]||0),0);}
 function totVidas(){return BANDS.reduce((s,b)=>s+vidas[b],0);}
@@ -534,7 +538,7 @@ function slotBlock(ci,si,x,v){
   let disp, tip='';
   if(noV) disp='informe vidas';
   else if(badTier){
-    const rr=CATALOG.filter(c=>c.operadora===op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&c.vmin!=null);
+    const rr=CATALOG.filter(c=>c.operadora===op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c)&&c.vmin!=null);
     const ranges=[...new Set(rr.map(c=>c.vmin+'–'+c.vmax))].join(' ou ');
     disp = ranges ? ('requer '+ranges+' vidas') : 'indisponível';
     const isOdo=/\+\s*Odonto/i.test(x.plano||'');
@@ -586,6 +590,16 @@ function setMei(v){
   if(meiMode===v)return; meiMode=v;
   reconcileSel();
   buildMeiChips(); recompute();
+}
+function buildContratChips(){
+  const el=document.getElementById('contratChips'); if(!el) return;
+  el.innerHTML=['Compulsório','Adesão'].map(m=>`<div class="chip ${contratMode===m?'active':''}" data-contrat="${m}">${m}</div>`).join('');
+  el.querySelectorAll('[data-contrat]').forEach(e=>e.onclick=()=>setContrat(e.dataset.contrat));
+}
+function setContrat(m){
+  if(contratMode===m)return; contratMode=m;
+  reconcileSel();
+  buildContratChips(); recompute();
 }
 
 function renderCards(){
@@ -793,7 +807,7 @@ async function gerarFolder(){
   fel.innerHTML=`
     <div class="fd-head"><div><h1>Proposta de Cotação</h1><div class="fsub">Plano de Saúde · ${tv} vida(s)</div></div>
       <div class="fbrand">${fdLogo}<div style="font-size:11px;font-weight:600;margin-top:4px;opacity:.95">${fdSub}</div></div></div>
-    <div class="fd-meta"><div><b>Cliente:</b> ${nome||'—'}</div><div><b>Data:</b> ${hoje}</div></div>
+    <div class="fd-meta"><div><b>Cliente:</b> ${nome||'—'}</div>${cols.some(c=>c.contratacao)?`<div><b>Contratação PME:</b> ${contratMode}</div>`:''}<div><b>Data:</b> ${hoje}</div></div>
     <div class="fd-sec">Perfil de vidas</div>
     <div class="fd-grid">${chips||'<div class="fd-chip">Sem vidas informadas</div>'}</div>
     <div class="fd-sec">Planos cotados</div>
@@ -951,7 +965,7 @@ function boot(){
   pracaSel=PRACAS.includes('SP / RMSP')?'SP / RMSP':PRACAS[0];
   FILIAIS=REG_ORDER.filter(r=>PRACAS.some(p=>pracaRegiao(p)===r));
   filialSel=pracaRegiao(pracaSel);
-  buildFilialChips(); buildPracaChips(); buildProdChips(); buildMeiChips(); buildOpChips(); buildVidas(); buildMatrix(); recompute();
+  buildFilialChips(); buildPracaChips(); buildProdChips(); buildMeiChips(); buildContratChips(); buildOpChips(); buildVidas(); buildMatrix(); recompute();
 }
 document.getElementById('convOverlay').addEventListener('click',e=>{if(e.target.id==='convOverlay')closeConv();});
 document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
