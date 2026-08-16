@@ -30,6 +30,9 @@
   /* calc layout */
   .calcgrid{display:grid;grid-template-columns:230px 1fr;gap:28px;align-items:start}
   @media(max-width:820px){.calcgrid{grid-template-columns:1fr}}
+  /* item de grid não encolhe abaixo do conteúdo sem isto — era o que fazia a
+     matriz de 680px empurrar a página inteira para o lado no celular */
+  .calcgrid > div{min-width:0}
   .subh{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:14px}
   .subh-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
   .btn.clear{border-color:#ffd9b8;color:var(--hap);background:#fff7f0}
@@ -59,6 +62,53 @@
   table.matrix .valcell.has{background:#fffaf4;color:var(--txt);font-weight:600}
   table.matrix tr.totalrow .valcell{font-weight:700;background:#f7f9fc;border-color:var(--navy);color:var(--navy);font-size:14px}
   .matrix-hint{font-size:12px;color:var(--muted);margin-top:8px}
+
+  /* ============ CELULAR ============
+     A matriz é uma tabela de 2 linhas em que cada COLUNA é uma operadora, e
+     colunas lado a lado não cabem em 375px. Aqui ela vira uma pilha de cartões
+     (um por operadora) sem tocar no JS: `display:contents` tira as linhas do
+     caminho e `order` intercala o cabeçalho de cada coluna com o corpo dela,
+     já que no DOM eles estão em linhas diferentes. */
+  @media(max-width:760px){
+    .matrix-wrap{overflow-x:visible}
+    /* minmax(0,…): com `1fr` puro a coluna cresce até o min-content do maior
+       cartão e a matriz volta a estourar os 680px */
+    /* `table.matrix` para bater a especificidade da regra base, senão o
+       min-width:680px dela continua valendo */
+    table.matrix{min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:0;border-spacing:0}
+    .matrix tbody,.matrix tr{display:contents}
+    .matrix th.rowlabel{display:none}  /* "Operadora"/"Planos" não fazem sentido empilhado */
+    .matrix th:not(.rowlabel),.matrix td{display:block;width:auto;vertical-align:initial}
+
+    .matrix tr:first-child th:nth-child(2){order:1}
+    .matrix tr:last-child  td:nth-child(2){order:2}
+    .matrix tr:first-child th:nth-child(3){order:3}
+    .matrix tr:last-child  td:nth-child(3){order:4}
+    .matrix tr:first-child th:nth-child(4){order:5}
+    .matrix tr:last-child  td:nth-child(4){order:6}
+    .matrix tr:first-child th:nth-child(5){order:7}
+    .matrix tr:last-child  td:nth-child(5){order:8}
+    .matrix tr:first-child th:nth-child(6){order:9}
+    .matrix tr:last-child  td:nth-child(6){order:10}
+
+    .matrix .ophead{border-radius:12px 12px 0 0;padding:12px;font-size:15px}
+    .matrix td{
+      border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;
+      padding:12px;background:#fff;margin-bottom:16px;
+    }
+    .matrix select{padding:11px 10px;font-size:15px}  /* 15px+ evita o zoom do iOS */
+    .matrix .valcell{font-size:14px;padding:10px 12px}
+
+    /* abas: rolar de lado em vez de empurrar a página */
+    .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex:0 0 auto;padding:12px 14px;font-size:13.5px}
+
+    /* demais abas: nada com largura mínima maior que a tela */
+    .cmp{min-width:0;width:100%}
+    .search{min-width:0}
+    .vs{min-width:0}
+  }
   table.matrix td{vertical-align:top}
   .ccol{display:flex;flex-direction:column;gap:8px}
   .cslot{border:1px solid var(--line);border-radius:9px;padding:9px;display:flex;flex-direction:column;gap:5px;background:#fff}
