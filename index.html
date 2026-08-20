@@ -528,6 +528,7 @@ function switchTab(t){
   document.getElementById('pane-calc').classList.toggle('active',t==='calc');
   document.getElementById('pane-comp').classList.toggle('active',t==='comp');
   document.getElementById('pane-rede').classList.toggle('active',t==='rede');
+  document.getElementById('pane-area').classList.toggle('active',t==='area');
   if(t==='comp'){if(!compInit){initComp();compInit=true;}else if(bandChart)bandChart.resize();}
   if(t==='rede'){loadRede();}
 }
