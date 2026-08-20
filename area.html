@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Área de Comercialização — Hapvida | Vendas Digital</title>
+<meta name="description" content="Onde cada produto pode ser vendido: regionais, filiais de vendas e municípios da área de comercialização.">
+<meta name="theme-color" content="#013BA6">
+<style>
+
+  :root{
+    --hap:#FF6B00; --hap-dark:#cc5500; --navy:#0f2740; --navy2:#1c3a5e; --ndblue:#1e2a5c;
+    --bg:#f4f6fa; --card:#ffffff; --line:#e6eaf0; --txt:#1a2433; --muted:#69758a;
+    --green:#1d9e75; --green-bg:#e1f5ee; --red:#e24b4a; --red-bg:#fbeaea; --blue:#378add; --blue-bg:#e6f1fb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1280px;margin:0 auto;padding:24px 20px 70px}
+  header.top{background:linear-gradient(100deg,var(--navy),var(--navy2));color:#fff;border-radius:16px;padding:26px 30px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+  header.top h1{font-size:24px;font-weight:600;letter-spacing:.2px}
+  header.top .sub{color:#aebfd4;font-size:14px;margin-top:4px}
+  .brand-pill{background:var(--hap);color:#fff;font-weight:700;font-size:13px;padding:7px 14px;border-radius:8px;letter-spacing:.5px}
+  .upd{font-size:12px;color:#aebfd4}
+  .tabs{display:flex;gap:4px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+  .tab{padding:12px 22px;font-size:14.5px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-1px}
+  .tab:hover{color:var(--navy)} .tab.active{color:var(--hap);border-bottom-color:var(--hap)}
+  .tabpane{display:none} .tabpane.active{display:block}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:22px}
+  .panel h2{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .panel .step{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--hap);color:#fff;font-size:13px;font-weight:700;margin-right:4px}
+  .panel .desc{font-size:13px;color:var(--muted);margin-bottom:16px}
+  /* calc layout */
+  .calcgrid{display:grid;grid-template-columns:230px 1fr;gap:28px;align-items:start}
+  @media(max-width:820px){.calcgrid{grid-template-columns:1fr}}
+  /* item de grid não encolhe abaixo do conteúdo sem isto — era o que fazia a
+     matriz de 680px empurrar a página inteira para o lado no celular */
+  .calcgrid > div{min-width:0}
+  .subh{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:14px}
+  .subh-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+  .btn.clear{border-color:#ffd9b8;color:var(--hap);background:#fff7f0}
+  .btn.clear:hover{background:var(--hap);color:#fff;border-color:var(--hap)}
+  .vidas{display:flex;flex-direction:column;gap:8px}
+  .vcell{display:grid;grid-template-columns:1fr 84px;align-items:center;gap:10px}
+  .vcell label{font-size:12.5px;font-weight:700;color:var(--navy)}
+  .vcell input{width:100%;padding:8px;border:1px solid var(--line);border-radius:9px;font-size:15px;text-align:center;color:var(--txt)}
+  .vcell input:focus{outline:none;border-color:var(--hap);box-shadow:0 0 0 3px rgba(255,107,0,.12)}
+  .vbar{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin-top:16px}
+  .vbar .totvidas{margin-bottom:4px}
+  .totvidas{font-size:14px;color:var(--muted)} .totvidas b{font-size:22px;color:var(--navy);margin-left:6px}
+  .btn{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:var(--hap);color:var(--hap)}
+  .btn.solid{background:var(--navy);color:#fff;border-color:var(--navy)} .btn.solid:hover{background:var(--hap);border-color:var(--hap);color:#fff}
+  /* matrix */
+  .matrix-wrap{overflow-x:auto}
+  table.matrix{width:100%;border-collapse:separate;border-spacing:6px;table-layout:fixed;min-width:680px}
+  table.matrix th.rowlabel{width:120px;text-align:right;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;padding-right:8px;background:none}
+  table.matrix .ophead{border-radius:8px;padding:9px 6px;text-align:center;font-size:13.5px;font-weight:700;color:#fff}
+  table.matrix select{display:block;width:100%;min-width:0;padding:7px 6px;font-size:12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--txt);cursor:pointer;margin-bottom:5px}
+  table.matrix select:last-child{margin-bottom:0}
+  table.matrix select:focus{outline:none;border-color:var(--hap)}
+  table.matrix select.sub{font-size:11px;color:var(--muted)}
+  table.matrix select:disabled{background:#f4f6fa;color:#aab2bf;cursor:not-allowed}
+  table.matrix .valcell{border:1px solid var(--line);border-radius:8px;padding:8px 10px;text-align:right;font-size:13px;background:#fff;color:var(--muted)}
+  table.matrix .valcell.has{background:#fffaf4;color:var(--txt);font-weight:600}
+  table.matrix tr.totalrow .valcell{font-weight:700;background:#f7f9fc;border-color:var(--navy);color:var(--navy);font-size:14px}
+  .matrix-hint{font-size:12px;color:var(--muted);margin-top:8px}
+
+  /* ============ CELULAR ============
+     A matriz é uma tabela de 2 linhas em que cada COLUNA é uma operadora, e
+     colunas lado a lado não cabem em 375px. Aqui ela vira uma pilha de cartões
+     (um por operadora) sem tocar no JS: `display:contents` tira as linhas do
+     caminho e `order` intercala o cabeçalho de cada coluna com o corpo dela,
+     já que no DOM eles estão em linhas diferentes. */
+  @media(max-width:760px){
+    .matrix-wrap{overflow-x:visible}
+    /* minmax(0,…): com `1fr` puro a coluna cresce até o min-content do maior
+       cartão e a matriz volta a estourar os 680px */
+    /* `table.matrix` para bater a especificidade da regra base, senão o
+       min-width:680px dela continua valendo */
+    table.matrix{min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:0;border-spacing:0}
+    .matrix tbody,.matrix tr{display:contents}
+    .matrix th.rowlabel{display:none}  /* "Operadora"/"Planos" não fazem sentido empilhado */
+    .matrix th:not(.rowlabel),.matrix td{display:block;width:auto;vertical-align:initial}
+
+    .matrix tr:first-child th:nth-child(2){order:1}
+    .matrix tr:last-child  td:nth-child(2){order:2}
+    .matrix tr:first-child th:nth-child(3){order:3}
+    .matrix tr:last-child  td:nth-child(3){order:4}
+    .matrix tr:first-child th:nth-child(4){order:5}
+    .matrix tr:last-child  td:nth-child(4){order:6}
+    .matrix tr:first-child th:nth-child(5){order:7}
+    .matrix tr:last-child  td:nth-child(5){order:8}
+    .matrix tr:first-child th:nth-child(6){order:9}
+    .matrix tr:last-child  td:nth-child(6){order:10}
+
+    .matrix .ophead{border-radius:12px 12px 0 0;padding:12px;font-size:15px}
+    .matrix td{
+      border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;
+      padding:12px;background:#fff;margin-bottom:16px;
+    }
+    .matrix select{padding:11px 10px;font-size:15px}  /* 15px+ evita o zoom do iOS */
+    .matrix .valcell{font-size:14px;padding:10px 12px}
+
+    /* abas: rolar de lado em vez de empurrar a página */
+    .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex:0 0 auto;padding:12px 14px;font-size:13.5px}
+
+    /* demais abas: nada com largura mínima maior que a tela */
+    .cmp{min-width:0;width:100%}
+    .search{min-width:0}
+    .vs{min-width:0}
+  }
+  table.matrix td{vertical-align:top}
+  .ccol{display:flex;flex-direction:column;gap:8px}
+  .cslot{border:1px solid var(--line);border-radius:9px;padding:9px;display:flex;flex-direction:column;gap:5px;background:#fff}
+  .cslot-val{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--muted);margin-top:1px}
+  .cslot-val.has{color:var(--txt)}
+  .cslot-val.warn{color:#a35a00;font-weight:700;font-size:11.5px}
+  .cslot-val b{cursor:pointer;color:var(--muted);font-weight:700;font-size:16px;line-height:1;padding:0 2px}
+  .cslot-val b:hover{color:var(--red)}
+  .cadd{border:1px dashed var(--line);background:#fff;color:var(--hap);font-weight:600;font-size:12.5px;border-radius:9px;padding:8px;cursor:pointer}
+  .cadd:hover{border-color:var(--hap);background:#fff7f0}
+  .ctot{text-align:right;font-weight:700;font-size:14px;color:var(--navy);border-top:2px solid var(--navy);padding-top:6px}
+  .ctot.has{color:var(--hap-dark)}
+  .rchips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+  .rchip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--navy);background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:3px 6px 3px 10px}
+  .rchip b{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px;line-height:1}
+  .rchip b:hover{color:var(--red)}
+  .mei-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .vidas-warn{background:#fff3df;border:1px solid #ffd9b8;color:#854f0b;border-radius:9px;padding:9px 13px;font-size:13px;margin-bottom:14px}
+  .mei-lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  /* plan cards */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px;margin-top:22px}
+  .pcard{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff;border-top:3px solid var(--navy)}
+  .pcard .pcop{font-size:13px;font-weight:700}
+  .pcard .pcname{font-size:18px;font-weight:700;color:var(--navy);margin:5px 0 9px}
+  .pcard .pcmeta{font-size:12.5px;color:var(--muted);line-height:1.75}
+  .pcard .pcval{font-size:20px;font-weight:700;color:var(--navy);margin-top:11px}
+  .pcard .pcval small{font-size:12px;color:var(--muted);font-weight:400}
+  .pcard .vd{margin-top:11px;width:100%;font-size:12.5px;padding:7px}
+  /* kpis + results */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
+  .kpi{background:#f7f9fc;border-radius:12px;padding:16px 18px}
+  .kpi .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+  .kpi .val{font-size:24px;font-weight:700;margin-top:5px;color:var(--navy)} .kpi .val.hap{color:var(--hap)} .kpi .val.green{color:#0f6e56}
+  .kpi .foot{font-size:11.5px;color:var(--muted);margin-top:3px}
+  table.res{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.res th,table.res td{padding:11px 12px;text-align:right;border-bottom:1px solid var(--line)}
+  table.res th:first-child,table.res td:first-child{text-align:left}
+  table.res thead th{background:#f7f9fc;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+  table.res tbody tr:hover{background:#fafbfd}
+  tr.best td{background:#f1faf6} tr.haprow td:first-child{box-shadow:inset 3px 0 0 var(--hap)}
+  .rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;background:#eef1f6;color:#42506a;margin-right:8px}
+  .rank.g{background:var(--green-bg);color:#0f6e56}
+  .pn-cell b{font-weight:700;color:var(--navy)} .pn-cell .op{font-size:11.5px;color:var(--muted)}
+  .empty{text-align:center;color:var(--muted);padding:36px 10px;font-size:14px}
+  .note{font-size:12.5px;color:var(--muted);background:#f7f9fc;border-left:3px solid var(--hap);padding:10px 14px;border-radius:0 8px 8px 0;margin-top:16px}
+  /* comparativo */
+  select.cmp{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;min-width:300px;color:var(--txt);cursor:pointer}
+  .fgroup{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+  .fgroup label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:#fff;color:var(--txt);padding:6px 13px;border-radius:18px;font-size:12.5px;cursor:pointer;font-weight:500}
+  .chip:hover{border-color:var(--hap)} .chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .cmp-head{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch;margin:6px 0 20px}
+  .side{border-radius:14px;padding:18px 20px;border:1px solid var(--line)}
+  .side.hapvida{background:#fff7f0;border-color:#ffd9b8} .side.conc{background:#f3f7fc;border-color:#d3e3f5}
+  .side .op{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+  .side.hapvida .op{color:var(--hap)} .side.conc .op{color:var(--blue)}
+  .side .plan{font-size:22px;font-weight:700;color:var(--navy);margin:2px 0 12px}
+  .badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .badge{font-size:11.5px;padding:3px 9px;border-radius:6px;background:#eef1f6;color:#42506a;font-weight:600}
+  .badge.copart{background:#fff3df;color:#854f0b} .badge.sem{background:var(--green-bg);color:#0f6e56}
+  .tot{font-size:13px;color:var(--muted)} .tot b{font-size:26px;color:var(--navy);font-weight:700;display:block}
+  .vs{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:90px}
+  .vs .vtag{font-weight:700;color:var(--muted);font-size:13px}
+  .diff{font-size:22px;font-weight:800;padding:8px 12px;border-radius:10px;text-align:center}
+  .diff.good{background:var(--green-bg);color:#0f6e56} .diff.bad{background:var(--red-bg);color:#a32d2d}
+  .diff-year{font-size:15px;font-weight:800;padding:6px 12px;border-radius:9px;text-align:center;line-height:1.15}
+  .diff-year small{display:block;font-size:10px;font-weight:600;opacity:.85;margin-top:2px;letter-spacing:.2px}
+  .diff-year.good{background:var(--green-bg);color:#0f6e56} .diff-year.bad{background:var(--red-bg);color:#a32d2d}
+  .year-box{display:flex;align-items:center;gap:13px;background:linear-gradient(90deg,#eef7f2,#f8fbfa);
+    border:1px solid #cde9dd;border-left:5px solid #0f6e56;border-radius:12px;padding:14px 18px;margin:0 0 20px;
+    font-size:15px;color:#0f3b2e;line-height:1.35}
+  .year-box b{color:#0f6e56} .year-box b.big{font-size:18px}
+  .year-box .yi{font-size:24px;flex:0 0 auto}
+  .diff small{display:block;font-size:11px;font-weight:600;opacity:.8}
+  table.band{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.band th,table.band td{padding:9px 11px;text-align:right;border-bottom:1px solid var(--line)}
+  table.band th:first-child,table.band td:first-child{text-align:left}
+  table.band thead th{background:#f7f9fc;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+  td.win{color:#0f6e56;font-weight:700} td.win::after{content:" ▼";font-size:10px}
+  tr.total-row td{font-weight:700;background:#f7f9fc;font-size:14px;border-top:2px solid var(--navy)}
+  .cell-hap{background:#fff7f0}
+  .chart-box{position:relative;width:100%;height:360px}
+  /* modais */
+  .overlay{position:fixed;inset:0;background:rgba(15,39,64,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:16px;padding:26px 28px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+  .modal h3{font-size:18px;font-weight:600;color:var(--navy);margin-bottom:6px}
+  .modal p{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .modal textarea{width:100%;min-height:130px;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:14px;font-family:inherit;resize:vertical}
+  .modal textarea:focus{outline:none;border-color:var(--hap)}
+  .modal .mfoot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;flex-wrap:wrap}
+  .modal table{width:100%;border-collapse:collapse;font-size:13px}
+  .modal table th,.modal table td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line)}
+  .modal table th:first-child,.modal table td:first-child{text-align:left}
+  .modal table thead th{color:var(--muted);font-size:11.5px;text-transform:uppercase}
+  .modal tr.tot td{font-weight:700;border-top:2px solid var(--navy);background:#f7f9fc}
+  .conv-result{font-size:12.5px;color:var(--muted);margin-top:10px}
+  .xclose{cursor:pointer;color:var(--muted);font-size:22px;line-height:1;background:none;border:none}
+  /* rede de atendimento */
+  .rede-opbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .rede-oplabel{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-right:6px}
+  .opbtn{border:none;border-radius:9px;padding:11px 20px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;opacity:.5;text-align:center}
+  .opbtn.active{opacity:1;box-shadow:0 0 0 3px rgba(15,39,64,.2)}
+  .opbtn:not(.base):hover{opacity:.85}
+  .opbtn.base{opacity:1;cursor:default}
+  .opbtn.base .bt{display:block;font-size:9px;font-weight:600;letter-spacing:.5px;opacity:.85;text-transform:uppercase;margin-top:1px}
+  .rede-filters{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px}
+  .rede-filters .search{min-width:200px}
+  .legend-rede{font-size:12px;color:var(--muted);margin:12px 0;display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center}
+  .legend-rede b{color:var(--navy);font-weight:700}
+  .rede-tbl{width:100%;border-collapse:collapse;font-size:13px}
+  .rede-tbl th,.rede-tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+  .rede-tbl thead th{background:#f7f9fc;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+  .rede-tbl thead th.cov-head{text-align:center;color:#fff;border-radius:7px 7px 0 0}
+  .rede-tbl thead th.cov-head.hap{background:var(--hap)} .rede-tbl thead th.cov-head.cc{background:#2D6CC0}
+  .rede-tbl td.cov{text-align:center;font-weight:600;font-size:12.5px;white-space:nowrap}
+  .rede-tbl td.cov.no{color:#c2c8d2}
+  .rede-tbl td.cov.yhap{background:#fff7f0;color:var(--hap-dark)}
+  .rede-tbl td.cov.ycc{background:#eef5fc;color:#185fa5}
+  .rede-tbl tbody tr:hover{background:#fafbfd}
+  .rede-tbl .hname{font-weight:600;color:var(--navy)}
+  .rede-count{font-size:12.5px;color:var(--muted);margin:4px 0 10px}
+  /* folder / proposta */
+  .folder-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .folder-bar input{flex:1;min-width:220px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;color:var(--txt)}
+  .folder-bar input:focus{outline:none;border-color:var(--hap)}
+  #folder{display:none}
+  .fd-head{background:var(--hap);color:#fff;padding:22px 26px;border-radius:12px;display:flex;justify-content:space-between;align-items:flex-start}
+  .fd-head h1{font-size:22px;font-weight:700;margin:0}
+  .fd-head .fsub{font-size:13px;opacity:.92;margin-top:3px}
+  .fd-head .fbrand{font-size:13px;font-weight:700;text-align:right;line-height:1.5}
+  /* Tema PPO (NotreDame) — folder azul */
+  #folder.ppo .fd-head{background:var(--ndblue)}
+  #folder.ppo .fd-sec{border-bottom-color:var(--ndblue)}
+  #folder.ppo .fd-hi{background:#eef1fa;border-color:#c9d3ee}
+  #folder.ppo .fd-chip b, #folder.ppo .fd-hi .v, #folder.ppo .fd-hi-item b{color:var(--ndblue)}
+  #folder.ppo .fd-hi-item{border-top-color:#c9d3ee}
+  /* Cotação mista (Hapvida + NotreDame Saúde) — cabeçalho navy, 2 marcas mesmo tamanho */
+  #folder.mixed .fd-head{background:var(--navy)}
+  #folder.mixed .fd-sec{border-bottom-color:var(--navy)}
+  .fd-head .fbrand .dual{display:flex;align-items:center;justify-content:flex-end;gap:14px}
+  .fd-head .fbrand .dual img{height:24px;background:#fff;border-radius:5px;padding:2px 5px}
+  .fd-head .fbrand .dual svg{height:26px}
+  .fd-head .fbrand img,.fd-head .fbrand svg{height:30px;width:auto;display:block}
+  .fd-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:18px 0;font-size:14px}
+  .fd-meta b{color:var(--navy)}
+  .fd-sec{font-size:15px;font-weight:700;color:var(--navy);margin:20px 0 10px;border-bottom:2px solid var(--hap);padding-bottom:5px}
+  .fd-tbl{width:100%;border-collapse:collapse;font-size:13px}
+  .fd-tbl th,.fd-tbl td{border:1px solid #d9dee7;padding:8px 10px;text-align:right}
+  .fd-tbl th:first-child,.fd-tbl td:first-child{text-align:left}
+  .fd-tbl thead th{background:#0f2740;color:#fff;font-weight:600}
+  .fd-tbl tr.best td{background:#fff2e6;font-weight:700}
+  .fd-grid{display:flex;gap:10px;flex-wrap:wrap}
+  .fd-chip{border:1px solid #d9dee7;border-radius:8px;padding:6px 12px;font-size:13px}
+  .fd-chip b{color:var(--hap)}
+  .fd-hi{background:#fff2e6;border:1px solid #ffd9b8;border-radius:10px;padding:14px 18px;margin:14px 0;font-size:14px}
+  .fd-hi .v{font-size:24px;font-weight:800;color:var(--hap)}
+  .fd-hi-t{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px}
+  .fd-hi-item{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:4px 0;border-top:1px solid #ffd9b8}
+  .fd-hi-item:first-of-type{border-top:none}
+  .fd-hi-item b{color:var(--hap-dark);white-space:nowrap}
+  .fd-foot{margin-top:24px;font-size:11px;color:#666;border-top:1px solid #d9dee7;padding-top:10px;line-height:1.5}
+  .fd-tbl tr.grp td{background:#13315c;color:#fff;font-weight:600;text-align:left;font-size:12px}
+  .fd-tbl tr.used td{background:#e6e9ee;font-weight:600}
+  .fd-rede th,.fd-rede td{font-size:10.5px;padding:5px 7px}
+  .fd-cov{text-align:center} .fd-cov.no{color:#bbb}
+  .fd-note{font-size:11px;color:#666;margin:6px 0 8px}
+  @media print{
+    .wrap,.overlay{display:none !important}
+    #folder{display:block !important}
+    body{background:#fff}
+    .fd-head,.fd-tbl thead th,.fd-tbl tr.best td,.fd-tbl tr.grp td,.fd-tbl tr.used td,.fd-hi{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .fd-sec{page-break-after:avoid}
+    .fd-tbl tr{page-break-inside:avoid}
+    @page{size:A4;margin:12mm}
+  }
+  /* área de comercialização */
+  .ac-intro{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+  @media(max-width:720px){.ac-intro{grid-template-columns:1fr}}
+  .ac-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#f7f9fc}
+  .ac-card b{color:var(--navy)}
+  .ac-card .tag{display:inline-block;background:var(--navy);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px}
+  .ac-reg-title{font-size:15px;font-weight:700;color:var(--navy);margin:22px 0 10px;border-bottom:2px solid var(--hap);padding-bottom:5px}
+  .ac-op{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .ac-op-h{background:var(--navy);color:#fff;font-weight:700;font-size:13.5px;padding:8px 14px}
+  .ac-op-h span{color:#aebfd4;font-weight:500;font-size:12px}
+  .ac-fil{display:flex;gap:10px;padding:8px 14px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.55}
+  .ac-fil b{flex:0 0 165px;color:var(--hap-dark)}
+  .ac-fil span{color:var(--muted)}
+  .ac-fil mark{background:#ffe9b3;border-radius:3px;padding:0 2px}
+  .ac-hint{background:#fff3df;border:1px solid #ffd9b8;color:#854f0b;border-radius:9px;padding:9px 13px;font-size:13px;margin:0 0 14px}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
+  @media(max-width:680px){.vidas{grid-template-columns:repeat(3,1fr)}.cmp-head{grid-template-columns:1fr}.vs{flex-direction:row}}
+
+
+  /* ---- página autônoma (gerada por build_area.py) ---- */
+  body { padding-bottom: 28px; }
+  .ac-head {
+    background: linear-gradient(160deg, #0A4FCB 0%, #013BA6 55%, #00246B 100%);
+    color: #fff; padding: 16px 18px; display: flex; align-items: center;
+    justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  }
+  .ac-head h1 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -.2px; }
+  .ac-head .sub { margin: 3px 0 0; font-size: 12.5px; opacity: .85; }
+  .ac-head img { height: 30px; border-radius: 6px; }
+  #pane-area { display: block; max-width: 1180px; margin: 0 auto; padding: 16px 14px 0; }
+  @media (max-width: 760px) {
+    .ac-head { padding: 14px 14px; }
+    .ac-head h1 { font-size: 16px; }
+    #pane-area { padding: 12px 12px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="ac-head">
+  <div>
+    <h1>Área de Comercialização</h1>
+    <p class="sub">Governança Comercial Varejo Brasil · Hapvida NotreDame</p>
+  </div>
+  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMDAgQDAwMEBAQFBgoGBgUFBgwICQcKDgwPDg4MDQ0PERYTDxAVEQ0NExoTFRcYGRkZDxIbHRsYHRYYGRj/2wBDAQQEBAYFBgsGBgsYEA0QGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBj/wAARCAB8AeADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD5rooor9+PzMKKKKACiiigAoqe1tLi9uVt7aJpJG7DsPU+groIvB05TM97Gjf3UQt+uRXjZnxBl+WNRxdVRb6bv7ldn0+Q8GZ1n0XPLcO5xW70S9LtpXOYorZ1Hw3fWEJnUpcRLyzRggj3I9Kxq68vzPC5hT9thKinHy/Xqjzs4yLMMmr/AFfMaLpz7Pqu6ezXowoooruPJCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKPc0U6Nd8qp/eYD8zUzlyRcn0LpQc5qC66HeeHtOSy0hJNv76YB3Pt2H5VsUgAUbQMAcClr+UMzx1THYqpiaru5Nv/gfI/0UyHKaOUZfRwOHVowil8+r9W9X5iEc9a4HxFp62Grnyl2xSjzFUfw88j8/5139cx4yjH2O0k7iRl/MZ/pX1Xh9mNTDZtCin7tRNNfJtP71+LPzvxnyajjuHKuJkvfotSi+urSa9Gn+COQooor+hz+LAooooAKKKKACivpv4B/szeGvix8Kn8Wa9r+tWExvprWKKx8rYUjCjcd6Mc7iw/Cu28VfsO6TH4buJfBnjDU31WNS0MGqpEYZj2QtGqlM/wB7kD0rwKvE2Bo13QqSaadnpoenDKMTOmqkVo/M+LqKmu7S5sNQnsb2B4Lm3kaGaKQYaN1JVlPuCCKhr3k01dHmNW0YUVJDDJPcxwRIXkkdY0UDJLE4A/M197WP7Evwsjs41vtX8UXE+0b2F3EgzjnAEfTNeXmec4fLuX29/evay7f8OduEwFXFX9n0PgWivt34g/skfCfwr8MNe8UQat4mhfTLCa7UPdxOrMiEqpBj6EgD8a+IucDIwcciqyzNqGYxlOhey7qxOLwVTCtKp1CiiivTOQKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigApyI8kixxozuzBVVRksT0AA6k+lNr7G/Yq+Gmk3tnqfxM1W0S4vLe7On6b5gBEG1A0kqj++d4UHqADjrXnZrmMMvw0q81fsu7OrBYV4qqqadj53X4I/F59E/tZfhx4i+ybPM3fZSH24zny87/wDx2uDkjeKV4pEZHQlWRhgqRwQQeh9q/Y4ouOlfBP7avhbR9F+LOja9ptvFBc61ZyPepGMb5InVRKR/eZXAJ77K+dyTiipjsT9XrQSve1r9O56uYZPHDUvaQle258y0UUV9meAFFFAGTQAUV9UfAT9lXS/HfgW18beOtQ1CCyvsvY6fYusTSRAkCSRyCQGIOFGOMHPOB7Hc/safBqaDbEniC1b+/HqJYj/vpSP0r5vE8VYHD1XSk22tHZafmetRybEVYKasr9z89KKu6xb2dr4i1C106SSSzhupYoHlILtGrkKTjjJAB4qlX0UZcyUl1PKas7BRRRVCCiiigAooooAKKK2/C2hHX9eS2cstvGPMnZeu30HuTx+dcWZZhQy7C1MZiXaEFdv+vwO7Lcvr5jiqeDw0bzm7Jf1+JlQWtzdSFLa2mnYdViQsR+VOuLG9tBm6s7iAessTIP1Fe8Wlpa2FqttZQJBCowEQYH/1/qalYBkKOAyngqeQa/B6vjnJV37PB3p+cve/K35n71S8C4ugvaYu1Tyj7v53/L0Pnr3p0bFZVYfwsD+Rr1jXfAel6krTWCJYXXXKD925917fUfrXmOo6ZeaTqL2OoQtFKvOOoYeqnuK/UuGON8s4lpuGHly1Lawlo/Vd16fM/LeJuCMz4YrRniI81O+k47fPs/X5XPSgQw3DoeRRWdod2LzQbeTdllXy3+q8f4H8a0a/n3H4WeFxNShPeLa+5n9z5RmFPMcFRxlJ3jOKkvmrhXMeM3AtLSPuXZvyGP610xOK4jxVdfaNbEKnKwLt/E8n+g/Cvq/D/ByxGc05raCbf3WX4s/O/GTMoYPhitTb96q4xX33f4JmD1pQpZwiglj0UdT+FdV4Z8E3esql5es1rYnlSB88o/2R2HufwzXpmmaLpejxBNPs44T0L4y7fVjya+64q8U8tySo8NQXtqq3SdkvJy118kn52P534V8K8zzumsTXfsaT2bV5PzUdNPNteVzxQ6Tqgi8w6ZeBP7xgbH8qp/hX0Nk56muV8YeFrbVtMmvrSFU1CJS4KDHnAclW9T6Gvm8g8aKeMxccPj6Hs4ydlJO9r7XVtvNbdj6XP/Bapg8JLEZfXdSUVdxate29mnv5de55HSjlhmk+lBVmRlQZYjAHqe1fubeh+FJa2P01/Zk0gaR+yz4Rj8so9xbPevnuZZGcH8iK9aI/nWL4L0kaF8ONA0UIqfYtOt7YqvQFI1U/qDUnizVV0LwLrWtscCxsJ7on/cjZv6V+F4mbr4ic1vKT/Fn6LSj7OlFdkflV8QdUi1r4t+KNXh2+Vd6vdTIV6FTM2P0xXN0b2k/eOcs3zN9TyaK/caUPZwjBdEkfnlSXNJyOy+E2j/298dvB2kbNyT6xbbwf7iyB2/8AHVNfq+vIzX5u/slaT/an7U2izMu5NPtrq9b8IjGP1kH5V+kQGBX5txpW5sXCn2j+bZ9ZkELUJS7v8jxj9qvV10n9lbxKoJD3vkWK/wDbSZQf/HQ1fmsTlifWvu39uHWGtfhBoGiqcG+1bzW91iiY/wDoTrXwjX0PBtLkwLn/ADSf6I8vPZ82IUeyCivZPhZ+zX8QfijYxaxBHDoehScpqWoBv349Yox8zj/aOF9Ca92tP2FfDy2gF/8AELVpZ8ctBZRRpn6MWP616OL4iwGFm6c6l2ui1/I5aOVYmtHmjHTz0PiWivpL4j/sc+NvCmlzat4R1KPxVaQgu9qkJgvFXrlUyVkx6KQfQGvKfhn8IPG3xX12bT/C9hGsNsR9rv7xjFBbZ6BjgkscH5QCfXA5rpo5xg61F14VFyrfpb1MamBrwmqco6vY4OivrFv2FvFAtQ6/EDR/OxyhsZduf97dn9K+dPiB4Kvvh38R9T8G6lfWd7d6eyLJNZ7vLJZFcAbgDkBhn3owWcYTGzdPDzu1rs/1QV8DXoR5qkbI5mivd/hR+y74o+KfgSDxdb+I9L0nT55pIoknhkllbYxUtgYAGQcc9qv/ABC/ZC8e+CvC1x4g0rVLHxLa2sZluIbWJ4bhEAyWVGJDgDJIBzxwDWcs8wMa3sHUSle3Xf12KWXYhw9ooaHzzRXp/wALPgL4/wDiyftehWUVlo6tsfV78lICR1EeATIR/sjA6EivojTv2FNEWzH9rfELUprjHJtLKONAfYMWJ/OoxnEGBwk/Z1amvZa/kVQyzEVlzQjp9x8UUV9T+Of2JvFOj6ZNqHgjxHB4hMa7vsF1CLWdh6I24ox9jt+tfL13aXVhfz2N9by21zBIYpoJkKPG4OCrKeQQeorqwOZ4bHRcsPO9vv8AuZjiMHVw7tUViGivfPhh+yt4m+J3w+sfGNn4s0XT7C8aRUieKWWVNjlG3AYAOVPc8Yro/Ef7EnjzS9ElvdB8S6Rrk8alvsZie1kkx2QsWUn2JH1rlnxBl8KjpSqpSTts/wDI2jlmJlDnUND5goqW4t57S7ltLqGSCeF2jlikUqyOpwysD0IIIIqKvYTT1RwtW3Ciuz+GPwy8RfFfxwPDHhs20UywNczXN2WWKGNSBlioJySwAGOTXv0H7Cvidogbr4g6RG/92KxlcfmWH8q8zGZ1gsHP2depZ9tX+R10MBXrx56cbo+Tq+nv2Ufjr4f+Hyah4K8ZXf2DS765+2WmoOCY4JioR0kxyqsFUhugIOcZzXB/GX9n7VPg1pWnX+qeK9J1IX87QQW8Eckcx2ruZ9rZG0cAnPVh1rp/h/8AsieLvHXgTSvFjeKtG0y01O3W5ghaGWaUI3Qt90AkdgTXDmeLy7G4K9apanJ6Oz3XbQ6cJQxVDEWpx95bryPsXXvjr8I/D+hNql58QNCmiCbkisrtLmWX2SOMlifwr89/jX8Vbv4u/FGfxG8Elpp8MYtNOtHOWihBJy2ON7EljjpwOcZr2q5/YW8UxxFrHx9o0sn92WyljB/EM38q+WdRsn07WLzTpJYpXtZ5LdpIiSjlGKkqTzg44rg4bwGXU6kquGqc813VrJ+XmdOa4nFSgo1o8sX+JVorX8M+FvEHjLxLb+H/AAxpVxqepXB+SCBecDqzE8Ko7sSAK+ofC37Der3VlHc+MfG1vp8rDJtNLtvtBX2MrkDP0U/Wvfx2b4TA6V52fbd/cjzMPga2I/hxufI9B3bTtBLYOAOpPavtTVP2FdJazY6L8Qr+K4A+UX1kkiMffYykfrXhOq/Afxx4E+NHhfw14m06OS01TVra2ttRtSZLa4BlXcAxAKttydrAH6jmubDcQYHFJqlPVJ6PQ2qZZiKLTnHT7z9FfA+jx6B8NfD+hxxCNbHTre22gYxtjUH9Qad4z1ZdA+HOva4zbRYadcXRPpsiZv6VtrjtXk/7TWr/ANjfsseLpg2HuLZLJPczSpGf0Y1+S4eDxGIjF7ykvxZ9pVkqVKT7I/MYZ2DPXHP1paU9fau++GXwa8dfFjUpIfC+nItlA2y41O8YxW0J/u7sEs3+yoJ9cV+318RTw8HOrJKK6s/P4Up1ZcsFdnAUV9o6P+wppwtVbXviFeSTkcrYWKRov0LsxP5CsLxn+w/rdhp0l34G8Ww6tMgyLDUoRbu/ssqkrn/eAHvXiR4py2U+T2nzs7fkd8snxajzcv4nyXRXVaP8N/G+ufEg+ArDw7d/8JAkjRzWUy+WYNv3mkJ4VACDu6HIxnIz9BWP7DPi6XT0k1Dx1ottdEZMMNrLMin03krn8q7sVnOCwtlWqJX+f5HPRwFetfkjsfKdFek/GH4N6z8G9e07TNZ1nTdSbUIXnhazDqVVWCncGHGSeME9DXm1duHxFPEU1VpO8Wc9WlKlJwmrNBXffDCSIXupQnHmNGjD3AJB/UiuBq/o+qXGjaxDqFtgvGcFT0dT1U/WvA4wyapnOT4jA0naclp6pppfO1j6Pg7OaeTZxh8dVV4xevo0038k7nu9FZ+kaxY63pwvLCXcvR0P3oz6MP8AOa0K/ifF4SthKsqGIi4zi7NPRo/tvCYuji6Ua+HmpQkrprVNBWT4h0G18QaS1rNhJly0E2OY2/qD3Fa1FXgMfXwGIhisNJxnF3TRnmGAoZhh54XExUoSVmmeQ6BLPpOu3Gi3y+U7PtKk/dkH9CP6V1o9arfEPRPMtI9etQVmgwkxXqUz8rfUH9D7VU0XV11PT8uwFxGMSjp/wL6H9DX7Xm8o5/gafEGFjrL3aqX2Zrr6PT8O58ZwBmDyHGVOFMdP4byoyf2oPVr1i7/j2LeoXkdhYS3cn8C/KP7zdh+dYvg7w02u6g+q6mu60jkJ2sP9fJ1I/wB0d/y9ap3883iXxJb6TYNmLzNqt2J/if6AZx/9evWLGyt9P06GytU2QxKFUf1Puev41lnGY1OEsnWHpvlxeJV33hT/AEb/AA17I8zEOlxzn/tX72Cwjsu1So935paevoycAAYAAA4wOKWiivw5tt3Z+opJKyCmyOkcTSSHCKCzH0A5NO6nArgPHHi2EWsmiabKHd/luZkOQo7oD3J7+nSvoeGOHsVnuPhhMNHquZ9Irq3/AFqfPcT8RYXIsBPFYmXT3V1k+iS/PstTzqRleZ3QYVmJA9ATxW/4D0dvEHxT8NaGg5vdUtoD9DKuf0zXPV67+zFpC6x+1R4VjkGUtZJr4+3lQsR/48Vr+1sbP6thJyX2Yv8ABH8Q0F7bERv1f6n6aDpXm3x+/tdv2b/F1toOnXeoahdWX2SK2tImlkfzHVGwqgk4VmP4V6Sv3RQQOpr8To1PZVI1LXs0/uPv6kOeLj3PycPwq+JwPHw68VY/7BU3/wATR/wqv4nf9E68Vf8Agqm/+Jr9Y+PU/nRx6n86+z/13xH/AD6j+J4X+r1L+d/gfGH7Gvw+8T6D8SPEeu+JPDWq6QI9NS0gN/avB5hklDNt3AZwI1zjpn3r7QpMD/Jpa+XzPMJ4/EPETVm7aeh6+Ew0cNSVKLvY+Hv26NWMvjvwloQkBW2sJ7tkHYySBQfyiNed/sy/CGH4pfE9rnW7fzfDuihLi9Q/duZCf3cB9jgs3+yuP4qn/a61Yan+1Jqtusm9NPs7Wz68KdnmEfnLX1b+yh4Qj8Mfs2aTePDsvNbZ9UnJGCQ5xGPoI1X8zX2tbFSy7IqSg7SmrL53bf3HgU6KxWYzcto/poe2wwRQQJDDGkcaKFVEG1VAGAAB0HtVPV9a0nQdLl1PW9Ts9OsohmS5u5lijT6sxAq+TgV+an7S3xQv/iH8Z9RsIrx20DRZ3srC3Vsxs6HbJPjoWZgQD2UAeufksmymeZ1/Zp2S1bPax+NjhKfO1dvZH3/4c+Jvw98Yak2neGfGmh6tdqNxt7S8R5MDuFByR7itrSdA0bRPtv8AZGm29l9tunvbnyE2+dM+N0jerHAya/IvTNW1DQ9atdb0q6ktb+xlFxbzxnDRuvIIP4c+oyK/XjRb2TUfDthfyoEkuLeOZkH8JZAxH611Z/kn9luHJO8Zfp/w5hluYfXE+aNmv1LzdP0r8pfjBrI174/+MtXBJSXWLhUP+wjmMfogr9TtWv00vQrzUpSAlrBJO2fRFLf0r8gJpbjVL6SaQ7p7uUsx6/NI2f5tXr8E0v3laq+iS+/X9Di4gl7sId2fp7+zzo50P9mLwZZSLh305bph7zM0v/s4r01lVkKsMgjkVm+H9LTRfCel6PEu2OytIrZR6BEC/wBKq+M/Ett4O+H+teKbwBoNMspbtkJxv2KSF/E4H418dWnLEV5SWrk3+LPdppU6aT2SKGseKvh98NNFs7PWdb0Pw3ZKgjtbaWVIBtHaOMc4HsKveGPGvhLxnYveeFPEWm6xBGwWR7K4WTyyegYA5X8a/KXxT4o1zxp4vvPE/iO9e81K8cvLIx4QdkUfwoo4CjgAV6H+zN4gv9A/ad8MCzmZItRnbT7qMHAljdGwGHfDBWHoRX2OI4P9lhJVnUvNK7XTzX/BPCo55z1lTUfdbt5n6akAqQRXxL+2z8O7TTtZ0b4j6bbrEdQc6fqO0YDyqu6KQ/7RRXUn/ZWvtscivAf2xbaKf9mC+lcDdb6haSofQ+Zt/kxrwOH8RKhmFJx6uz9HoenmdKNTDTv01+4xv2Jta+3fAjUtHd8vpuryqq56JIiSD/x4vX0swBU5r4l/YV1nyvFfjDw8z/8AHxaW96i5/wCebsjEf9/F/SvtrtVcR0fZZjVXd3+9XFlU+fCwfbT7j81P2qdDh0P9qTxB9njEcV+kGoAD+9JGAx/FkY/jXjQGTivqX9uPSRb/ABT8M6ysRAvNLe3ZwOCYpcj9Ja8F+Gngi6+IvxW0Twda7gL64AnkUf6qBfmlf8EB/Eiv0jJ8XH+zKdeo9FHX/t3T9D5THUH9blTit3+Z9q/sdfDseGPg/J4wvYAuoeInEyFh8y2qZEQ9RuJd/oVr6QbAXpVawsbbTdLt9PsoVgtraJYYYlHCIoAVR9AAK8v/AGifiOfht8CtT1G0uPL1a/H9nadg/MJZAcuP9xAzfUD1r8trTq5njHJfFN6fp9yPsKcYYShZ7RR8U/tNfEY/EL46ai1jceZpOjK2m2G05VyhPmSD13SZwe4Va/RDwPo6aB8NPD2hxoEFjptvbbR22RKD+or8rPA+knXfif4b0RUMn23VLW3I6khpVB/TJr9cV447V9HxZThhaWHwlPaKf6a/PU8vJZOtOrXlu2ZniTUl0XwfqusO21bKzmuSfTYjN/SvyEUzXMisQ8s0pyQBlnZj29yT+tfp9+0Zq40b9l7xncl9rS2Bs15xkzMsQH/j9fDn7NHg9PGP7SmgW9xD5tnpzNqs4I4xCAUB+shj4ro4TnHC4PEYuWy/RX/UyzlOtXpUV1/U+1v2ffg7Y/Cn4aW6XNtG3iPUY1n1S5xlgxGRAp7ImcY7tuPevXW+VcigAha8Z/aZ+J138NfgnPNo9z5Gt6rKLCxlB+aHIJklHuqA49ytfHr22Y4qz1nN/n+iPb/d4Wj2jFHb698Vvht4Y1Y6X4h8daBpt6v3ra5vUWRP95c5X8cVuRroPiXTbK+j+w6paeYl5a3EbLKm9TlJEYZGQehHvX5CO7yTPK7szuxZ3ZiWYnkkk8kn1NfYv7DHiPVJJ/FfhKWZ5NNgSG/gjJ4hkdmR9o7Btqk+4z3r6XNeFVgcK8RCpdxtfS2/Y8rB5w8RWVKUbJn2VjA4r5o/ba1j7H8BtM0pHw2oaxEGGeqRxu5/8e2V9MHpXxV+3Xq2/W/Bmgq/EUN1euv+8yIp/wDHX/WvJ4cpe1zGkuzv9yud2aT5MLNnzj8MPAOofEz4p6V4PsHaIXUm65uAM/Z4F5kk+oHA9WKiv1K8LeGNE8H+E7Hw54esI7LTrKIRwxIO3ck92JySTySSa+Vv2GvCEa6X4n8d3EQMksqaVbORyqqBJLj6lox/wGvsHoK7+LcwlXxbw6fuw/Pq/wBDlyTCqnR9q1rL8iOeeG2t3nnlSKKNS7yOwVVA5JJPAFcbZ/F/4W6j4gTRLH4heG7i/d/LS3j1CMs7f3Rzgn2FfLv7aPxRv5fENr8LdKu5IrKGBLzVVQ48935iib1VVG8joSy56V8jdRtPI9K6Mq4T+uYZV6s+Xm2SXTuzPG517Cr7OEb23P1+i8P6LF4ouPEcWmWyarcW6Ws16qYkkiRiyoT3ALE//qrTIAFeVfs3+ItV8Ufs0eF9U1m4kuLwQyWzzyHLSiKVo1YnudqjJ716o33a+UxNKVGrKlN3cXb7tD2qU1Ugpx66n57ftnauuoftHx6erZGm6TbwEZ6M7PKf0da+eK9L/aD1g65+0740vM5WPUDaKfaFVi/mhrzSv2XJ6XssDRh/dX46nwWPqc+InLzCiiivSOQtWGoXmm3i3VhcvbzD+JT1HoR0I9jXdaX8SwEWPWbIk9DNbd/qp/oa87pVySABkk4A9favmc/4RynPI3x9FOS+0tJL5r8ndH0/D/F+bZFL/YKzUX9l6xfyf5qzPZrfxp4ZuFB/tSOEntOrIf1FXB4i0Fl3DWbEj185a5Tw18HfEWsQpd6tIuj2z4IWVd8zD12ZG3/gR/Cu6tfgh4TijAurzVLl+7CVYs/gF/rX845/lPA2W1nRjj6kpLdQSnb52S/E/esm4x4vxlJVJ4Kmk+sm43+V2/wMS/8AE3hWSymtrrV7WSOVCjrGTISCMdAK8cLGKRxDK2DlNwJBZff6+le/3vwa8EQWEtw9zqtrHEjSPKblWCqBknBX0FeFWmmXuq3FyukWN1eLBE9y4ijLtHCvJdgOgAxmv0zwqr5DHD4l5ZVqSgnHm9olGKetrdL99ex+c+JWOzjFVsPLMKcISXNy+zbbtpe9+nb5m/4E1DRtM1O4u9Uu1glMYjhLKSME5Y5A46AV6JH4l8PSrmPWrEj3mA/nXE/DLwnoHi/VL2y1i5u45Yo1liS3dVEi5w3JB5GV/A16efgr4JK4xqoPr9r/APsa+T8SqnDP9tTWZ160a1o3UYxcUrK1r20+/W59P4fZrn+FyiEMBQpSpXerk1Ju+t7X/wCGsYsnijw5EPn1uyHsJNx/Ssm9+IWgWysLdri7cdBHHtB/4E2K1tV+BVi8bNomu3EMnaO8jEiH/gS4I/I15X4j8Ka74VvhbazZmMOf3c6HfFL/ALrf0OD7UuEeFOCs7qKFDGTqT/klaDfytd/Jm/EnH/FuXU3KeFhTj/MrzS+d7L5ot63441fVo2ghK2Ns3BjhPzMPduv5YrmO2O1HQ0V/QWVZNgspo+wwNJQj5dfV7v5n4Vm2dY3Nq3t8dVc5efTyS2S9Ar6Z/Yj0kXfxu1rVnjJFjo7KrY4DSyqPzwjfrXzNX2v+wrpBj8LeMddaMDz7y3s0k9RHGXI/OUVx8T1vZ5bUt1svvYsohz4qPlqfXQ6V4H+0H+0Lf/BrXdE0rS9AstXm1CCW4lFzcNF5SqwVcbQc5O7r6V75/DX55/tl6x/aP7Sf9ngnbpmlW8BHozl5T+jrX57w5gaeNxqp1VeNm3/XqfUZriJUMO5wdnodX/w3T4p/6J9o3/gfL/8AEUv/AA3T4pz/AMk+0b/wPl/+Ir5OpCdqFsZwCcV+if6tZb/z6/F/5ny/9r4r+b8Efq58JPGepfEL4PaL4y1TTYNNuNSR5fssEhkVUEjKhDMAeVUHp3rtj0578VyXwu0X/hH/AIKeE9GK4e00i2jfjHz+Upb9Sa6HVb5NM0S81GX7ltA87fRFLf0r8kxCi60lTWl3b0vofaU21TTlvY/LP4v6mfEv7QnjC+gbP2rWZ4Yj6hX8lf8A0AV+onhvSItB8HaVokQxHY2cNqv0RAv9K/KLwsTrfxV0NrvJ+36xbNLnv5lwpP8A6Ea/XEdPxr7Hi9eyp4agtkn+i/Q8TI/flVqd2YPjbWz4b+G+v+IAwB0/T7i6Ut03JGzD9QK/I1nkkYySsWkb5nJ7seSfzzX6fftHXElr+yx42liOGOnNGfozqp/QmvzBb7xrv4IppUatTq2l9y/4JzcQybnCPkXtE046x4n03SF5a9u4bUD18yRU/wDZq/X+CJILdIY1wkahFHoAMCvy5+AGjnXP2mPBdkYjKi6kt04xkBYVaUk+3yCv1JX7tcHG9W9elS7Jv73/AMA6OHoWpzn3Z518edXbQ/2bPGuoJJ5b/wBlTQIw6hpR5Q/V6/OD4W6QNd+N/hDRihdLjWLVHUf3BIGb8MKa+4f2ydXGnfs0TWPmbW1LU7W2AB6hWMx/9FV8t/soaT/av7VGgyFN0djFc3r+22Iqp/76kWujh3/Z8pxFf1/Bf5syzT97jadP0/M/ScDivFP2rtXXSv2V/ESE/PfNb2K+++Zc/wDjqtXtnbFfLX7cOrPbfCDw/o65xe6v5jHtiKFzj83H5V8nktL2uPow/vL8NT2sfPkw85eR8JE5Oa9W/Zr06XU/2qfB8Ua5EN1JdP7LHC7fzxXlNfUH7EnheTUfi3rPiuSJjb6TYfZ0ft507Dj6hI2/76r9WzyuqGArTfZr79P1PjMupupiYJdz7xH3a+dv2z9QWz/ZtS0LfNe6vbQgeu0PIf8A0CvortXxv+3T4gUQ+D/CscgLFrjUZkzyAAI0P6yflX5fw/SdXMKSXR3+7U+wzOfJhZvyPKf2Rda/sn9qLS7Vm2pqdnc2RPvs81f1iFfo71Xivyf+E+tHw98c/CGs79i2+r23mH/YaQI3/jrGv1fHAxXr8aUeXFwqfzR/JnDkFTmoSj2Z8n/t0aaZfAXhLVxHn7PqM1sXx0EkO7+cVN/Yp+G40/wxqHxM1GD/AEjUibHTyw+7bo37xx/vOMfSP3ruv2tfD914m+BVlpVhHvvJdesIbcAch5ZDCP8A0ZXsPhbw9YeE/Bel+GtMjCWmm2sdrGAMZCKBk+5OSfc1xTzNwyeGEi9XJ39Fr+LZ0RwiljnWeyS+812OB0r87v2tviN/wmXxtfw9Yz79L8OBrNdpyHuWwZm/AhU/4AfWvtL4z/EKL4Z/BnWPFG9ftiReRYRt/wAtLmT5Yx74PzH2U1+WM0stxcSTzytLNIxeSRjkuxOSx9ySTXqcGZd7SpLGTWkdF69fw/M48+xXLBUI9dWes/syaQdY/ao8Jx7QUtZpb189hHC5H/j22v01A+UfSvgb9iTR/tnxz1fV3B26fpDKP96WVAP0Rq++e1cXGFXnx/J/LFL9f1OjIocuG5u7PnH9tPWBYfs8W2mqxD6lq0EJA7qivKf1Ra82/YV0VJfFHjDxEyfNb2tvYo3/AF0d3Yf+Q1q7+3Xq/wA/gvQEbj/Sr2QZ/wByNf5vXQ/sMW6r8LfE93/FJq6ofosCY/8AQjXZBOhw62vtv9bfoYSaqZol2X6f8E+qcCvhf9uPXpLn4leGfDaykxWWnPdsg6B5pNoJ/wCAxfrX3SelfnJ+1/K8n7U2po2cRWFmi/Tyy382NefwjSU8xTfRN/p+p053PlwrXdo8Ir7X/YT0pU8N+MtcaP5pru3s1cjskbOQPxkFfFA61+if7HWkPpn7M1pdyQlDqWoXN2Cf4lDCJT+UdfYcX1eTL3H+Zpfr+h4eRw5sSn2TPfj0r87/ANsbVxqX7TUtiHz/AGbplrakZ6Ft0p/9Giv0QIyMV+WXx31j+3P2k/GuoB9yjVJLZD6rCBEP/QK+X4Mo8+NlP+WP5tf8E9fPp8uHUe7Pun9lnRho/wCyz4Yym2W9Wa/k4xnzJWK/+Oha9jbpj8K4n4N26W37PXgeKNcAaFZnHuYVJ/U12srbYmYdgTXzeOm6mJqTfWT/ADPVw0VGjFLsvyPyl+MGvN4n+Pfi/WyxZZtVnSMk5+SNvKT/AMdQVxYIB3HoOTU9/K8+q3U8hJeSeR2J7ksSf51HBbS3lzHZwrukndYUHqzHaB+ZFftmHgqNCMVskvwR+f1ZOpUb7s/Ub4BaRJof7NPgvT5V2yf2XHOwxjmXMp/9Dr0SeVIYWmkYKiAsxPYDk1T0PTk0jw3p+lR/ctLaK3X6IgX+lc/8VtX/ALB+CPi3WA+xrbSLp0b0fymC/qRX4lNvEYhtbyl+bP0GP7qkvJfkj8rtf1OXWvFeqazMcyXt5Ncsc55eRm/rWdSAbUVfQAUtfucIqEVFdD87k+ZtsKKKKokK9h+CfhW0umufFN7Esr28vkWisMhWABaT6jIA9Oa8er1f4QeNtO0QXHh/WblLWC4l8+3uJDhFcgBkY9gcAg9M5r888UqeY1OHK8MsTc3a/LvyX963y38rn2HAk8HDOaUsbbl1tfbmtpf5/jY939aKpyarpcFp9pm1OyjgxnzWnQL+ea818ZfGTTrKCSx8KOt7dkbftjL+5i91B++f0+tfx1kXCObZ5iFh8FQk+7aajHzb2X59kf0Zm3EOX5XRdXE1UuyTu36Ij+MnjKO200+EdPkLXNwA14U58uPqI/8AebjI9PrXsnwb+HsXgT4fxfaoFGs6gqz37kZK5GVh+ig8juxavmj4RaM3i7466THqbtcqkz6hdNKdxl8sb/m9cttr7d5PJ619n4sTjwnlmF4RwUviXta0tueTdor0Vm7eUex+YZLip59jaucV1ovdguy6/PX8WfJHxT8Mz/Cb4xWfibw9AE0u+dp4YF4RG/5bQeykNkegb/Zr1jRtXsdd0O31fTZRLbXCb1PcHup9GB4IrW+O3h+LXfgjqshTNxpoW/hYDkFDhh+KFv0r5X8FePNT8Gag3kqLrT5WBntHOAe25T/C2O/Q9D7e9lmT1vEjhWljaTvjsLem7/8ALyKScbvvZ6N7u997pYLPIcK5rPD1v92re9/hezfp38rH1BjiqWr6Rp+uaLPpWp24mtplwynqD2ZT2YdQayNA8e+FvEUCtY6rDHMR81tcsIpVPpgnn6gmrWveLNA8OabJealqMA2rlII3DSynsqqDk59enrX5PSybN8Hj44eFGca6asrNSv0t/n8z9VqZnl2IwkqsqsZUmtXdWt5ny3remS6L4kv9Imfe9pO8Jf8AvYPB/EYNUKvazqc2s+Ib3VrgBZbudpmUdF3HIH4DA/CqNf6CYBV1hqX1n+Jyrm/xW1/E/kbF+y9vP2PwXdvS+n4BX6Kfse6Q2mfsxWV24wdSv7q8HH8O/wAsfpHX515AG49ua/VD4H6Ougfs6eDNMx8y6TBI/f5pF8xv1c18xxpW5cJCn3l+SZ62QQvWlLsj0A/dOK/Lj4/6u2t/tNeNL0vuVNSa1Q5z8sSrEP8A0A1+oVxPHb20lxM2yONS7M3AAHJr8g9b1GTV/E2patK++S8u5rlm9S8jN/WvK4IpXr1ar6JL73/wDtz+dqcId2UK0vD2ltrni/SdFQEm+voLUY6/PIq/1rNra8H66vhf4haF4ke3+0LpmoQXrQjGXEcisQM9yAce+K/Qq/N7OXJvZ2Pl6dudXP11ijSKFYo1CqgCqB2A4Fee/HfWH0L9m7xrqMbhZBpU0KH0aQeWP1euk8K+NvC/jXw3BrnhnW7S/s5lDBo5RuTP8Lr1Rh3BGRXjX7YmtR2X7NFxYx3C79S1K1ttqsCSFYyn8P3dfi2X4eU8bTpTVnzK/wB+p9/iasY0JTT0sz4C0TUP7G8T6Zqy8fYruG5BPby5Fb/2Wv19tLmC8soru2kWSGZBLG6nhlYZB/I1+OZ9+a+7/wBlj49aTrngyw+HPinUo7XXtPQW1hJcOFW+gHCKrHjzFGFK9SACM84+54yy+pWpQxFNX5b39HbU+dyLExpzlSk7X2PoPxt4WtPGvw81rwnfOUg1O0ktWkAyYyw4cDuQcH8K/O7WP2XvjZpWvNpsfg6XU13lY72xniaCQZ+9lmBUH0YDFfpduXPP5VHPPbWts91cyxxQxqWeWRgqoB1JJ4Ar47Ks8xGW80aKTUuj7nu43L6WLs56Ndj52/Zs/Z1u/hfNP4u8XyW8viO5hNvDbW7eZHYxEgt8/RpGwASOABgE5Jr6Q7V4dD+1B8Nrr422/gOz1OGWzkR4zrpkC2v2nI2wqx4II3fvM7d20DOc17cHyoIyQe4FYZnPF1a3tsYmpSV1dW08jTBxowh7Og9EfIP7desBNF8GeH1Yky3Fzeuv+4ixr/6MauV/Yc0hp/il4n1srlLPS0tgfRpZQf5RH86zf22NYN78d9L0lWymn6PHkZ6PLI7H9FSvUP2GdIEHw28U66V5vNTjtQfUQxA/zlNfXS/2bhxLrL9ZX/I8Rfvc09P0R9W15D+0P8I5/i78Lk03Sp4INa0+f7ZYtOSscjbSrRMR0DKevYgds166TgV5bafHHwh/wvjW/hdq93Dpuo2TQraTzyBYrwvErtGGPAkUtjaT8w6c5FfF4J14VfbYdaw1/ry7nv4j2coezq7S0PiOw/ZZ+ON7rIsH8GfYwG2tdXV7CsKj13KxJH0BNfdXwY+Fen/CL4ZQeG7a4W7vZHNzf3oTb587AAkDsoACqPQepNegkr16H3oMiqpJOAOSewrvzTiDFZjBU6llFdF1fnqzlweWUcLJyhq/MexwK/ML9onx5F8Qf2gta1WynE2m2ZGm2Tqcho4sgsD6M5kYexFfR/7SP7TGlaX4evfAXw91SO+1e6RoL7U7V90VlGeGRHHDSkcZHCZPO7AHw50GB06Yr6rhDKJ0r4ysrXVo+nV/5Hj55joztQpu/f8AyFWR4mEsZIdPnXBxyOR/Kv178M6tHr/gzSNcjIKX9lDdqR3Ekat/WvyDHWv03/Zq1w65+y94RuHfdLbWpspADnBhkaMZ9PlVT+NPjejejSq9m196/wCALh6pac4d0el6ro1jrK2i38Pmra3Ud5ED2kjO5D+B5q9gKntRu9j+Vcr8SPG9j8PPhdrPi+/IK2NuzxRNx50p4jjH+8xUfnX57CMqklTjq3ovmfTyagnJnxn+2X8Rv+Eg+Jtp4D0+43WGgLvuQp4e7kXkH12IQPYu1fMtWtT1K+1jWrvVtTuGuL28me4uJWOS8jsWY/mTVWv2zLMDHA4aFBdFr69fxPz/ABeIeIrOo+p9q/sKaQi+HfGWvFPmmu7eyVvZI2kI/OUV9eHpXz/+xzpX9m/syWl2YyrajqN1dZx1Afygfyjr35idhxn8q/J8/q+1zCtLzt92n6H2uWw5MNBeR+fX7Z+rNf8A7RsOnh8pp2kQRbfRnZ5D+jJXpf7CmsxP4e8YeHmcCaK6gvVUn7yuhQkfQxj8xXzt+0JrA1z9p3xnepIHSPUDaqQcjEKLFx+KGq3wV+J9z8Jvi1Z+Jljkn0+RDaajbxn5pYGIJ2/7SkKw9SMd6+9q5bKvkkcPBe9ypr13Pm4YxU8wdWW12v0P1P7V8m/tSfs+eK/HXi+28deBbOPULo2q2t9p5lWORthOyRCxCnhipXIPAIzzX0t4X8V+H/GXhu31/wAM6tb6lp865SaBs4PdWHVWHdTgitolMdq/OMFja2XYhVaatJaWf4pn1OIoU8VT5JbM/OfwJ+yd8VPE/iGCLxDpD+GNJDj7Rd3kiGUKOoijViWb0JwO/tX6DeHNA0zwv4V0/wAPaNbC3sLC3S2gjH8KKMDJ7nuT3JNcp8TPi74L+FXh6S/8RajH9rKE2ulwsDc3Ldgqdh6scAevapvhZ8TdB+Kfw/s/EejTxLMyBbyxEgaSzmx80bjr1zhsYYYIr0M1zDHZjTjXrRtTTsrLS5zYLDYfCzdOm7yf3nZ3VxHa2ctzM22OJDIx9ABk/wAq/H/Vb+TV9fvtUmOZLy5kuXOe7uWP86/U34w6z/YPwD8Y6rvMbQ6RchG6Ydoyi/qwr8pgNgC+gAr6Tgej7tar6L+vvPK4hqawh6s/Uj4Aa1Drv7NHgu8gcMI9LitHx2eH90wP4pXpLdOlfB/7J/x10vwTcXHgDxhfLZ6RfT+fYX0xxHaztgMjn+FHwCG6Bs5+9kfdkU0U0KTRyK8bgMjqchgehB6EV8pneAqYPFzjJaNtp90z2cvxMa9CLT1S1Pz2+KP7K/xL0Xx7qVx4R8Pya9oVzcvNayWcieZErsW8t42IIK5xkZBAB9q7/wDZ/wD2VvEel+OLHxr8SrWGxj06QXFnpPmLLJJMOUeUqSqqp5C5JJAzgDn7MOw9s49Oa8W+I/7TPw7+H/ivTvDxvU1W7ku0i1A2b7006EnDSSMucsP+eY56k4wM+nHP8zxtH6nSV3azaWtvyOSWWYTD1PbTfXZ7XPawMV4j+1pq66X+yvrsO7a9/Lb2Sc4J3TKxH/fKNXsenajY6rpcGpaZeQ3lpcIJIri3cSRyKehVhwRXy/8Aty6z5Hwy8MaCDg3mqPcke0MRH85RXlZJR9rj6MGvtL8Nf0OzH1OTDTl5HwznPNFFFftR8AFFFFABRRRQAm1ePlXj2pc0UUkkth3bPX/2bJoo/jb5b43y6bcLHnuQUYj8gfyr6/HSvz68KeI73wj4y07xJp4DT2Uwk8tjgSL0ZD7FSR+NfZvh/wCLnw+8Q6RHfQ+J9PsXK5ktdQnWCWI9wQxAP1XINfyB9IPhDMq2b0s2w1KU6UoKLcU3aUW97bXT0e25+r8B5rh4YWWFqSSknfXS6djT+IU0Nt8JvE005AjGl3AJPvGQP1Ir4G7D6V9F/HT4x6LrHh1/BvhK+S+juHU319FnytinIiQ/xZIBJHGBgE5OPnQ9a/S/APhjG5LklWrj4OEq0+ZRejUUrJtdL6/Kx87xxmVHGYyMaErqCs2u7A4IwQD9RmjgcgDPrRRX7pZXufFX6BRRRTEFWY9R1CFdsOoXkY9EuHUfoarUVMoqXxK41JrZlmTUdRlUrLqF5ID1D3DsD+ZqtRRRGKjshuTe7CiiiqJHI7xkmN2QnqVOM/XFK0srjDyuw9GYmmUUuVb2HzO1goyc0UUxXO50b4zfFfQLJLTSfiH4hgt412pC10ZVUegD7sVl+JPiH478YQiHxR4w1rVoQciG6u2aMH/cGF/SuaormjgsPGXOqav3sjZ4iq1yuTt6h1GCAR6VrweK/FNtYCxtvE+tw2qjAgj1CZYwPQKGxWRRW0qcZ/ErmanKOzHySyzymSaWSV26vIxYn8TzX6PfslaR/Zf7LGhzldr6hPc3rcYJ3SsoP/fKLX5vEkKSOoGa/Uj4Oah4Z034GeEtHtNe0mV7XSbdJVgvI32yeWC44bruLV8fxpNrC06cVvL8l/wT3chSdaU32PSW6Y9eK/KP4v6wmvfHvxjq0Z3Rz6vcBD6qjmNf0QV+iXxR+NPgv4b+Cb7UbrXbC41QRMLLTYJ1kmnlwdo2qchc4yx4AzX5eTzS3NzJczvvmlcySN/eZjkn8ya4uCsJNSqYiUbKyS/X9Doz/ERahTi9dzsdE+L/AMUvDdkllonxA1+0toxhIPtZkRR6BXyBVfxB8UfiN4qtGtPEXjjXtRtmOWt5rxhEfqi4B/KuSor7dYPDqXP7NX72R899Yq25eZ29Q6AAcAcADtRRRXSYhVuy1TU9NlEmnale2bg5DW1w8RB/4CRVSilKKkrSVxptao6L/hP/AB5s2f8ACb+Jdvp/as//AMXWRe6pqmpSGTUtTvb1yclrm4eU/wDjxNVKKzjRpxd4xS+RTqSas2FFFFakF+w1zW9KOdL1nUrE9P8ARbuSH/0FhVm78WeK9Qh8q/8AFGuXUf8Acn1CZx+Raseis3Rpt3cVf0LVWaVk2KSWJLEknqTzSUUVoQa2g+KPEnha/N74a1/U9IuG4aWwuXhLfXacH8c11tx8ePjLdWX2Wb4leIfLxj5LgIx+rKAx/OvPKK56mEoVJc04JvzSNoV6kFyxk0ia7vLu/vZLy/u57q5kO6Se4kMjufUsxJNSWGpajpN2LrStQu7C4Ax51pM0L49NykGqtFbckbcttDPmd731NDUNe13Vv+Qrrep3/wD193ck3/oTGs+iiiMIxVoqwnJy3YV1Xhz4l/EHwhaC18M+NNc0u2U5Fvb3beUP+AHKj8q5WipqUadVctSKa81cqFSUHeLsdrrvxf8Aij4lsns9b8fa/d2zjDwfa2jjYe6ptB/GuKHHTj6UUUqVCnRVqcUvRWHOrObvN3NPTvEfiHSLdrfSdf1XT4WOWjs7yWFT9QrAVUu76+v5/Ovr25upf79xM0jfmxNV6KpUoJ8ySuJzk1a+gUUUVZAUUUUAFFFFABRRRQAUduefrRRQAZJ70UUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFJtXOQig+oFLRRa4XEAUEkKAT1IHWloooG3cKKKKBBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB/9k=" alt="Hapvida" style="height:42px;border-radius:8px;display:block">
+</header>
+
+<div id="pane-area">
+    <div class="panel">
+      <h2>Área de Comercialização — Governança Comercial Varejo Brasil</h2>
+      <div class="desc">Onde cada produto pode ser vendido: Regionais, filiais de vendas e municípios da área de comercialização (conteúdo do Cap. 18 do HapOn Learn).</div>
+      <div class="ac-intro">
+        <div class="ac-card"><span class="tag">REGIONAL 1</span><br><b>Norte, Nordeste, Centro-Oeste e Minas</b><br>NDI Minas, Hapvida MG, Brasília, Ceará, Goiás, Bahia, Pará, Piauí, Maranhão, Pernambuco, Rio Grande do Norte, Alagoas, Sergipe, Paraíba, Amazonas e mais.</div>
+        <div class="ac-card"><span class="tag">REGIONAL 2</span><br><b>São Paulo, Sul e Rio de Janeiro</b><br>NDI São Paulo (Grande SP, Campinas, litoral e interior), Santa Catarina, Clinipam (PR/SC), CCG (RS) e Rio de Janeiro.</div>
+      </div>
+      <div class="ac-hint">⚠ Antes de vender, confirme se o <b>município do cliente</b> está na área da filial e se o <b>tipo de contratação</b> (Individual, Super Simples, PME, Adesão) é ofertado naquela praça.</div>
+      <div class="rede-filters" style="margin-bottom:12px">
+        <div class="fgroup" style="flex:1"><label>Buscar município ou filial</label><input class="search" id="acSearch" placeholder="ex.: Contagem, Guarulhos, Canoas…" oninput="acFilter()"></div>
+        <div class="fgroup"><label>&nbsp;</label><button class="btn clear" onclick="document.getElementById('acSearch').value='';acFilter()">Limpar</button></div>
+      </div>
+      <div class="rede-count" id="acCount"></div>
+      <div id="acR1"><div class="ac-reg-title">Regional 1 — Norte · Nordeste · Centro-Oeste · Minas Gerais</div>
+<div class="ac-op"><div class="ac-op-h">NDI Minas <span>· Coletivos Empresariais</span></div><div class="ac-fil"><b>Belo Horizonte</b> <span>Belo Horizonte · São Joaquim de Bicas · Contagem · Pedro Leopoldo · Santa Luzia · Mário Campos · Juatuba · Igarapé · Sabará · Caeté · Nova Lima · Jatuba · São José da Lapa · Matozinhos · Vespasiano · Brumadinho · Betim · Taquaruçu de Minas · Sarzedo · Esmeraldas · Raposos · Itabirito · Ribeirão das Neves · Moeda · Lagoa Santa · Nova união · Rio Acima · Capim branco · Confins</span></div><div class="ac-fil"><b>Divinópolis</b> <span>Divinópolis · São Sebastião do Oeste · Nova Serrana · São Gonçalo do Pará · Perdigão · Pitangui · Leandro Ferreira · Carmo do Cajuru · Onça de Pitangui · Carmo da Mata · Bom Despacho · Cláudio · Pará de Minas · Itaúna · Conceição do Pará · Mateus Leme · Araújos · Pedra do Indaiá · Igaratinga · Santo Antônio dos Campos · Santo Antônio do Monte · Ibirité</span></div><div class="ac-fil"><b>Alfenas</b> <span>Alfenas · Campos Gerais · Fama · Alterosa · Areado · Elói Mendes · Monte Belo · Poço Fundo · Serrania</span></div><div class="ac-fil"><b>Poços De Caldas</b> <span>Poço de Caldas · Bandeira do Sul · Divinolândia · Caconde · São João da Boa Vista · Campestre · São José do Rio Pardo · Águas da Prata · Botelhos · Areias · Ibitiúra de Minas · Santa Rita de Caldas · Caldas · São Sebastião da Grama · Andradas · Vargem Grande do Sul · Cabo verde</span></div><div class="ac-fil"><b>Varginha</b> <span>Varginha · Elói Mendes · Três Corações · Paraguaçu · Cambuquira · Carmo da Cachoeira · Monsenhor Paulo · Santana da Vargem · Cordislândia · Três Pontas · Campanha · São Bento Abade</span></div></div><div class="ac-op"><div class="ac-op-h">NDI Minas <span>· Individual</span></div><div class="ac-fil"><b>Divinópolis</b> <span>Divinópolis · São Sebastião do Oeste · Nova Serrana · São Gonçalo do Pará · Perdigão · Pitangui · Leandro Ferreira · Carmo do Cajuru · Onça de Pitangui · Carmo da Mata · Bom Despacho · Cláudio · Pará de Minas · Itaúna · Conceição do Pará · Mateus Leme · Araújos · Pedra do Indaiá · Igaratinga · Santo Antônio dos Campos · Santo Antônio do Monte · Ibirité</span></div></div><div class="ac-op"><div class="ac-op-h">Hapvida - Minas Gerais <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Uberaba</b> <span>Uberaba</span></div><div class="ac-fil"><b>Uberlândia</b> <span>Uberlândia</span></div><div class="ac-fil"><b>Belo Horizonte</b> <span>Belo Horizonte · São Joaquim de Bicas · Contagem · Pedro Leopoldo · Santa Luzia · Mário Campos · Juatuba · Igarapé · Sabará · Lagoa Santa · Nova Lima · Brumadinho · São José da Lapa · Esmeraldas · Vespasiano · Ibirité · Betim · Confins · Sarzedo · Rio Acima · Raposos · Ribeirão das Neves</span></div></div><div class="ac-op"><div class="ac-op-h">Brasília <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Brasília</b> <span>Brasília · Águas Lindas de Goiás · Cidade Ocidental · Formosa · Novo Gama · Planaltina · Santo Antônio do Descoberto · Val Paraíso de Goiás</span></div></div><div class="ac-op"><div class="ac-op-h">Ceará <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Fortaleza</b> <span>Aquiraz · Caucaia · Eusébio · Fortaleza · Itaitinga · Maracanaú · Maranguape · Pacajus (somente ambulatorial) · Pacatuba · São Gonçalo do Amarante (somente ambulatorial)</span></div><div class="ac-fil"><b>Juazeiro Do Norte</b> <span>Barbalha · Caririaçu · Crato · Juazeiro do Norte · Missão Velha</span></div></div><div class="ac-op"><div class="ac-op-h">Goiás <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Anápolis</b> <span>Abadiânia · Anápolis · Campo Limpo de Goiás · Goianápolis · Ouro Verde de Goiás · Terezópolis de Goiás</span></div><div class="ac-fil"><b>Goiânia</b> <span>Abadia de Goiás · Aparecida de Goiânia · Araçu · Aragoiânia · Goiânia · Goianira · Guapó · Nerópolis · Santo Antônio de Goiás · Senador Canedo · Trindade</span></div></div><div class="ac-op"><div class="ac-op-h">Goiás <span>· Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Quirinópolis</b> <span>Paranaiguara · Quirinópolis</span></div><div class="ac-fil"><b>Rio Verde</b> <span>Jataí · Montividiu · Rio Verde · Santa Helena de Goiás</span></div></div><div class="ac-op"><div class="ac-op-h">Bahia <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Feira De Santana</b> <span>Antônio Cardoso · Conceição do Jacuípe · Feira de Santana · São Gonçalo dos Campos</span></div><div class="ac-fil"><b>Salvador</b> <span>Candeias · Lauro de Freitas · Salvador · Simões Filho · Vera Cruz</span></div><div class="ac-fil"><b>Camaçari</b> <span>Camaçari</span></div></div><div class="ac-op"><div class="ac-op-h">Pará <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Belém</b> <span>Ananindeua · Quirinópolis</span></div><div class="ac-fil"><b>Parauapebas</b> <span>Curionópolis · Parauapebas</span></div></div><div class="ac-op"><div class="ac-op-h">Piauí <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Teresina</b> <span>Demerval Lobão · Teresina · Nazária · Timon</span></div></div><div class="ac-op"><div class="ac-op-h">Maranhão <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>São Luís</b> <span>Paço do Lumiar · Raposa · São Luís · São José de Ribamar</span></div></div><div class="ac-op"><div class="ac-op-h">Pernambuco <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Recife</b> <span>Abreu e Lima · Cabo de Santo Agostinho · Camaragibe · Goiana · Agarassu · Itapissuma · Jaboatão dos Guararapes · Moreno · Olinda · Paulista · Recife · São Lourenço da Mata</span></div></div><div class="ac-op"><div class="ac-op-h">Rio Grande do Norte <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Natal</b> <span>Extremoz · Macaíba · Natal · Parnamirim · São Gonçalo do Amarante</span></div><div class="ac-fil"><b>Mossoró</b> <span>Baraúna · Mossoró · Serra do Mel · Tibau</span></div></div><div class="ac-op"><div class="ac-op-h">Amazonas <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Manaus</b> <span>Careiro da Várzea · Iranduba · Manaus</span></div></div><div class="ac-op"><div class="ac-op-h">Sergipe <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Aracaju</b> <span>Aracaju · Barra dos Coqueiros · Laranjeiras · Nossa Senhora do Socorro · São Cristóvão</span></div></div><div class="ac-op"><div class="ac-op-h">Paraíba <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Campina Grande</b> <span>Campina Grande · Fagundes · Lagoa Seca · Massaranduba · Puxinanã · Queimadas</span></div><div class="ac-fil"><b>João Pessoa</b> <span>Bayeux · Cabedelo · Conde · João Pessoa · Santa Rita</span></div></div><div class="ac-op"><div class="ac-op-h">Alagoas <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Maceió</b> <span>Coqueiro Seco · Maceió · Marechal Deodoro · Piripueira · Rio Largo · Santa Luzia do Norte · Satuba</span></div></div><div class="ac-op"><div class="ac-op-h">Mato Grosso <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Cuiabá</b> <span>Cuiabá · Várzea Grande</span></div><div class="ac-fil"><b>Rondonópolis</b> <span>Juscimeira · Pedra Preta · Rondonópolis · São José do Povo</span></div></div><div class="ac-op"><div class="ac-op-h">Mato Grosso do Sul <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Campo Grande</b> <span>Campo Grande · Jaraguari · Nova Alvorada do Sul · Ribas do Rio Pardo · Sidrolândia · Terenos</span></div><div class="ac-fil"><b>Dourados</b> <span>Deodápolis · Douradina · Dourados · Fátima do Sul · Itaporã · Rio Brilhante</span></div><div class="ac-fil"><b>Três Lagoas</b> <span>Três Lagoas</span></div></div><div class="ac-op"><div class="ac-op-h">Interior de São Paulo <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Ribeirão Preto</b> <span>Brodowski · Cravinhos · Dumont · Guatapará · Jardinópolis · Luís Antônio · Ribeirão Preto · Serrana</span></div><div class="ac-fil"><b>Araraquara</b> <span>Américo Brasiliense · Araraquara · Boa Esperança do Sul · Gavião Peixoto · Matão · Motuca · Rincão · Santa Lúcia</span></div><div class="ac-fil"><b>Barretos</b> <span>Barretos · Colina · Colômbia · Guaíra · Guaraci · Jaborandi · Olímpia · Severínia</span></div><div class="ac-fil"><b>Jaboticabal</b> <span>Guariba · Jaboticabal · Monte Alto · Taiúva · Taquaral · Taquaritinga</span></div></div><div class="ac-op"><div class="ac-op-h">Interior de São Paulo <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Leme</b> <span>Araras · Leme</span></div><div class="ac-fil"><b>Limeira</b> <span>Artur Nogueira · Cordeirópolis · Cosmópolis · Engenheiro Coelho · Iracemápolis · Limeira · Santa Bárbara D’oeste</span></div><div class="ac-fil"><b>Lins</b> <span>Cafelândia · Getulina · Guaiçara · Lins · Sabino</span></div><div class="ac-fil"><b>Marília</b> <span>Álvaro de Carvalho · Campos Novos Paulista · Echaporã · Guaimbê · Júlio Mesquita · Marília · Ocauçu · Oriente · Pompeia · Vera Cruz</span></div></div><div class="ac-op"><div class="ac-op-h">Interior de São Paulo <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>São José Dos Campos</b> <span>Caçapava · Igaratá · Jacareí · Monteiro Lobato · São José dos Campos · Santa Branca · Paraibuna · Taubaté</span></div><div class="ac-fil"><b>Franca</b> <span>Cristais Paulista · Franca · Patrocínio Paulista · Restinga · Ribeirão Corrente · São José da Bela Vista</span></div><div class="ac-fil"><b>Piracicaba</b> <span>Capivari · Charqueada · Ipeúna · Laranjal Paulista · Piracicaba · Rio Claro · Rio das Pedras · Saltinho · Santa Maria da Serra · São Pedro · Tietê</span></div><div class="ac-fil"><b>Pirassununga</b> <span>Aguaí · Analândia · Pirassununga · Porto Ferreira · Santa Cruz da Conceição · Santa Cruz das Palmeiras · Santa Rita do Passa Quarto</span></div></div><div class="ac-op"><div class="ac-op-h">Interior de São Paulo <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Sertãozinho</b> <span>Barrinha · Pitangueiras · Pontal · Sertãozinho</span></div><div class="ac-fil"><b>São Carlos</b> <span>Descalvado · Ibaté · Itirapina · Ribeirão Bonito · São Carlos</span></div><div class="ac-fil"><b>Bauru</b> <span>Agudos · Arealva · Avaí · Bauru · Duartina · Pederneiras · Piratininga</span></div></div>
+      </div>
+      <div id="acR2"><div class="ac-reg-title">Regional 2 — São Paulo · Sul · Rio de Janeiro</div>
+<div class="ac-op"><div class="ac-op-h">NDI São Paulo <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Americana</b> <span>Americana · Artur Nogueira · Cosmópolis · Nova Odessa · Santa Bárbara D´Oeste</span></div><div class="ac-fil"><b>Campinas</b> <span>Campinas · Valinhos · Paulínia · Hortolândia · Jaguariúna · Pedreira · Indaiatuba · Monte Mor · Holambra · Sumaré · Elias Fausto · Santo Antônio de Posse · Amparo</span></div><div class="ac-fil"><b>Jundiaí</b> <span>Jundiaí · Várzea Paulista · Louveira · Itupeva · Cajamar · Vinhedo · Itatiba</span></div><div class="ac-fil"><b>Mogi Das Cruzes</b> <span>Mogi das Cruzes · Suzano · Poá · Itaquaquecetuba · Ferraz de Vasconcelos · Arujá · Guararema · Santa Isabel</span></div></div><div class="ac-op"><div class="ac-op-h">NDI São Paulo <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Santos</b> <span>Santos · São Vicente · Praia Grande · Guarujá · Cubatão · Bertioga · Mongaguá</span></div><div class="ac-fil"><b>São Bernardo Do Campo</b> <span>São Bernardo do Campo · Santo André · Diadema · São Caetano do Sul · Mauá · Ribeirão Pires · Rio Grande da Serra · Embu-Guaçu</span></div><div class="ac-fil"><b>São Paulo</b> <span>São Paulo · Taboão da Serra · Carapicuíba · Guarulhos · Caieiras · Embu das Artes · Barueri · Osasco · Mairiporã · Jandira · Franco da Rocha · Itapecerica da Serra · Cotia · Itapevi</span></div><div class="ac-fil"><b>Sorocaba</b> <span>Sorocaba · Votorantim · Araçoiaba da Serra · Salto de Pirapora · Alumínio · Piedade · Capela do Alto · Ibiúna · Iperó · São Roque · Porto Feliz · Salto · Itu · Cabreúva · Sarapuí · Araçariguama</span></div></div><div class="ac-op"><div class="ac-op-h">Santa Catarina <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Joinville</b> <span>Araquari · Garuva · Joinville · São Francisco do Sul</span></div></div><div class="ac-op"><div class="ac-op-h">Clinipam <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Curitiba</b> <span>(Paraná) · Almirante Tamandaré · Colombo · Pinhais · Araucária · Campo magro · Itaperuçu · Campina Grande do Sul · Campo Largo · Rio Branco do Sul · Quatro Barras · São José dos Pinhais · Piraquara · Fazenda Rio Grande · Curitiba</span></div><div class="ac-fil"><b>Balneário Camboriú</b> <span>(Santa Catarina) · Camboriú · Itajaí · Navegantes · Itapema · Bombinhas · Porto Belo · Ilhota · Penha · Balneário Piçarras · Tijucas · Balneário Camboriú</span></div><div class="ac-fil"><b>Londrina</b> <span>(Paraná) · Arapongas · Rolândia · Cambé · Jataizinho · Ibiporã · Primeiro de Maio · Londrina</span></div><div class="ac-fil"><b>Maringá</b> <span>(Paraná) · Ângulo · Iguaraçu · Floresta · Marialva · Sarandi · Paiçandu · Mandaguaçu · Maringá</span></div></div><div class="ac-op"><div class="ac-op-h">CCG <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Porto Alegre</b> <span>(Rio Grande do Sul) · Eldorado do Sul · Alvorada · Cachoeirinha · Porto Alegre · Viamão · Guaíba · Gravataí</span></div><div class="ac-fil"><b>Novo Hamburgo</b> <span>(Rio Grande do Sul) · Araricá · Dois Irmãos · Estância Velha · Ivoti · Nova Hartz · Novo Hamburgo · Parobé · São Sebastião do Caí · Sapiranga</span></div><div class="ac-fil"><b>São Leopoldo</b> <span>(Rio Grande do Sul) · Capela de Santana · Campo Bom · Montenegro · São Leopoldo · Portão</span></div><div class="ac-fil"><b>Canoas</b> <span>(Rio Grande do Sul) · Canoas · Esteio · Nova Santa Rita · Sapucaia do Sul</span></div></div><div class="ac-op"><div class="ac-op-h">Rio de Janeiro <span>· Individual, Super Simples, PME e Administradora</span></div><div class="ac-fil"><b>Rio De Janeiro</b> <span>Rio de Janeiro · Niterói · Duque de Caxias · São Gonçalo · São João do Meriti · Nilópolis · Belfort Roxo · Mesquita · Nova Iguaçu · Magé · Itaboraí · Maricá · Queimados</span></div></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function acFilter(){
+  const q=(document.getElementById('acSearch').value||'').trim().toLowerCase();
+  const norm=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const nq=norm(q);
+  let vis=0, tot=0;
+  document.querySelectorAll('#pane-area .ac-fil').forEach(f=>{
+    tot++;
+    const txt=norm(f.textContent);
+    const hit=!nq||txt.includes(nq);
+    f.style.display=hit?'':'none';
+    if(hit)vis++;
+    const sp=f.querySelector('span');
+    if(sp){
+      if(sp.dataset.orig===undefined)sp.dataset.orig=sp.innerHTML;
+      if(nq&&hit){
+        const rx=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+        sp.innerHTML=sp.dataset.orig.replace(rx,'<mark>$1</mark>');
+      } else sp.innerHTML=sp.dataset.orig;
+    }
+  });
+  document.querySelectorAll('#pane-area .ac-op').forEach(op=>{
+    const any=[...op.querySelectorAll('.ac-fil')].some(f=>f.style.display!=='none');
+    op.style.display=any?'':'none';
+  });
+  document.getElementById('acCount').textContent=nq?`${vis} de ${tot} filiais com "${q}"`:`${tot} filiais de vendas`;
+}
+document.addEventListener('DOMContentLoaded', function () {
+  try { acFilter(); } catch (e) {}   // pinta a contagem de filiais na abertura
+});
+</script>
+</body>
+</html>
