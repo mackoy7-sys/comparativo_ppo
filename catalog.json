@@ -96082,5 +96082,29 @@
 "54 a 58": 796.37,
 "59 ou mais": 1147.81
 }
+},
+{
+"id": 3762,
+"operadora": "Hapvida",
+"plano": "Infinity",
+"label": "Infinity",
+"acomodacao": "Apartamento",
+"coparticipacao": "Completa",
+"mei": false,
+"categoria": "Geral",
+"tipo": "Empresarial",
+"praca": "SP / RMSP",
+"precos": {
+"00 a 18": 742.73,
+"19 a 23": 868.99,
+"24 a 28": 1060.16,
+"29 a 33": 1272.21,
+"34 a 38": 1335.83,
+"39 a 43": 1469.4,
+"44 a 48": 1836.76,
+"49 a 53": 2220.77,
+"54 a 58": 2777.82,
+"59 ou mais": 4419.54
+}
 }
 ]
