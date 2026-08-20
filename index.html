@@ -1088,6 +1088,16 @@ function boot(){
 document.getElementById('convOverlay').addEventListener('click',e=>{if(e.target.id==='convOverlay')closeConv();});
 document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
 fetch('catalog.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{CATALOG=d;boot();}).catch(e=>{var m=document.getElementById('matrix');if(m)m.innerHTML='<tr><td style=padding:20px>Erro ao carregar catálogo ('+e.message+'). Recarregue a página.</td></tr>';});
+
+  /* deep-link de aba: /#area abre direto na Área de Comercialização — usado
+     pelo card do app HapON Vendas, que aponta para uma aba específica.
+     (o cotador não usa o hash para mais nada, então não há conflito) */
+  function _abaDoHash(){
+    var m = (location.hash||'').match(/^#\/?(calc|comp|rede|area)$/);
+    if (m) switchTab(m[1]);
+  }
+  _abaDoHash();
+  window.addEventListener('hashchange', _abaDoHash);
 </script>
 </body>
 </html>
