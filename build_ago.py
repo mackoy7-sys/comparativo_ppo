@@ -41,6 +41,8 @@ PROD_KINDS = [
     (r'NOSSOPLANO-?SEMFRANQUIA', 'Nosso Plano'),
     (r'NOSSOPLANO-?FRANQUIA', 'Nosso Plano'),
     (r'NOSSOPLANO-?AMB(ULATORIAL)?', 'Nosso Plano'),
+    (r'NOSSOPLANO-?MUNICIPAL', 'Nosso Plano Municipal'),
+    (r'NOSSOPLANO-?GRUPODEMUNICIPIOS', 'Nosso Plano Grupo Municípios'),
     (r'NOSSOPLANO', 'Nosso Plano'),
     (r'NOSSOMEDICO', 'Nosso Médico'),
     (r'MIX-?FRANQUIA', 'Mix'),
@@ -69,16 +71,17 @@ def get_rows(page, tol=3.2):
     return rows
 
 def merge_values(words):
-    # aceita '-' inicial espúrio: SS Joinville tem '59+' impresso dobrado
-    # ("RR$$ 1 . 6 8 -3,00" = R$ 1.683,00) — preços nunca são negativos
-    toks = [w for w in words if w['text'] != 'R$' and re.match(r'^-?[\d\.,]+$', w['text'])]
+    # aceita '-'/'!' iniciais espúrios: SS Joinville tem '59+' impresso dobrado
+    # ("RR$$ 1 . 6 8 -3,00" = R$ 1.683,00) e Teresina SS 24/08 tem "#REF!714,59"
+    # sobre o valor — preços nunca são negativos nem começam com pontuação
+    toks = [w for w in words if w['text'] != 'R$' and re.match(r'^[-!]?[\d\.,]+$', w['text'])]
     def inc(t):
         return ',' not in t or len(t.split(',')[-1]) < 2
     vals = []; i = 0
     while i < len(toks):
-        t = toks[i]['text'].lstrip('-'); x = toks[i]['x0']
+        t = toks[i]['text'].lstrip('-!'); x = toks[i]['x0']
         while i + 1 < len(toks) and inc(t) and (toks[i+1]['x0'] - toks[i]['x1']) < 8:
-            t += toks[i+1]['text'].lstrip('-'); i += 1
+            t += toks[i+1]['text'].lstrip('-!'); i += 1
         if ',' in t and re.search(r'\d', t):
             vals.append((float(t.replace('.', '').replace(',', '.')), x))
         i += 1
@@ -183,6 +186,7 @@ def parse_city(page, city, is_pf):
     fr_spans = classify_spans(segs, [
         (r'SEMFRANQUIA', 'Sem'),
         (r'COMFRANQUIA', 'Com'),
+        (r'SEM(?=COMFRANQUIA)|^SEM$', 'Sem'),  # linha "FRANQUIA* | SEM | COM FRANQUIA*" (Brasília SS 24/08)
     ])
     # franquia só vale como dimensão quando é linha de cabeçalho (fora de banner de produto)
     prod_ys = {round(y) for n, a, b, y in prod_spans}
@@ -257,12 +261,10 @@ def parse_city(page, city, is_pf):
                 best = (nome, d, y)
         return best[0] if best else None
 
-    def pick_band(spans, cx):
-        """Span do intervalo horizontal que contém cx; divisórias = ponto médio
-        entre spans consecutivos (títulos centralizados não cobrem toda a área)."""
-        if not spans: return None
-        sp = sorted(spans, key=lambda t: (t[1] + t[2]) / 2)
+    def merge_cops(spans):
         # cabeçalho quebrado em 2 linhas ("COM COPARTICIPAÇÃO" + "PARCIAL"): merge
+        if not spans: return []
+        sp = sorted(spans, key=lambda t: (t[1] + t[2]) / 2)
         merged = []
         for t in sp:
             if merged:
@@ -273,7 +275,12 @@ def parse_city(page, city, is_pf):
                     merged[-1] = (nome, min(p[1], t[1]), max(p[2], t[2]), p[3])
                     continue
             merged.append(t)
-        sp = merged
+        return merged
+
+    def pick_band(spans, cx):
+        """Span do intervalo horizontal que contém cx; divisórias = ponto médio
+        entre spans consecutivos (títulos centralizados não cobrem toda a área)."""
+        sp = merge_cops(spans)
         for i, (nome, a, b, y) in enumerate(sp):
             lo = -1e9 if i == 0 else (sp[i-1][2] + a) / 2
             hi = 1e9 if i == len(sp) - 1 else (b + sp[i+1][1]) / 2
@@ -295,8 +302,15 @@ def parse_city(page, city, is_pf):
         txmax = max(c[1] for c in tcols) + 40
         def in_x(t):
             return t[1] < txmax and t[2] > txmin
-        band_cops = sorted([t for t in cop_spans if in_band(t[3], 80) and in_x(t)], key=lambda t: t[1])
-        band_copc = [t for t in cop_cells if in_band(t[3], 80) and in_x(t)]
+        def near_prod(t):
+            # cabeçalho "PRODUTO COM COPARTICIPAÇÃO" pode ficar à direita das
+            # colunas do grupo (PME 24/08 Campina Grande: 2 colunas, banner largo);
+            # é legítimo quando emenda com um span de produto na mesma linha
+            return any(abs(p[3] - t[3]) < 3 and -25 <= t[1] - p[2] <= 25
+                       for p in prod_spans)
+        band_cops = sorted([t for t in cop_spans if in_band(t[3], 80) and (in_x(t) or near_prod(t))],
+                           key=lambda t: t[1])
+        band_copc = [t for t in cop_cells if in_band(t[3], 80) and (in_x(t) or near_prod(t))]
         band_seg = [t for t in seg_spans if in_band(t[3], 70)]
         band_ac_all = [t for t in acom_toks if in_band(t[3], 60)]
         band_med = [t for t in med_spans if in_band(t[3], 40)]
@@ -329,6 +343,22 @@ def parse_city(page, city, is_pf):
         if DEBUG:
             print(f'  DBG {city}: tabela cy={cy:.0f} band_cops=' +
                   ' | '.join(f'{n}[{a:.0f}-{b:.0f}]y{y:.0f}' for n, a, b, y in band_cops))
+        # grupos por repetição do REGISTRO ANS: quando o nº de runs bate com o nº
+        # de grupos de copart, as divisórias entre runs são exatas (cabeçalhos de
+        # copart centralizados/alinhados à esquerda não cobrem o grupo inteiro)
+        merged_cops = merge_cops(band_cops)
+        tregs = sorted([(c, x) for c, x, y in regs
+                        if 0 < cy - y < 42 and y > prev_cy], key=lambda t: t[1])
+        runs = []
+        cur = []; seen = set()
+        for c, x in tregs:
+            if c in seen:
+                runs.append(cur); cur = []; seen = set()
+            cur.append((c, x)); seen.add(c)
+        if cur: runs.append(cur)
+        run_bounds = None
+        if len(runs) == len(merged_cops) > 1:
+            run_bounds = [(runs[i][-1][1] + runs[i+1][0][1]) / 2 for i in range(len(runs) - 1)]
         tout = []
         for code, cx, ccy in tcols:
             inc = [p for p in band_prodc
@@ -357,16 +387,19 @@ def parse_city(page, city, is_pf):
                                     for sn, sa, sb, sy in band_seg if sn == 'SKIP')}
                 if len(band) == 1:
                     segm = band.pop()
-            # copart: célula do cabeçalho que contém a coluna; senão divisórias por x
-            cc = {n for n, a, b, y, l, r in band_copc
-                  if l is not None and r is not None and l - 2 <= cx <= r + 2}
-            cop = cc.pop() if len(cc) == 1 else pick_band(band_cops, cx)
+            # copart: divisórias dos runs de ANS; senão célula do cabeçalho; senão
+            # divisórias por x entre os spans
+            if run_bounds is not None:
+                gi = sum(1 for b in run_bounds if cx > b)
+                cop = merged_cops[gi][0]
+            else:
+                cc = {n for n, a, b, y, l, r in band_copc
+                      if l is not None and r is not None and l - 2 <= cx <= r + 2}
+                cop = cc.pop() if len(cc) == 1 else pick_band(band_cops, cx)
             if produto is None or cop is None or segm == 'SKIP':
                 if DEBUG:
                     print(f'  DBG {city}: drop col {code} x={cx:.0f} prod={produto} cop={cop} segm={segm}')
                 continue
-            if segm is None:
-                print(f'  !! {city}: sem segmentacao col {code} ({produto})'); continue
             ac = [(n, (a+b)/2, y) for n, a, b, y in band_ac_all if abs((a+b)/2 - cx) < 55]
             if ac:
                 ymax_ac = max(t[2] for t in ac)
@@ -384,8 +417,7 @@ def parse_city(page, city, is_pf):
                 bac = {n for n, a, b, y in band_ac_all if a < txmax and b > txmin}
                 if len(bac) == 1:
                     acom = bac.pop()
-            if not acom:
-                print(f'  !! {city}: sem acomodacao col {code} ({produto})'); continue
+            # segm/acom None seguem para o backfill por ANS após o loop
             md = [(n, (a+b)/2, y) for n, a, b, y in band_med if abs((a+b)/2 - cx) < 30]
             med = min(md, key=lambda t: abs(t[1]-cx))[0] if md else None
             # franquia (linha de cabeçalho SEM/COM FRANQUIA)
@@ -409,9 +441,33 @@ def parse_city(page, city, is_pf):
                     print(f'  DBG {city}: drop col {code} x={cx:.0f} faixas={len(pr)}')
                 continue
             has_obst = any(n == 'OBST' for n, a, b, y in band_seg)
+            ans = min(tregs, key=lambda t: abs(t[1] - cx))[0] \
+                if tregs and min(abs(t[1] - cx) for t in tregs) < 45 else None
             tout.append(dict(produto=produto, cop=cop, segm=segm, acom=acom,
                              med=med, fr=fr, precos=pr, cod=code,
-                             has_obst=has_obst))
+                             has_obst=has_obst, ans=ans))
+        # backfill por REGISTRO ANS: segmentação/acomodação são propriedades do
+        # registro — recupera célula corrompida na fonte (Fortaleza PME 24/08 tem
+        # '\\' no lugar de ENFERM) e rótulos fora do alcance horizontal
+        segmap = {}; acmap = {}
+        for t in tout:
+            if t['ans']:
+                if t['segm']: segmap.setdefault(t['ans'], set()).add(t['segm'])
+                if t['acom']: acmap.setdefault(t['ans'], set()).add(t['acom'])
+        kept = []
+        for t in tout:
+            if t['segm'] is None and t['ans'] and len(segmap.get(t['ans'], ())) == 1:
+                t['segm'] = next(iter(segmap[t['ans']]))
+            if t['acom'] is None and t['ans'] and len(acmap.get(t['ans'], ())) == 1:
+                t['acom'] = next(iter(acmap[t['ans']]))
+            if t['segm'] == 'AMB' and not t['acom']:
+                t['acom'] = 'Ambulatorial'
+            if t['segm'] is None:
+                print(f"  !! {city}: sem segmentacao col {t['cod']} ({t['produto']})"); continue
+            if t['acom'] is None:
+                print(f"  !! {city}: sem acomodacao col {t['cod']} ({t['produto']})"); continue
+            kept.append(t)
+        tout = kept
         # Médica¹/² sem linha ASSISTÊNCIA (ex.: João Pessoa): pares de colunas
         # idênticas na chave -> a mais barata é a variante "+ Odonto"
         pares = {}
@@ -454,7 +510,7 @@ def parse_city(page, city, is_pf):
 
 # ---------------- cidades ----------------
 UFS = ('AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO').split()
-CITY_NOUF = {'JOINVILLE': 'Joinville - SC'}
+CITY_NOUF = {'JOINVILLE': 'Joinville - SC', 'JUAZEIRODONORTE': 'Juazeiro Do Norte - CE'}
 
 def load_catalog():
     return json.load(open(CATALOG))
