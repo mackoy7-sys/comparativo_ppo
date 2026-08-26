@@ -871,8 +871,10 @@ async function gerarFolder(){
   const min=rows[0];
   const bestHap=rows.find(r=>r.c.operadora==='Hapvida');
   const chips=BANDS.filter(b=>vidas[b]>0).map(b=>`<div class="fd-chip">${b}: <b>${vidas[b]}</b></div>`).join('');
+  const temReemb=rows.some(r=>r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]);
   let trs=rows.map((r,i)=>{const cop=segLabel(r.c.coparticipacao);const prod=(r.c.tipo==='Individual')?'Individual (PF)':'Empresarial (PME)';
-    return `<tr><td>${i+1}</td><td>${r.c.label}</td><td>${opDisp(r.c)}</td><td>${prod}</td><td>${r.c.acomodacao}</td><td>${cop}</td><td>R$ ${fmt(r.total)}</td></tr>`;}).join('');
+    const reembCell=temReemb?`<td>${r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]?REEMBOLSO[r.c.plano]:'—'}</td>`:'';
+    return `<tr><td>${i+1}</td><td>${r.c.label}</td><td>${opDisp(r.c)}</td><td>${prod}</td><td>${r.c.acomodacao}</td><td>${cop}</td>${reembCell}<td>R$ ${fmt(r.total)}</td></tr>`;}).join('');
   let hi;
   if(rows.length===1){
     const r=rows[0];
@@ -936,7 +938,7 @@ async function gerarFolder(){
     <div class="fd-grid">${chips||'<div class="fd-chip">Sem vidas informadas</div>'}</div>
     <div class="fd-sec">Planos cotados</div>
     ${hi}
-    <table class="fd-tbl"><thead><tr><th>#</th><th>Plano</th><th>Operadora</th><th>Produto</th><th>Acomodação</th><th>Coparticipação</th><th>Mensalidade</th></tr></thead><tbody>${trs}</tbody></table>
+    <table class="fd-tbl"><thead><tr><th>#</th><th>Plano</th><th>Operadora</th><th>Produto</th><th>Acomodação</th><th>Coparticipação</th>${temReemb?'<th>Reembolso</th>':''}<th>Mensalidade</th></tr></thead><tbody>${trs}</tbody></table>
     <div class="fd-sec">Tabela de valores — mensalidade por faixa etária</div>
     ${priceTbl}
     ${copHtml}
