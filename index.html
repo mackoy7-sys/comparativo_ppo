@@ -762,7 +762,8 @@ function openDetail(id){
   const c=planById(id);const o=OPS.find(x=>x.key===c.operadora);const col=opColorFor(c);
   document.getElementById('detailHead').innerHTML=`<div style="color:${col};font-weight:700;font-size:13px">${opDisp(c)}</div><h3 style="margin:2px 0 0">${c.label} · ${c.acomodacao}</h3><p style="margin:4px 0 0">${c.tipo==='Individual'?'Saúde PF':'Saúde PME'} · ${c.coparticipacao}${c.operadora==='Hapvida'&&REEMBOLSO[c.plano]?` · Reembolso ${REEMBOLSO[c.plano]}`:''}</p>`;
   let body=`<table><thead><tr><th>Faixa etária</th><th>Vidas</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>`;
-  BANDS.forEach(b=>{const q=vidas[b],p=c.precos[b]||0;body+=`<tr><td>${b}</td><td>${q}</td><td>R$ ${fmt(p)}</td><td>R$ ${fmt(q*p)}</td></tr>`;});
+  const mostraTudo=totVidas()===0; // sem vidas informadas, mostra a tabela completa de preços
+  BANDS.forEach(b=>{const q=vidas[b],p=c.precos[b]||0;if(!mostraTudo&&q===0)return;body+=`<tr><td>${b}</td><td>${q}</td><td>R$ ${fmt(p)}</td><td>R$ ${fmt(q*p)}</td></tr>`;});
   body+=`<tr class="tot"><td>Total</td><td>${totVidas()}</td><td></td><td>R$ ${fmt(planTotal(c))}</td></tr></tbody></table>`;
   document.getElementById('detailBody').innerHTML=body;
   document.getElementById('detailOverlay').classList.add('show');
