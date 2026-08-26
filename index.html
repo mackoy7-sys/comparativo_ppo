@@ -920,7 +920,7 @@ async function gerarFolder(){
     }
   }
   const ppoAny=sel.some(isPPO);
-  const hapAny=sel.some(c=>!isPPO(c));
+  const hapAny=sel.some(c=>c.operadora==='Hapvida'&&!isPPO(c)); // só produtos Hapvida contam — concorrentes não tiram a exclusividade PPO
   const mixed=ppoAny&&hapAny;
   let fdLogo,fdSub,fcls;
   if(mixed){ fdLogo=`<span class="dual">${LOGO_SVG}${NOTRE_LOGO_SVG}</span>`; fdSub='Hapvida · NotreDame Saúde · Vendas Digital'; fcls='mixed'; }
