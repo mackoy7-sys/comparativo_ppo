@@ -376,6 +376,7 @@
       <div class="desc">Ranking dos planos selecionados (todas as operadoras), do menor para o maior custo mensal.</div>
       <div class="folder-bar">
         <input id="clienteNome" placeholder="Nome do cliente (aparece no folder)">
+        <input id="consultorNome" placeholder="Consultor de Vendas (aparece no folder)">
         <button class="btn solid" onclick="gerarFolder()"><i></i>Gerar folder (PDF)</button>
       </div>
       <div id="resultArea"><div class="empty">Informe as vidas e selecione ao menos um plano na matriz para ver o ranking.</div></div>
@@ -865,6 +866,7 @@ async function gerarFolder(){
   const sel=selectedPlans(); const tv=totVidas();
   if(!sel.length||tv===0){alert('Informe as vidas e selecione ao menos um plano na matriz antes de gerar o folder.');return;}
   const nome=(document.getElementById('clienteNome').value||'').trim();
+  const consultor=(document.getElementById('consultorNome').value||'').trim();
   const hoje=new Date().toLocaleDateString('pt-BR');
   let rows=sel.map(c=>({c,total:planTotal(c)})).sort((a,b)=>a.total-b.total);
   const cols=rows.map(r=>r.c);
@@ -933,7 +935,7 @@ async function gerarFolder(){
   fel.innerHTML=`
     <div class="fd-head"><div><h1>Proposta de Cotação</h1><div class="fsub">Plano de Saúde · ${tv} vida(s)</div></div>
       <div class="fbrand">${fdLogo}<div style="font-size:11px;font-weight:600;margin-top:4px;opacity:.95">${fdSub}</div></div></div>
-    <div class="fd-meta"><div><b>Cliente:</b> ${nome||'—'}</div>${cols.some(c=>c.contratacao)?`<div><b>Contratação PME:</b> ${contratMode}</div>`:''}<div><b>Data:</b> ${hoje}</div></div>
+    <div class="fd-meta"><div><b>Cliente:</b> ${nome||'—'}</div>${consultor?`<div><b>Consultor de Vendas:</b> ${consultor}</div>`:''}${cols.some(c=>c.contratacao)?`<div><b>Contratação PME:</b> ${contratMode}</div>`:''}<div><b>Data:</b> ${hoje}</div></div>
     <div class="fd-sec">Perfil de vidas</div>
     <div class="fd-grid">${chips||'<div class="fd-chip">Sem vidas informadas</div>'}</div>
     <div class="fd-sec">Planos cotados</div>
