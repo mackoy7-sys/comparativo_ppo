@@ -860,7 +860,7 @@ const COP_ROWS=[
 ];
 const CARENCIAS=[
   ['Urgência e emergência (pronto-socorro)','24 horas'],
-  ['Consultas eletivas e exames simples','30 dias'],
+  ['Consultas eletivas e exames simples','24 horas'],
   ['Exames complexos e procedimentos especiais','60 dias'],
   ['Internações, cirurgias, alta complexidade e terapias','180 dias'],
   ['Parto a termo','300 dias'],
@@ -900,16 +900,34 @@ async function gerarFolder(){
   const priceTbl=`<table class="fd-tbl"><thead><tr><th>Faixa etária</th>${colHead}</tr></thead><tbody>${priceBody}${priceQt}</tbody></table>`;
   // Tabela de coparticipação (só planos Hapvida presentes na cotação)
   let copHtml='';
-  const copIdx=[...new Set(cols.filter(c=>c.operadora==='Hapvida').map(c=>COP_IDX[c.plano]).filter(i=>i!==undefined))].sort((a,b)=>a-b);
-  if(copIdx.length){
-    const copParcial=(rot,tot)=>/^(Terapias|Demais)/i.test(rot)?tot:'—';
-    const chead=`<tr><th>Procedimento</th>`+copIdx.map(i=>`<th>${COP_COLS[i].tier}<br><span style="font-weight:400;font-size:10px">${COP_COLS[i].planos} · Copart. parcial</span></th><th>${COP_COLS[i].tier}<br><span style="font-weight:400;font-size:10px">${COP_COLS[i].planos} · Copart. total</span></th>`).join('')+`</tr>`;
-    const cbody=COP_ROWS.map(r=>`<tr><td>${r[0]}</td>`+copIdx.map(i=>`<td>${copParcial(r[0],r[i+1])}</td><td>${r[i+1]}</td>`).join('')+`</tr>`).join('');
-    const copHap=cols.some(c=>c.operadora==='Hapvida'&&!isPPO(c)&&COP_IDX[c.plano]!==undefined);
+  await ensureCopart();
+  const PROC=['Consultas eletivas','Consultas de urgência','Exames simples','Exames complexos','Terapias especiais','Demais terapias','Internações'];
+  const PROC_ALT={'Consultas eletivas':'Consultas Eletivas','Consultas de urgência':'Consultas de Urgência','Exames simples':'Exames Simples','Exames complexos':'Exames Complexos','Terapias especiais':'Terapias Especiais','Demais terapias':'Demais Terapias','Internações':'Internações'};
+  const copCols=[];const vistos=new Set();
+  cols.filter(c=>c.operadora==='Hapvida').forEach(c=>{
+    const src=(COPART_PRACA&&COPART_PRACA[c.praca]&&COPART_PRACA[c.praca][c.plano])||null;
+    if(src){
+      const key='D|'+c.praca+'|'+c.plano; if(vistos.has(key))return; vistos.add(key);
+      const get=(g,p)=>{const o=src[g]||{};return o[p]!==undefined?o[p]:o[PROC_ALT[p]];};
+      copCols.push({t:c.label,sub:c.praca,parcial:p=>get('parcial',p),total:p=>get('total',p)});
+    } else if(COP_IDX[c.plano]!==undefined){
+      const i=COP_IDX[c.plano];const key='T|'+i; if(vistos.has(key))return; vistos.add(key);
+      copCols.push({t:COP_COLS[i].tier,sub:COP_COLS[i].planos,
+        parcial:p=>{const r=COP_ROWS.find(x=>x[0]===p);return r&&/^(Terapias|Demais)/i.test(p)?r[i+1]:null;},
+        total:p=>{const r=COP_ROWS.find(x=>x[0]===p);return r?r[i+1]:null;}});
+    }
+  });
+  if(copCols.length){
+    const chead=`<tr><th>Procedimento</th>`+copCols.map(c=>`<th>${c.t}<br><span style="font-weight:400;font-size:10px">${c.sub} · Copart. parcial</span></th><th>${c.t}<br><span style="font-weight:400;font-size:10px">${c.sub} · Copart. total</span></th>`).join('')+`</tr>`;
+    const cbody=PROC.map(p=>{
+      const cels=copCols.map(c=>`<td>${c.parcial(p)||'—'}</td><td>${c.total(p)||'—'}</td>`).join('');
+      return copCols.every(c=>!c.parcial(p)&&!c.total(p))?'':`<tr><td>${p}</td>${cels}</tr>`;
+    }).join('');
+    const copHap=cols.some(c=>c.operadora==='Hapvida'&&!isPPO(c));
     const copPPO=cols.some(c=>c.operadora==='Hapvida'&&isPPO(c));
     const copMarca=copHap&&copPPO?'Hapvida/NotreDame Saúde':(copPPO?'NotreDame Saúde':'Hapvida');
     copHtml=`<div class="fd-sec">Tabela de coparticipação (${copMarca})</div>
-      <div class="fd-note">Coparticipação por procedimento, conforme o plano cotado. Consultas/exames: percentual limitado ao teto indicado; terapias e internações: valor fixo. Referencial — sujeito às condições contratuais e vigência.</div>
+      <div class="fd-note">Coparticipação por procedimento, conforme o plano cotado. Consultas/exames: percentual limitado ao teto indicado ou valor fixo; terapias e internações: valor fixo. "—" = sem cobrança nesse grupo. Referencial — sujeito às condições contratuais e vigência.</div>
       <table class="fd-tbl"><thead>${chead}</thead><tbody>${cbody}</tbody></table>`;
   }
   const reembSel=[...new Map(cols.filter(c=>c.operadora==='Hapvida'&&REEMBOLSO[c.plano]).map(c=>[c.plano,c.label])).entries()];
@@ -922,7 +940,7 @@ async function gerarFolder(){
   const carBody=CARENCIAS.map(r=>{const cpt=/CPT/.test(r[0]);
     return `<tr${isencao&&cpt?' class="used"':''}><td>${r[0]}</td><td style="text-align:right">${isencao&&!cpt?'<b>Isento</b>':r[1]}</td></tr>`;}).join('');
   const carHtml=`<div class="fd-sec">Tabela de carências</div>
-    <div class="fd-note">Prazos contados a partir da vigência do contrato.${isencao?' <b>Contrato empresarial com '+tv+' vidas: isenção de carências</b> (a partir de 30 vidas), exceto CPT para doenças e lesões preexistentes declaradas.':(empresarial?' Empresas com até 29 vidas seguem os prazos abaixo; a partir de 30 vidas há isenção de carências.':'')} Promoções vigentes podem reduzir consultas e exames para 24 horas. Referencial — sujeito às condições contratuais e à tabela vigente.</div>
+    <div class="fd-note">Prazos contados a partir da vigência do contrato.${isencao?' <b>Contrato empresarial com '+tv+' vidas: isenção de carências</b> (a partir de 30 vidas), exceto CPT para doenças e lesões preexistentes declaradas.':(empresarial?' Empresas com até 29 vidas seguem os prazos abaixo; a partir de 30 vidas há isenção de carências.':'')} Referencial — sujeito às condições contratuais e à tabela vigente.</div>
     <table class="fd-tbl"><thead><tr><th>Cobertura</th><th style="text-align:right">Carência</th></tr></thead><tbody>${carBody}</tbody></table>`;
   // Rede de atendimento dos planos selecionados
   let redeHtml='';
@@ -1001,6 +1019,13 @@ function buildRedeIndex(){
     });
   }
   for(const op in PLAN_BY_OP)PLAN_BY_OP[op]=[...PLAN_BY_OP[op]].sort();
+}
+let COPART_PRACA=null;
+function ensureCopart(){
+  return new Promise(res=>{
+    if(COPART_PRACA!==null)return res(true);
+    fetch('copart.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{COPART_PRACA=d;res(true);}).catch(()=>{COPART_PRACA={};res(false);});
+  });
 }
 function ensureRede(){
   return new Promise(res=>{
