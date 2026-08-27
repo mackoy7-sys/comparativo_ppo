@@ -888,9 +888,9 @@ async function gerarFolder(){
   let hi;
   if(rows.length===1){
     const r=rows[0];
-    hi=`<div class="fd-hi">Mensalidade: <span class="v">R$ ${fmt(r.total)}</span> — ${r.c.label} (${opDisp(r.c)})</div>`;
+    hi=`<div class="fd-hi">Mensalidade: <span class="v">R$ ${fmt(r.total)}</span> — ${r.c.label} (${opDisp(r.c)}) · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</div>`;
   } else {
-    const items=rows.map(r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao}</span><b>R$ ${fmt(r.total)}</b></div>`).join('');
+    const items=rows.map(r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</span><b>R$ ${fmt(r.total)}</b></div>`).join('');
     hi=`<div class="fd-hi"><div class="fd-hi-t">${rows.length} opções cotadas</div>${items}</div>`;
   }
   // Tabela de valores completa (preço por faixa etária)
