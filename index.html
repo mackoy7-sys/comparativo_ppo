@@ -894,9 +894,13 @@ async function gerarFolder(){
   let copHtml='';
   const copIdx=[...new Set(cols.filter(c=>c.operadora==='Hapvida').map(c=>COP_IDX[c.plano]).filter(i=>i!==undefined))].sort((a,b)=>a-b);
   if(copIdx.length){
-    const chead=`<tr><th>Procedimento</th>`+copIdx.map(i=>`<th>${COP_COLS[i].tier}<br><span style="font-weight:400;font-size:10px">${COP_COLS[i].planos}</span></th>`).join('')+`</tr>`;
-    const cbody=COP_ROWS.map(r=>`<tr><td>${r[0]}</td>`+copIdx.map(i=>`<td>${r[i+1]}</td>`).join('')+`</tr>`).join('');
-    copHtml=`<div class="fd-sec">Tabela de coparticipação (Hapvida)</div>
+    const copParcial=(rot,tot)=>/^(Terapias|Demais)/i.test(rot)?tot:'—';
+    const chead=`<tr><th>Procedimento</th>`+copIdx.map(i=>`<th>${COP_COLS[i].tier}<br><span style="font-weight:400;font-size:10px">${COP_COLS[i].planos} · Copart. parcial</span></th><th>${COP_COLS[i].tier}<br><span style="font-weight:400;font-size:10px">${COP_COLS[i].planos} · Copart. total</span></th>`).join('')+`</tr>`;
+    const cbody=COP_ROWS.map(r=>`<tr><td>${r[0]}</td>`+copIdx.map(i=>`<td>${copParcial(r[0],r[i+1])}</td><td>${r[i+1]}</td>`).join('')+`</tr>`).join('');
+    const copHap=cols.some(c=>c.operadora==='Hapvida'&&!isPPO(c)&&COP_IDX[c.plano]!==undefined);
+    const copPPO=cols.some(c=>c.operadora==='Hapvida'&&isPPO(c));
+    const copMarca=copHap&&copPPO?'Hapvida/NotreDame Saúde':(copPPO?'NotreDame Saúde':'Hapvida');
+    copHtml=`<div class="fd-sec">Tabela de coparticipação (${copMarca})</div>
       <div class="fd-note">Coparticipação por procedimento, conforme o plano cotado. Consultas/exames: percentual limitado ao teto indicado; terapias e internações: valor fixo. Referencial — sujeito às condições contratuais e vigência.</div>
       <table class="fd-tbl"><thead>${chead}</thead><tbody>${cbody}</tbody></table>`;
   }
