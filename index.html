@@ -597,7 +597,11 @@ function segLabel(s){return s.includes('Sem')?'Sem coparticipação':(s.includes
 function vidasOk(c){ if(c.vmin==null&&c.vmax==null) return true; const tv=totVidas(); if(tv===0) return true; return tv>=(c.vmin||0) && tv<=(c.vmax||1e9); }
 function resolved(ci,si){const col=matrixCols[ci];if(!col)return null;const x=col.slots[si];if(!(x&&x.plano&&x.acom&&x.seg))return null;
   const ms=CATALOG.filter(c=>c.operadora===col.op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c));
-  return ms.find(vidasOk)||null;}
+  const cands=ms.filter(vidasOk);
+  if(!cands.length)return null;
+  // preferir a tabela de porte MAIS ESPECÍFICA (1 vida > 2-29 > 30-99 > sem porte)
+  const amp=c=>(c.vmin==null&&c.vmax==null)?1e9:((c.vmax==null?1e9:c.vmax)-(c.vmin||0));
+  return cands.slice().sort((a,b)=>amp(a)-amp(b))[0];}
 function planTotal(c){return BANDS.reduce((s,b)=>s+vidas[b]*(c.precos[b]||0),0);}
 function totVidas(){return BANDS.reduce((s,b)=>s+vidas[b],0);}
 
