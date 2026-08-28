@@ -655,9 +655,13 @@ function resolved(ci,si){const col=matrixCols[ci];if(!col)return null;const x=co
 let ODONTO={};
 function temOdonto(c){return /\+ Odonto/.test((c&&c.label)||'');}
 function odontoFam(c){return c.acomodacao==='Ambulatorial'?'Ambulatorial':'Hospitalar';}
+/* O odonto casado com a Médica ¹ MUDA conforme a tabela: em Teresina o
+   Individual usa ODONTO PROTEÇÃO (R$ 3,85) e o PME 30-99 usa +ODONTO PREMIUM
+   NACIONAL cód 9732 (R$ 14,87 promo / R$ 75,84). Por isso a chave é
+   praça x TIPO x família — nunca aplicar o valor do PF no PME. */
 function odontoVal(c){ // R$ por vida/mês (VALOR PROMO)
   if(!temOdonto(c))return 0;
-  const d=(ODONTO[c.praca]||{})[odontoFam(c)];
+  const d=((ODONTO[c.praca]||{})[c.tipo]||{})[odontoFam(c)];
   return d&&d.promo?d.promo:0;
 }
 function odontoFalta(c){return temOdonto(c)&&!odontoVal(c);}  // praça sem valor carregado
@@ -851,7 +855,10 @@ function notaCopart(rows,note){
   const hasP=rows.some(r=>!r.c.coparticipacao.includes('Sem')),hasS=rows.some(r=>r.c.coparticipacao.includes('Sem'));
   if(hasP&&hasS)avisos.push('A comparação mistura planos <b>com coparticipação</b> (Hapvida = Parcial) e <b>sem coparticipação</b>. O custo mensal é só a mensalidade — nos planos com coparticipação há custo adicional conforme o uso.');
   const semOdo=[...new Set(rows.filter(r=>odontoFalta(r.c)).map(r=>r.c.label))];
-  if(semOdo.length)avisos.push('⚠ O valor do <b>plano odontológico</b> ainda não está carregado para esta praça — '+semOdo.join(', ')+' está sendo cotado <b>só com a assistência médica</b>. Confira no sistema antes de enviar a proposta.');
+  if(semOdo.length){
+    const emp=rows.some(r=>odontoFalta(r.c)&&r.c.tipo!=='Individual');
+    avisos.push('⚠ O valor do <b>plano odontológico</b> ainda não está carregado para '+(emp?'as tabelas <b>PME / Super Simples</b> desta praça (elas têm plano odontológico próprio, diferente do Individual)':'esta praça')+' — '+semOdo.join(', ')+' está sendo cotado <b>só com a assistência médica</b>. Confira no sistema antes de enviar a proposta.');
+  }
   if(avisos.length){note.style.display='block';note.innerHTML=avisos.join('<br><br>');}else note.style.display='none';
 }
 // aviso quando o vendedor declarou "mista" mas ainda não montou os dois lados
@@ -895,12 +902,40 @@ function resMista(rows,tv){
   const yb=(cbs.length>1&&dif>0)?`<div class="year-box"><span class="yi">💰</span><div>Entre a combinação mais econômica e a mais cara há <b class="big">R$ ${fmt(dif*12)}</b> em <b>12 meses</b> — o cliente leva o mesmo desenho de contrato (${vd(hL)} HMO + ${vd(pL)} PPO).</div></div>`:'';
   return kpis+yb+t+ct;
 }
+/* slots totalmente preenchidos na matriz que mesmo assim não resolvem para
+   nenhuma linha do catálogo — quase sempre porte (nº de vidas) fora da tabela.
+   Sem isso o Resultado ficava vazio dizendo "informe as vidas", o que é falso. */
+function slotsSemTabela(){
+  const out=[];
+  matrixCols.forEach((col,ci)=>col.slots.forEach((x,si)=>{
+    if(!(x.plano&&x.acom&&x.seg)||resolved(ci,si))return;
+    const todos=CATALOG.filter(c=>c.operadora===col.op&&c.label===x.plano&&c.acomodacao===x.acom
+      &&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c));
+    const mv=Math.max(0,...todos.map(minVidas),0);
+    const ranges=[...new Set(todos.filter(c=>c.vmin!=null).map(c=>c.vmin+'–'+c.vmax))].join(' ou ');
+    out.push({plano:x.plano,acom:x.acom,mv,ranges});
+  }));
+  return out;
+}
 function calcResult(){
   const tv=totVidas();const sel=selectedPlans();
   const area=document.getElementById('resultArea');const note=document.getElementById('resNote');
   const mista=mistaAtiva(sel);
   setResHead(mista);
-  if(!sel.length||tv===0){area.innerHTML=pendMista(sel)+'<div class="empty">Informe as vidas e selecione ao menos um plano na matriz para ver o ranking.</div>';note.style.display='none';return;}
+  if(!sel.length||tv===0){
+    const pend=slotsSemTabela();
+    let msg;
+    if(tv>0&&pend.length){
+      msg='<div class="vidas-warn" style="display:block">'+pend.map(p=>{
+        if(p.mv&&tv<p.mv)return `⚠ <b>${p.plano}</b> exige contrato com no mínimo <b>${p.mv} vida${p.mv>1?'s':''}</b> — o contrato informado tem ${tv}.`;
+        if(p.ranges)return `⚠ <b>${p.plano}</b> (${p.acom}) só tem tabela em <b>${pracaSel}</b> para <b>${p.ranges} vidas</b> — o contrato informado tem ${tv}. Ajuste as vidas ou escolha outro produto.`;
+        return `⚠ <b>${p.plano}</b> (${p.acom}) não tem tabela em <b>${pracaSel}</b> para esta configuração.`;
+      }).join('<br>')+'</div>';
+    } else {
+      msg='<div class="empty">Informe as vidas e selecione ao menos um plano na matriz para ver o ranking.</div>';
+    }
+    area.innerHTML=pendMista(sel)+msg;note.style.display='none';return;
+  }
   let rows=sel.map(c=>({c,total:planTotal(c)})).sort((a,b)=>a.total-b.total);
   if(mista){ area.innerHTML=resMista(rows,tv); notaCopart(rows,note); return; }
   const min=rows[0].total,max=rows[rows.length-1].total;const bestHap=rows.find(r=>r.c.operadora==='Hapvida');const econ=max-min;
@@ -1068,7 +1103,7 @@ async function gerarFolder(){
   // "Plano de saúde" + "Plano odontológico" = mensalidade)
   const odoSub=r=>{
     if(!temOdonto(r.c))return '';
-    if(odontoFalta(r.c))return `<div class="fd-hi-sub warn">⚠ Valor do plano odontológico não carregado para ${r.c.praca} — o total acima cobre apenas a assistência médica.</div>`;
+    if(odontoFalta(r.c))return `<div class="fd-hi-sub warn">⚠ Valor do plano odontológico não carregado para ${r.c.praca} (${r.c.tipo==='Individual'?'Individual':'PME/Super Simples'}) — o total acima cobre apenas a assistência médica.</div>`;
     return `<div class="fd-hi-sub">Plano de saúde <b>R$ ${fmt(planMed(r.c))}</b> · Plano odontológico <b>R$ ${fmt(planOdo(r.c))}</b> (R$ ${fmt(odontoVal(r.c))}/vida × ${vidasCob(r.c)})</div>`;
   };
   let hi;

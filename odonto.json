@@ -1,388 +1,462 @@
 {
  "Alagoinhas - BA": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Anápolis - GO": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Aracaju - SE": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Araraquara - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Balneário Camboriú - SC": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Barretos - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Bauru - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Belo Horizonte - MG": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Belém - PA": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Brasília - DF": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Camaçari - BA": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Campina Grande - PB": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Canoas - RS": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Curitiba - PR": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Feira De Santana - BA": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Fortaleza - CE": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Franca - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Goiânia - GO": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Joinville - SC": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "João Pessoa - PB": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Juazeiro Do Norte - CE": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Limeira - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Lins - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Londrina - PR": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Maceió - AL": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Manaus - AM": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Maringá - PR": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Marília - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Mossoró - RN": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 73.03,
-   "promo": 14.9
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 73.03,
+    "promo": 14.9
+   }
   }
  },
  "Natal - RN": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 73.03,
-   "promo": 14.9
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 73.03,
+    "promo": 14.9
+   }
   }
  },
  "Novo Hamburgo - RS": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Parauapebas - PA": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Piracicaba - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Pirassununga - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Porto Alegre - RS": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Recife - PE": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Ribeirão Preto - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "Salvador - BA": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Sertãozinho - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "São Carlos - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "São José Dos Campos - SP": {
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "São Leopoldo - RS": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  },
  "São Luís - MA": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Teresina - PI": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 19.25,
-   "promo": 3.85
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   }
   }
  },
  "Uberlândia - MG": {
-  "Ambulatorial": {
-   "cheio": 19.25,
-   "promo": 3.85
-  },
-  "Hospitalar": {
-   "cheio": 75.84,
-   "promo": 24.5
+  "Individual": {
+   "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
+   }
   }
  }
 }
