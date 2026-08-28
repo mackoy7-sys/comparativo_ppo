@@ -42,6 +42,12 @@
   .vcell.vhead span{font-size:11px;font-weight:800;letter-spacing:.4px;text-align:center;color:#fff;background:var(--navy);border-radius:6px;padding:3px 0}
   .vcell.vhead span:last-child{background:var(--ndblue)}
   .vcell input[data-col="PPO"]{border-color:#c9d3ee;background:#f7f9ff}
+  .vidas.single .vcell{grid-template-columns:1fr 64px}
+  .cot-hint{font-size:12px;color:var(--muted);margin:2px 0 16px;line-height:1.55}
+  .cot-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 10px;border-radius:999px;vertical-align:middle;margin-left:10px}
+  .cot-badge.mista{background:#eef1fa;color:var(--ndblue);border:1px solid #c9d3ee}
+  .cot-badge.comp{background:#fff2e6;color:var(--hap-dark);border:1px solid #ffd9b8}
+  .cot-badge.pend{background:#fdf3d8;color:#8a6a17;border:1px solid #ecd9a4}
   .vcell label{font-size:12.5px;font-weight:700;color:var(--navy)}
   .vcell input{width:100%;padding:8px;border:1px solid var(--line);border-radius:9px;font-size:15px;text-align:center;color:var(--txt)}
   .vcell input:focus{outline:none;border-color:var(--hap);box-shadow:0 0 0 3px rgba(255,107,0,.12)}
@@ -248,8 +254,8 @@
   #folder.ppo .fd-head{background:var(--ndblue)}
   #folder.ppo .fd-sec{border-bottom-color:var(--ndblue)}
   #folder.ppo .fd-hi{background:#eef1fa;border-color:#c9d3ee}
-  #folder.ppo .fd-chip b, #folder.ppo .fd-hi .v, #folder.ppo .fd-hi-item b{color:var(--ndblue)}
-  #folder.ppo .fd-hi-item{border-top-color:#c9d3ee}
+  #folder.ppo .fd-chip b, #folder.ppo .fd-hi .v, #folder.ppo .fd-hi-item b, #folder.ppo .fd-hi-tot .v{color:var(--ndblue)}
+  #folder.ppo .fd-hi-item,#folder.ppo .fd-hi-tot{border-top-color:#c9d3ee}
   /* Cotação mista (Hapvida + NotreDame Saúde) — cabeçalho navy, 2 marcas mesmo tamanho */
   #folder.mixed .fd-head{background:var(--navy)}
   #folder.mixed .fd-sec{border-bottom-color:var(--navy)}
@@ -274,6 +280,9 @@
   .fd-hi-item{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:4px 0;border-top:1px solid #ffd9b8}
   .fd-hi-item:first-of-type{border-top:none}
   .fd-hi-item b{color:var(--hap-dark);white-space:nowrap}
+  .fd-hi-grp{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#8a8880;margin:10px 0 1px}
+  .fd-hi-tot{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:12px;padding-top:10px;border-top:2px solid #ffd9b8;font-size:13px;font-weight:700;color:var(--navy)}
+  .fd-hi-tot .v{font-size:22px;font-weight:800;color:var(--hap);white-space:nowrap}
   .fd-foot{margin-top:24px;font-size:11px;color:#666;border-top:1px solid #d9dee7;padding-top:10px;line-height:1.5}
   .fd-tbl tr.grp td{background:#13315c;color:#fff;font-weight:600;text-align:left;font-size:12px}
   .fd-tbl tr.used td{background:#e6e9ee;font-weight:600}
@@ -334,6 +343,9 @@
       <div class="calcgrid">
         <!-- item 1 -->
         <div>
+          <div class="subh">Tipo de cotação</div>
+          <div class="chips" id="cotModeChips" style="margin-bottom:8px"></div>
+          <div class="cot-hint" id="cotHint"></div>
           <div class="subh">Distribuição de vidas</div>
           <div class="vidas" id="vidasGrid"></div>
           <div class="vbar">
@@ -375,8 +387,8 @@
     </div>
 
     <div class="panel">
-      <h2>Resultado consolidado</h2>
-      <div class="desc">Ranking dos planos selecionados (todas as operadoras), do menor para o maior custo mensal.</div>
+      <h2 id="resTitle">Resultado consolidado</h2>
+      <div class="desc" id="resDesc">Ranking dos planos selecionados (todas as operadoras), do menor para o maior custo mensal.</div>
       <div class="folder-bar">
         <input id="clienteNome" placeholder="Nome do cliente (aparece no folder)">
         <input id="consultorNome" placeholder="Consultor de Vendas (aparece no folder)">
@@ -467,8 +479,8 @@
     <textarea id="convInput" placeholder="15/03/1990&#10;02/11/1975&#10;1998-07-22"></textarea>
     <div class="conv-result" id="convResult"></div>
     <div class="mfoot">
-      <span style="font-size:12px;color:var(--muted)">Idade calculada na data de hoje. Distribuir em:
-        <select id="convCol" style="margin-left:6px;padding:4px 8px;border:1px solid var(--line);border-radius:8px"><option value="HMO">HMO (Hapvida)</option><option value="PPO">PPO (NotreDame)</option></select></span>
+      <span style="font-size:12px;color:var(--muted)">Idade calculada na data de hoje.<span id="convColWrap"> Distribuir em:
+        <select id="convCol" style="margin-left:6px;padding:4px 8px;border:1px solid var(--line);border-radius:8px"><option value="HMO">HMO (Hapvida)</option><option value="PPO">PPO (NotreDame)</option></select></span></span>
       <div style="display:flex;gap:10px"><button class="btn" onclick="closeConv()">Cancelar</button><button class="btn solid" onclick="applyConv()">Distribuir nas faixas</button></div>
     </div>
   </div>
@@ -539,6 +551,7 @@ function switchTab(t){
 }
 
 /* ================= TAB 1: CALCULADORA ================= */
+let cotMode='comparativa'; // 'comparativa' = planos são alternativas | 'mista' = HMO + PPO no MESMO contrato
 let vidasHMO = Object.fromEntries(BANDS.map(b=>[b,0]));
 let vidasPPO = Object.fromEntries(BANDS.map(b=>[b,0]));
 // `vidas` = visão consolidada do contrato (HMO+PPO) — usada por porte/mínimo/perfil
@@ -546,7 +559,10 @@ let vidas = new Proxy({}, {get:(_,b)=> (vidasHMO[b]||0)+(vidasPPO[b]||0), ownKey
   getOwnPropertyDescriptor:()=>({enumerable:true,configurable:true})});
 function totCol(o){return BANDS.reduce((s,b)=>s+(o[b]||0),0);}
 // coluna de vidas que um plano usa: PPO (NotreDame) x HMO (Hapvida); se a coluna estiver vazia, usa a outra
-function vidasDe(c){const ppo=isPPO(c);const own=ppo?vidasPPO:vidasHMO;const other=ppo?vidasHMO:vidasPPO;
+function vidasDe(c){
+  // na cotação mista o concorrente é alternativa ao CONTRATO INTEIRO — cobre HMO+PPO
+  if(cotMode==='mista'&&c&&!isPPO(c)&&!isHapHMO(c)&&totCol(vidasHMO)>0&&totCol(vidasPPO)>0) return vidas;
+  const ppo=isPPO(c);const own=ppo?vidasPPO:vidasHMO;const other=ppo?vidasHMO:vidasPPO;
   return totCol(own)>0?own:(totCol(other)>0?other:own);}
 let opMode='hapvida'; // default: só Hapvida (colunas). 'todas' = Hapvida + concorrentes
 let matrixCols=[];
@@ -559,6 +575,15 @@ buildCols();
 function opColor(op){const o=OPS.find(x=>x.key===op);return o?o.color:'#0f2740';}
 function opLabelC(op){const o=OPS.find(x=>x.key===op);return o?o.label:op;}
 function isPPO(c){return /^(Adv|Advance|Premium|Infinity)/i.test((c&&c.label)||'');}
+function isHapHMO(c){return !!(c&&c.operadora==='Hapvida'&&!isPPO(c));}
+// mista "ativa" = modo declarado + vidas nas duas colunas + ao menos 1 plano de cada lado
+function mistaAtiva(sel){sel=sel||selectedPlans();
+  return cotMode==='mista'&&totCol(vidasHMO)>0&&totCol(vidasPPO)>0
+    &&sel.some(isHapHMO)&&sel.some(isPPO);}
+// combinações HMO x PPO: cada uma é um contrato possível; total = soma das duas partes
+function combosDe(rows){const h=rows.filter(r=>isHapHMO(r.c)),p=rows.filter(r=>isPPO(r.c));const out=[];
+  h.forEach(a=>p.forEach(b=>out.push({h:a,p:b,total:a.total+b.total})));
+  return out.sort((x,y)=>x.total-y.total);}
 function opDisp(c){return isPPO(c)?'NotreDame Saúde':opLabelC(c.operadora);}
 function opColorFor(c){return isPPO(c)?'#1e2a5c':opColor(c.operadora);}
 function colIsPPO(ci){const col=matrixCols[ci];return !!(col&&col.slots.some((x,si)=>{const rc=resolved(ci,si);return rc&&isPPO(rc);}));}
@@ -622,11 +647,33 @@ function totVidas(){return totCol(vidasHMO)+totCol(vidasPPO);}  // total do CONT
 
 function buildCat(){document.getElementById('catSel').innerHTML=CATEGORIES.map(c=>`<option value="${c}" ${c===categoria?'selected':''}>${c}</option>`).join('');}
 function buildVidas(){
-  const head=`<div class="vcell vhead"><label></label><span title="Produtos Hapvida (rede própria/HMO)">HMO</span><span title="Produtos NotreDame Saúde (PPO): Advance, Premium, Infinity">PPO</span></div>`;
-  document.getElementById('vidasGrid').innerHTML = head + BANDS.map(b=>
+  const mista=cotMode==='mista';
+  const g=document.getElementById('vidasGrid');
+  const head=mista?`<div class="vcell vhead"><label></label><span title="Produtos Hapvida (rede própria/HMO)">HMO</span><span title="Produtos NotreDame Saúde (PPO): Advance, Premium, Infinity">PPO</span></div>`:'';
+  g.classList.toggle('single',!mista);
+  g.innerHTML = head + BANDS.map(b=>
     `<div class="vcell"><label>${b}</label>`+
     `<input type="number" min="0" step="1" value="${vidasHMO[b]||0}" data-b="${b}" data-col="HMO" onchange="onVida(this)" oninput="onVida(this)">`+
-    `<input type="number" min="0" step="1" value="${vidasPPO[b]||0}" data-b="${b}" data-col="PPO" onchange="onVida(this)" oninput="onVida(this)"></div>`).join('');
+    (mista?`<input type="number" min="0" step="1" value="${vidasPPO[b]||0}" data-b="${b}" data-col="PPO" onchange="onVida(this)" oninput="onVida(this)">`:'')+`</div>`).join('');
+  const w=document.getElementById('convColWrap'); if(w) w.style.display=mista?'':'none';
+  if(!mista){const cs=document.getElementById('convCol'); if(cs) cs.value='HMO';}
+}
+function buildCotModeChips(){
+  const el=document.getElementById('cotModeChips'); if(!el)return;
+  const opts=[['comparativa','Cotação comparativa'],['mista','Cotação mista (HMO + PPO)']];
+  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${cotMode===v?'active':''}" data-cotm="${v}">${l}</div>`).join('');
+  el.querySelectorAll('[data-cotm]').forEach(e=>e.onclick=()=>setCotMode(e.dataset.cotm));
+  const h=document.getElementById('cotHint');
+  if(h) h.innerHTML = cotMode==='mista'
+    ? 'Um <b>único contrato</b> com vidas divididas entre produtos Hapvida (HMO) e NotreDame Saúde (PPO). Os planos <b>se somam</b> — o resultado mostra o total do contrato. As vidas mínimas de Premium 900 Care (2), Premium 900 (3) e Infinity (5) olham o total das duas colunas.'
+    : 'Os planos selecionados são <b>alternativas entre si</b>: todas as vidas vão para o mesmo plano e o resultado é um ranking do mais barato ao mais caro.';
+}
+function setCotMode(m){
+  if(cotMode===m)return;
+  if(m==='comparativa'){ // funde PPO no HMO para não perder vidas já digitadas (o total do contrato não muda)
+    BANDS.forEach(b=>{vidasHMO[b]=(vidasHMO[b]||0)+(vidasPPO[b]||0);vidasPPO[b]=0;});
+  }
+  cotMode=m; buildCotModeChips(); buildVidas(); refreshTot(); recompute();
 }
 function onVida(el){let v=parseInt(el.value||'0',10);if(isNaN(v)||v<0)v=0;el.value=v;
   (el.dataset.col==='PPO'?vidasPPO:vidasHMO)[el.dataset.b]=v;refreshTot();recompute();}
@@ -765,11 +812,71 @@ function renderCards(){
       <button class="btn vd" onclick="openDetail(${c.id})">Ver detalhes</button></div>`;}).join('');
 }
 
+function setResHead(mista){
+  const h2=document.getElementById('resTitle'),ds=document.getElementById('resDesc');
+  // 3 estados: mista ativa | mista declarada mas incompleta | comparativa
+  const pend=cotMode==='mista'&&!mista;
+  const cls=mista?'mista':(pend?'pend':'comp');
+  const lbl=mista?'Cotação mista':(pend?'Cotação mista · incompleta':'Cotação comparativa');
+  if(h2) h2.innerHTML=(mista?'Resultado do contrato misto':'Resultado consolidado')+
+    `<span class="cot-badge ${cls}">${lbl}</span>`;
+  if(ds) ds.innerHTML=mista
+    ?'Os planos <b>não competem entre si</b>: cada um cobre as vidas da sua coluna e o cliente paga a <b>soma</b>. As combinações vão da mais econômica para a mais cara.'
+    :'Ranking dos planos selecionados (todas as operadoras), do menor para o maior custo mensal.';
+}
+function notaCopart(rows,note){
+  const hasP=rows.some(r=>!r.c.coparticipacao.includes('Sem')),hasS=rows.some(r=>r.c.coparticipacao.includes('Sem'));
+  if(hasP&&hasS){note.style.display='block';note.innerHTML='Atenção: a comparação mistura planos <b>com coparticipação</b> (Hapvida = Parcial) e <b>sem coparticipação</b>. O custo mensal é só a mensalidade — nos planos com coparticipação há custo adicional conforme o uso.';}else note.style.display='none';
+}
+// aviso quando o vendedor declarou "mista" mas ainda não montou os dois lados
+function pendMista(sel){
+  if(cotMode!=='mista')return '';
+  const f=[];
+  if(totCol(vidasHMO)===0)f.push('vidas na coluna <b>HMO</b>');
+  if(totCol(vidasPPO)===0)f.push('vidas na coluna <b>PPO</b>');
+  if(!sel.some(isHapHMO))f.push('um plano <b>Hapvida (HMO)</b> na matriz');
+  if(!sel.some(isPPO))f.push('um plano <b>NotreDame (PPO)</b> na matriz');
+  if(!f.length)return '';
+  return `<div class="vidas-warn" style="display:block;margin-bottom:16px">⚠ <b>Cotação mista</b> selecionada, mas ainda falta: ${f.join(' · ')}. Até lá os planos aparecem como <b>alternativas</b>, sem total do contrato.</div>`;
+}
+function resMista(rows,tv){
+  const cbs=combosDe(rows);const best=cbs[0];const worst=cbs[cbs.length-1];const dif=worst.total-best.total;
+  const hL=totCol(vidasHMO),pL=totCol(vidasPPO);
+  const vd=q=>`${q} vida${q>1?'s':''}`;
+  let kpis=`<div class="kpis">
+    <div class="kpi"><div class="lbl">Total de vidas</div><div class="val">${tv}</div><div class="foot">HMO ${hL} · PPO ${pL} — 1 contrato</div></div>
+    <div class="kpi"><div class="lbl">Total do contrato</div><div class="val hap">R$ ${fmt(best.total)}</div><div class="foot">${cbs.length>1?'combinação mais econômica: ':''}${best.h.c.label} + ${best.p.c.label}</div></div>
+    <div class="kpi"><div class="lbl">Parte Hapvida (HMO)</div><div class="val">R$ ${fmt(best.h.total)}</div><div class="foot">${vd(hL)} · ${best.h.c.label} · ${best.h.c.acomodacao}</div></div>
+    <div class="kpi"><div class="lbl">Parte NotreDame (PPO)</div><div class="val">R$ ${fmt(best.p.total)}</div><div class="foot">${vd(pL)} · ${best.p.c.label} · ${best.p.c.acomodacao}</div></div>`;
+  if(cbs.length>1) kpis+=`<div class="kpi"><div class="lbl">Diferença entre combinações</div><div class="val">R$ ${fmt(dif)}</div><div class="foot">R$ ${fmt(dif*12)} em 12 meses</div></div>`;
+  kpis+='</div>';
+  let t=`<div style="overflow-x:auto"><table class="res"><thead><tr><th>Combinação do contrato</th><th>Parte HMO (${vd(hL)})</th><th>Parte PPO (${vd(pL)})</th><th>Total mensal</th><th>R$/vida</th><th>vs menor</th></tr></thead><tbody>`;
+  cbs.forEach((k,i)=>{const d=k.total-best.total,pct=best.total?d/best.total*100:0;
+    t+=`<tr class="${i===0?'best':''} haprow"><td class="pn-cell"><span class="rank ${i===0?'g':''}">${i+1}</span><b>${k.h.c.label} + ${k.p.c.label}</b><br><span class="op" style="margin-left:30px">Hapvida + NotreDame Saúde</span></td>
+      <td>R$ ${fmt(k.h.total)}</td><td>R$ ${fmt(k.p.total)}</td><td><b>R$ ${fmt(k.total)}</b></td><td>R$ ${fmt(k.total/tv)}</td>
+      <td style="color:${d===0?'#0f6e56':'#a32d2d'}">${d===0?'—':'+R$ '+fmt(d)+' ('+pct.toFixed(1)+'%)'}</td></tr>`;});
+  t+='</tbody></table></div>';
+  const conc=rows.filter(r=>!isHapHMO(r.c)&&!isPPO(r.c)).sort((a,b)=>a.total-b.total);
+  let ct='';
+  if(conc.length){
+    ct=`<div class="subh" style="margin:22px 0 8px">Comparação de mercado</div>
+      <div class="desc" style="margin-bottom:10px">O concorrente cobre o <b>contrato inteiro</b> (${tv} vidas) — por isso é comparado contra o total do contrato misto, não contra uma das partes.</div>
+      <div style="overflow-x:auto"><table class="res"><thead><tr><th>Plano</th><th>Acomodação</th><th>Custo mensal</th><th>R$/vida</th><th>vs contrato misto</th></tr></thead><tbody>`;
+    conc.forEach(r=>{const d=r.total-best.total;
+      ct+=`<tr><td class="pn-cell"><b>${r.c.label}</b><br><span class="op">${opDisp(r.c)}</span></td><td>${r.c.acomodacao}</td><td><b>R$ ${fmt(r.total)}</b></td><td>R$ ${fmt(r.total/tv)}</td><td style="color:${d>=0?'#0f6e56':'#a32d2d'}">${d===0?'—':(d>0?'+R$ ':'−R$ ')+fmt(Math.abs(d))}</td></tr>`;});
+    ct+='</tbody></table></div>';
+  }
+  const yb=(cbs.length>1&&dif>0)?`<div class="year-box"><span class="yi">💰</span><div>Entre a combinação mais econômica e a mais cara há <b class="big">R$ ${fmt(dif*12)}</b> em <b>12 meses</b> — o cliente leva o mesmo desenho de contrato (${vd(hL)} HMO + ${vd(pL)} PPO).</div></div>`:'';
+  return kpis+yb+t+ct;
+}
 function calcResult(){
   const tv=totVidas();const sel=selectedPlans();
   const area=document.getElementById('resultArea');const note=document.getElementById('resNote');
-  if(!sel.length||tv===0){area.innerHTML='<div class="empty">Informe as vidas e selecione ao menos um plano na matriz para ver o ranking.</div>';note.style.display='none';return;}
+  const mista=mistaAtiva(sel);
+  setResHead(mista);
+  if(!sel.length||tv===0){area.innerHTML=pendMista(sel)+'<div class="empty">Informe as vidas e selecione ao menos um plano na matriz para ver o ranking.</div>';note.style.display='none';return;}
   let rows=sel.map(c=>({c,total:planTotal(c)})).sort((a,b)=>a.total-b.total);
+  if(mista){ area.innerHTML=resMista(rows,tv); notaCopart(rows,note); return; }
   const min=rows[0].total,max=rows[rows.length-1].total;const bestHap=rows.find(r=>r.c.operadora==='Hapvida');const econ=max-min;
   let kpis=`<div class="kpis"><div class="kpi"><div class="lbl">Total de vidas</div><div class="val">${tv}</div><div class="foot">${sel.length} plano(s) na comparação</div></div>
     <div class="kpi"><div class="lbl">Menor custo mensal</div><div class="val green">R$ ${fmt(min)}</div><div class="foot">${opDisp(rows[0].c)} · ${rows[0].c.label}</div></div>`;
@@ -784,9 +891,8 @@ function calcResult(){
   t+='</tbody></table></div>';
   const hapCheapest=rows[0].c.operadora==='Hapvida';
   const yearBox=(rows.length>1&&econ>0)?`<div class="year-box"><span class="yi">💰</span><div>Em <b>12 meses</b>, a diferença entre o plano mais barato e o mais caro chega a <b class="big">R$ ${fmt(econ*12)}</b>${hapCheapest?' — e a opção mais econômica é da <b>Hapvida</b>.':'.'}</div></div>`:'';
-  area.innerHTML=kpis+yearBox+t;
-  const hasP=rows.some(r=>!r.c.coparticipacao.includes('Sem')),hasS=rows.some(r=>r.c.coparticipacao.includes('Sem'));
-  if(hasP&&hasS){note.style.display='block';note.innerHTML='Atenção: a comparação mistura planos <b>com coparticipação</b> (Hapvida = Parcial) e <b>sem coparticipação</b>. O custo mensal é só a mensalidade — nos planos com coparticipação há custo adicional conforme o uso.';}else note.style.display='none';
+  area.innerHTML=pendMista(sel)+kpis+yearBox+t;
+  notaCopart(rows,note);
 }
 
 /* detalhe do plano */
@@ -914,14 +1020,31 @@ async function gerarFolder(){
   const cols=rows.map(r=>r.c);
   const min=rows[0];
   const bestHap=rows.find(r=>r.c.operadora==='Hapvida');
-  const hib=totCol(vidasHMO)>0&&totCol(vidasPPO)>0;
-  const chips=BANDS.filter(b=>vidas[b]>0).map(b=>`<div class="fd-chip">${b}: <b>${vidas[b]}</b>${hib?` <span style="font-size:10.5px;color:#666">(HMO ${vidasHMO[b]||0} · PPO ${vidasPPO[b]||0})</span>`:''}</div>`).join('');
+  const split=totCol(vidasHMO)>0&&totCol(vidasPPO)>0;   // vidas nas duas colunas (só visual)
+  const hib=mistaAtiva(sel);                            // contrato misto de verdade (soma as partes)
+  const hL=totCol(vidasHMO),pL=totCol(vidasPPO);
+  const cbs=hib?combosDe(rows):[];
+  const chips=BANDS.filter(b=>vidas[b]>0).map(b=>`<div class="fd-chip">${b}: <b>${vidas[b]}</b>${split?` <span style="font-size:10.5px;color:#666">(HMO ${vidasHMO[b]||0} · PPO ${vidasPPO[b]||0})</span>`:''}</div>`).join('');
   const temReemb=rows.some(r=>r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]);
   let trs=rows.map((r,i)=>{const cop=segLabel(r.c.coparticipacao);const prod=(r.c.tipo==='Individual')?'Individual (PF)':'Empresarial (PME)';
     const reembCell=temReemb?`<td>${r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]?REEMBOLSO[r.c.plano]:'—'}</td>`:'';
     return `<tr><td>${i+1}</td><td>${r.c.label}</td><td>${opDisp(r.c)}</td><td>${prod}</td><td>${r.c.acomodacao}</td><td>${cop}</td>${reembCell}<td>R$ ${fmt(r.total)}</td></tr>`;}).join('');
   let hi;
-  if(rows.length===1){
+  if(hib){
+    const best=cbs[0];
+    const vd=q=>`${q} vida${q>1?'s':''}`;
+    const li=r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</span><b>R$ ${fmt(r.total)}</b></div>`;
+    if(cbs.length===1){
+      hi=`<div class="fd-hi"><div class="fd-hi-t">Cotação mista — 1 contrato, ${tv} vidas</div>`+
+         `<div class="fd-hi-grp">Hapvida (HMO) · ${vd(hL)}</div>${li(best.h)}`+
+         `<div class="fd-hi-grp">NotreDame Saúde (PPO) · ${vd(pL)}</div>${li(best.p)}`+
+         `<div class="fd-hi-tot"><span>Total do contrato · ${tv} vidas</span><span class="v">R$ ${fmt(best.total)}</span></div></div>`;
+    } else {
+      const items=cbs.map((k,i)=>`<div class="fd-hi-item"><span>${i+1}. ${k.h.c.label} <span style="color:#8a8880">(HMO ${hL})</span> + ${k.p.c.label} <span style="color:#8a8880">(PPO ${pL})</span></span><b>R$ ${fmt(k.total)}</b></div>`).join('');
+      hi=`<div class="fd-hi"><div class="fd-hi-t">Cotação mista — ${cbs.length} combinações para 1 contrato de ${tv} vidas</div>${items}`+
+         `<div class="fd-hi-tot"><span>Total do contrato · combinação mais econômica</span><span class="v">R$ ${fmt(best.total)}</span></div></div>`;
+    }
+  } else if(rows.length===1){
     const r=rows[0];
     hi=`<div class="fd-hi">Mensalidade: <span class="v">R$ ${fmt(r.total)}</span> — ${r.c.label} (${opDisp(r.c)}) · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</div>`;
   } else {
@@ -930,8 +1053,9 @@ async function gerarFolder(){
   }
   // Tabela de valores completa (preço por faixa etária)
   const colHead=cols.map(c=>`<th>${c.label}<br><span style="font-weight:400;font-size:10px">${opDisp(c)} · ${c.acomodacao} · ${segLabel(c.coparticipacao)}</span></th>`).join('');
-  const priceBody=BANDS.map(b=>`<tr class="${vidas[b]>0?'used':''}"><td>${b}${vidas[b]>0?` <span style="color:#5f5e5a;font-weight:400">(${vidas[b]} vida${vidas[b]>1?'s':''})</span>`:''}</td>`+cols.map(c=>{const q=(vidasDe(c)[b]||0);return `<td>R$ ${fmt(c.precos[b]||0)}${hib&&q>0?` <span style="font-size:9.5px;color:#666">(${q})</span>`:''}</td>`;}).join('')+`</tr>`).join('');
-  const priceQt=`<tr class="grp"><td colspan="${cols.length+1}">Mensalidade para a distribuição de vidas informada (${tv} vida(s))</td></tr><tr class="best"><td>Total mensal</td>`+cols.map(c=>`<td>R$ ${fmt(planTotal(c))}</td>`).join('')+`</tr>`;
+  const priceBody=BANDS.map(b=>`<tr class="${vidas[b]>0?'used':''}"><td>${b}${vidas[b]>0?` <span style="color:#5f5e5a;font-weight:400">(${vidas[b]} vida${vidas[b]>1?'s':''})</span>`:''}</td>`+cols.map(c=>{const q=(vidasDe(c)[b]||0);return `<td>R$ ${fmt(c.precos[b]||0)}${split&&q>0?` <span style="font-size:9.5px;color:#666">(${q})</span>`:''}</td>`;}).join('')+`</tr>`).join('');
+  const priceQt=`<tr class="grp"><td colspan="${cols.length+1}">${hib?`Cada plano sobre as vidas da sua coluna — contrato misto de ${tv} vida(s)`:`Mensalidade para a distribuição de vidas informada (${tv} vida(s))`}</td></tr><tr class="best"><td>${hib?'Subtotal do plano':'Total mensal'}</td>`+cols.map(c=>`<td>R$ ${fmt(planTotal(c))}</td>`).join('')+`</tr>`
+    +(hib?`<tr class="best"><td colspan="${cols.length+1}" style="text-align:right">Total do contrato (${tv} vidas)${cbs.length>1?' — combinação mais econômica':''}: R$ ${fmt(cbs[0].total)}</td></tr>`:'');
   const priceTbl=`<table class="fd-tbl"><thead><tr><th>Faixa etária</th>${colHead}</tr></thead><tbody>${priceBody}${priceQt}</tbody></table>`;
   // Tabela de coparticipação (só planos Hapvida presentes na cotação)
   let copHtml='';
@@ -1006,7 +1130,7 @@ async function gerarFolder(){
   else { fdLogo=LOGO_SVG; fdSub='NotreDame · Vendas Digital'; fcls=''; }
   const fel=document.getElementById('folder'); fel.className=fcls;
   fel.innerHTML=`
-    <div class="fd-head"><div><h1>Proposta de Cotação</h1><div class="fsub">Plano de Saúde · ${tv} vida(s)</div></div>
+    <div class="fd-head"><div><h1>Proposta de Cotação</h1><div class="fsub">Plano de Saúde · ${tv} vida(s)${hib?` · Cotação mista (HMO ${hL} + PPO ${pL})`:''}</div></div>
       <div class="fbrand">${fdLogo}<div style="font-size:11px;font-weight:600;margin-top:4px;opacity:.95">${fdSub}</div></div></div>
     <div class="fd-meta"><div><b>Cliente:</b> ${nome||'—'}</div>${consultor?`<div><b>Consultor de Vendas:</b> ${consultor}</div>`:''}${cols.some(c=>c.contratacao)?`<div><b>Contratação PME:</b> ${contratMode}</div>`:''}<div><b>Data:</b> ${hoje}</div></div>
     <div class="fd-sec">Perfil de vidas</div>
@@ -1174,7 +1298,7 @@ function boot(){
   pracaSel=PRACAS.includes('SP / RMSP')?'SP / RMSP':PRACAS[0];
   FILIAIS=REG_ORDER.filter(r=>PRACAS.some(p=>pracaRegiao(p)===r));
   filialSel=pracaRegiao(pracaSel);
-  buildFilialChips(); buildPracaChips(); buildProdChips(); buildMeiChips(); buildContratChips(); buildOpChips(); try{acFilter();}catch(e){} buildVidas(); buildMatrix(); recompute();
+  buildFilialChips(); buildPracaChips(); buildProdChips(); buildMeiChips(); buildContratChips(); buildOpChips(); buildCotModeChips(); try{acFilter();}catch(e){} buildVidas(); buildMatrix(); recompute();
 }
 document.getElementById('convOverlay').addEventListener('click',e=>{if(e.target.id==='convOverlay')closeConv();});
 document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
