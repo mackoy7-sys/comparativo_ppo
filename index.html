@@ -38,7 +38,10 @@
   .btn.clear{border-color:#ffd9b8;color:var(--hap);background:#fff7f0}
   .btn.clear:hover{background:var(--hap);color:#fff;border-color:var(--hap)}
   .vidas{display:flex;flex-direction:column;gap:8px}
-  .vcell{display:grid;grid-template-columns:1fr 84px;align-items:center;gap:10px}
+  .vcell{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;gap:8px}
+  .vcell.vhead span{font-size:11px;font-weight:800;letter-spacing:.4px;text-align:center;color:#fff;background:var(--navy);border-radius:6px;padding:3px 0}
+  .vcell.vhead span:last-child{background:var(--ndblue)}
+  .vcell input[data-col="PPO"]{border-color:#c9d3ee;background:#f7f9ff}
   .vcell label{font-size:12.5px;font-weight:700;color:var(--navy)}
   .vcell input{width:100%;padding:8px;border:1px solid var(--line);border-radius:9px;font-size:15px;text-align:center;color:var(--txt)}
   .vcell input:focus{outline:none;border-color:var(--hap);box-shadow:0 0 0 3px rgba(255,107,0,.12)}
@@ -334,7 +337,7 @@
           <div class="subh">Distribuição de vidas</div>
           <div class="vidas" id="vidasGrid"></div>
           <div class="vbar">
-            <div class="totvidas">Total de vidas <b id="totVidas">0</b></div>
+            <div class="totvidas">Total de vidas <b id="totVidas">0</b> <span id="totVidasSplit"></span></div>
             <button class="btn" onclick="openConv()">Conversor de datas de nascimento</button>
             <button class="btn" onclick="zerar()">Zerar vidas</button>
           </div>
@@ -464,7 +467,8 @@
     <textarea id="convInput" placeholder="15/03/1990&#10;02/11/1975&#10;1998-07-22"></textarea>
     <div class="conv-result" id="convResult"></div>
     <div class="mfoot">
-      <span style="font-size:12px;color:var(--muted)">Idade calculada na data de hoje.</span>
+      <span style="font-size:12px;color:var(--muted)">Idade calculada na data de hoje. Distribuir em:
+        <select id="convCol" style="margin-left:6px;padding:4px 8px;border:1px solid var(--line);border-radius:8px"><option value="HMO">HMO (Hapvida)</option><option value="PPO">PPO (NotreDame)</option></select></span>
       <div style="display:flex;gap:10px"><button class="btn" onclick="closeConv()">Cancelar</button><button class="btn solid" onclick="applyConv()">Distribuir nas faixas</button></div>
     </div>
   </div>
@@ -535,7 +539,15 @@ function switchTab(t){
 }
 
 /* ================= TAB 1: CALCULADORA ================= */
-let vidas = Object.fromEntries(BANDS.map(b=>[b,0]));
+let vidasHMO = Object.fromEntries(BANDS.map(b=>[b,0]));
+let vidasPPO = Object.fromEntries(BANDS.map(b=>[b,0]));
+// `vidas` = visão consolidada do contrato (HMO+PPO) — usada por porte/mínimo/perfil
+let vidas = new Proxy({}, {get:(_,b)=> (vidasHMO[b]||0)+(vidasPPO[b]||0), ownKeys:()=>BANDS.slice(), has:(_,b)=>BANDS.includes(b),
+  getOwnPropertyDescriptor:()=>({enumerable:true,configurable:true})});
+function totCol(o){return BANDS.reduce((s,b)=>s+(o[b]||0),0);}
+// coluna de vidas que um plano usa: PPO (NotreDame) x HMO (Hapvida); se a coluna estiver vazia, usa a outra
+function vidasDe(c){const ppo=isPPO(c);const own=ppo?vidasPPO:vidasHMO;const other=ppo?vidasHMO:vidasPPO;
+  return totCol(own)>0?own:(totCol(other)>0?other:own);}
 let opMode='hapvida'; // default: só Hapvida (colunas). 'todas' = Hapvida + concorrentes
 let matrixCols=[];
 function emptySlot(){return {plano:null,acom:null,seg:null};}
@@ -605,18 +617,25 @@ function resolved(ci,si){const col=matrixCols[ci];if(!col)return null;const x=co
   // preferir a tabela de porte MAIS ESPECÍFICA (1 vida > 2-29 > 30-99 > sem porte)
   const amp=c=>(c.vmin==null&&c.vmax==null)?1e9:((c.vmax==null?1e9:c.vmax)-(c.vmin||0));
   return cands.slice().sort((a,b)=>amp(a)-amp(b))[0];}
-function planTotal(c){return BANDS.reduce((s,b)=>s+vidas[b]*(c.precos[b]||0),0);}
-function totVidas(){return BANDS.reduce((s,b)=>s+vidas[b],0);}
+function planTotal(c){const v=vidasDe(c);return BANDS.reduce((s,b)=>s+(v[b]||0)*(c.precos[b]||0),0);}
+function totVidas(){return totCol(vidasHMO)+totCol(vidasPPO);}  // total do CONTRATO (porte e vidas mínimas)
 
 function buildCat(){document.getElementById('catSel').innerHTML=CATEGORIES.map(c=>`<option value="${c}" ${c===categoria?'selected':''}>${c}</option>`).join('');}
 function buildVidas(){
-  document.getElementById('vidasGrid').innerHTML = BANDS.map(b=>
-    `<div class="vcell"><label>${b}</label><input type="number" min="0" step="1" value="0" data-b="${b}" onchange="onVida(this)" oninput="onVida(this)"></div>`).join('');
+  const head=`<div class="vcell vhead"><label></label><span title="Produtos Hapvida (rede própria/HMO)">HMO</span><span title="Produtos NotreDame Saúde (PPO): Advance, Premium, Infinity">PPO</span></div>`;
+  document.getElementById('vidasGrid').innerHTML = head + BANDS.map(b=>
+    `<div class="vcell"><label>${b}</label>`+
+    `<input type="number" min="0" step="1" value="${vidasHMO[b]||0}" data-b="${b}" data-col="HMO" onchange="onVida(this)" oninput="onVida(this)">`+
+    `<input type="number" min="0" step="1" value="${vidasPPO[b]||0}" data-b="${b}" data-col="PPO" onchange="onVida(this)" oninput="onVida(this)"></div>`).join('');
 }
-function onVida(el){let v=parseInt(el.value||'0',10);if(isNaN(v)||v<0)v=0;el.value=v;vidas[el.dataset.b]=v;refreshTot();recompute();}
-function refreshTot(){document.getElementById('totVidas').textContent=totVidas();}
-function zerar(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);refreshTot();recompute();}
-function novaCotacao(){BANDS.forEach(b=>vidas[b]=0);document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);buildCols();refreshTot();recompute();}
+function onVida(el){let v=parseInt(el.value||'0',10);if(isNaN(v)||v<0)v=0;el.value=v;
+  (el.dataset.col==='PPO'?vidasPPO:vidasHMO)[el.dataset.b]=v;refreshTot();recompute();}
+function refreshTot(){const h=totCol(vidasHMO),p=totCol(vidasPPO);
+  document.getElementById('totVidas').textContent=h+p;
+  const d=document.getElementById('totVidasSplit');
+  if(d) d.innerHTML = (h&&p)?`<span style="font-size:11.5px;color:var(--muted)">HMO ${h} · PPO ${p}</span>`:'';}
+function zerar(){BANDS.forEach(b=>{vidasHMO[b]=0;vidasPPO[b]=0;});document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);refreshTot();recompute();}
+function novaCotacao(){BANDS.forEach(b=>{vidasHMO[b]=0;vidasPPO[b]=0;});document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);buildCols();refreshTot();recompute();}
 function buildOpChips(){
   const el=document.getElementById('opChipsCalc');if(!el)return;
   const opts=[['hapvida','Somente Hapvida'],['todas','Todas']];
@@ -776,7 +795,8 @@ function openDetail(id){
   document.getElementById('detailHead').innerHTML=`<div style="color:${col};font-weight:700;font-size:13px">${opDisp(c)}</div><h3 style="margin:2px 0 0">${c.label} · ${c.acomodacao}</h3><p style="margin:4px 0 0">${c.tipo==='Individual'?'Saúde PF':'Saúde PME'} · ${c.coparticipacao}${c.operadora==='Hapvida'&&REEMBOLSO[c.plano]?` · Reembolso ${REEMBOLSO[c.plano]}`:''}</p>`;
   let body=`<table><thead><tr><th>Faixa etária</th><th>Vidas</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>`;
   const mostraTudo=totVidas()===0; // sem vidas informadas, mostra a tabela completa de preços
-  BANDS.forEach(b=>{const q=vidas[b],p=c.precos[b]||0;if(!mostraTudo&&q===0)return;body+=`<tr><td>${b}</td><td>${q}</td><td>R$ ${fmt(p)}</td><td>R$ ${fmt(q*p)}</td></tr>`;});
+  const vd=vidasDe(c);
+  BANDS.forEach(b=>{const q=vd[b]||0,p=c.precos[b]||0;if(!mostraTudo&&q===0)return;body+=`<tr><td>${b}</td><td>${q}</td><td>R$ ${fmt(p)}</td><td>R$ ${fmt(q*p)}</td></tr>`;});
   body+=`<tr class="tot"><td>Total</td><td>${totVidas()}</td><td></td><td>R$ ${fmt(planTotal(c))}</td></tr></tbody></table>`;
   document.getElementById('detailBody').innerHTML=body;
   document.getElementById('detailOverlay').classList.add('show');
@@ -793,7 +813,9 @@ function ageBand(a){if(a<=18)return"00 a 18";if(a<=23)return"19 a 23";if(a<=28)r
 function applyConv(){const today=new Date();const lines=document.getElementById('convInput').value.split('\n');const dist=Object.fromEntries(BANDS.map(b=>[b,0]));let ok=0,bad=0;
   lines.forEach(l=>{if(!l.trim())return;const dt=parseDate(l);if(!dt){bad++;return;}let age=today.getFullYear()-dt.getFullYear();const md=today.getMonth()-dt.getMonth();if(md<0||(md===0&&today.getDate()<dt.getDate()))age--;if(age<0){bad++;return;}dist[ageBand(age)]++;ok++;});
   if(ok===0){document.getElementById('convResult').innerHTML=`<span style="color:var(--red)">Nenhuma data válida reconhecida.</span>`;return;}
-  BANDS.forEach(b=>{vidas[b]+=dist[b];});document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=vidas[i.dataset.b]);refreshTot();updateValues();renderCards();calcResult();
+  const alvo=(document.getElementById('convCol')&&document.getElementById('convCol').value==='PPO')?vidasPPO:vidasHMO;
+  BANDS.forEach(b=>{alvo[b]+=dist[b];});
+  document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>{i.value=(i.dataset.col==='PPO'?vidasPPO:vidasHMO)[i.dataset.b];});refreshTot();updateValues();renderCards();calcResult();
   document.getElementById('convResult').innerHTML=`${ok} vida(s) distribuída(s)${bad?`, ${bad} ignorada(s)`:''}. Faixas atualizadas.`;setTimeout(closeConv,900);}
 
 /* ================= TAB 2: COMPARATIVO ================= */
@@ -892,7 +914,8 @@ async function gerarFolder(){
   const cols=rows.map(r=>r.c);
   const min=rows[0];
   const bestHap=rows.find(r=>r.c.operadora==='Hapvida');
-  const chips=BANDS.filter(b=>vidas[b]>0).map(b=>`<div class="fd-chip">${b}: <b>${vidas[b]}</b></div>`).join('');
+  const hib=totCol(vidasHMO)>0&&totCol(vidasPPO)>0;
+  const chips=BANDS.filter(b=>vidas[b]>0).map(b=>`<div class="fd-chip">${b}: <b>${vidas[b]}</b>${hib?` <span style="font-size:10.5px;color:#666">(HMO ${vidasHMO[b]||0} · PPO ${vidasPPO[b]||0})</span>`:''}</div>`).join('');
   const temReemb=rows.some(r=>r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]);
   let trs=rows.map((r,i)=>{const cop=segLabel(r.c.coparticipacao);const prod=(r.c.tipo==='Individual')?'Individual (PF)':'Empresarial (PME)';
     const reembCell=temReemb?`<td>${r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]?REEMBOLSO[r.c.plano]:'—'}</td>`:'';
@@ -907,7 +930,7 @@ async function gerarFolder(){
   }
   // Tabela de valores completa (preço por faixa etária)
   const colHead=cols.map(c=>`<th>${c.label}<br><span style="font-weight:400;font-size:10px">${opDisp(c)} · ${c.acomodacao} · ${segLabel(c.coparticipacao)}</span></th>`).join('');
-  const priceBody=BANDS.map(b=>`<tr class="${vidas[b]>0?'used':''}"><td>${b}${vidas[b]>0?` <span style="color:#5f5e5a;font-weight:400">(${vidas[b]} vida${vidas[b]>1?'s':''})</span>`:''}</td>`+cols.map(c=>`<td>R$ ${fmt(c.precos[b]||0)}</td>`).join('')+`</tr>`).join('');
+  const priceBody=BANDS.map(b=>`<tr class="${vidas[b]>0?'used':''}"><td>${b}${vidas[b]>0?` <span style="color:#5f5e5a;font-weight:400">(${vidas[b]} vida${vidas[b]>1?'s':''})</span>`:''}</td>`+cols.map(c=>{const q=(vidasDe(c)[b]||0);return `<td>R$ ${fmt(c.precos[b]||0)}${hib&&q>0?` <span style="font-size:9.5px;color:#666">(${q})</span>`:''}</td>`;}).join('')+`</tr>`).join('');
   const priceQt=`<tr class="grp"><td colspan="${cols.length+1}">Mensalidade para a distribuição de vidas informada (${tv} vida(s))</td></tr><tr class="best"><td>Total mensal</td>`+cols.map(c=>`<td>R$ ${fmt(planTotal(c))}</td>`).join('')+`</tr>`;
   const priceTbl=`<table class="fd-tbl"><thead><tr><th>Faixa etária</th>${colHead}</tr></thead><tbody>${priceBody}${priceQt}</tbody></table>`;
   // Tabela de coparticipação (só planos Hapvida presentes na cotação)
