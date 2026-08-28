@@ -280,6 +280,9 @@
   .fd-hi-item{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:4px 0;border-top:1px solid #ffd9b8}
   .fd-hi-item:first-of-type{border-top:none}
   .fd-hi-item b{color:var(--hap-dark);white-space:nowrap}
+  .fd-hi-sub{font-size:10.5px;color:#6b6a66;margin:-2px 0 5px;padding-left:2px}
+  .fd-hi-sub b{color:#3d3c39;font-weight:700}
+  .fd-hi-sub.warn{color:#a32d2d}
   .fd-hi-grp{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#8a8880;margin:10px 0 1px}
   .fd-hi-tot{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:12px;padding-top:10px;border-top:2px solid #ffd9b8;font-size:13px;font-weight:700;color:var(--navy)}
   .fd-hi-tot .v{font-size:22px;font-weight:800;color:var(--hap);white-space:nowrap}
@@ -642,7 +645,26 @@ function resolved(ci,si){const col=matrixCols[ci];if(!col)return null;const x=co
   // preferir a tabela de porte MAIS ESPECÍFICA (1 vida > 2-29 > 30-99 > sem porte)
   const amp=c=>(c.vmin==null&&c.vmax==null)?1e9:((c.vmax==null?1e9:c.vmax)-(c.vmin||0));
   return cands.slice().sort((a,b)=>amp(a)-amp(b))[0];}
-function planTotal(c){const v=vidasDe(c);return BANDS.reduce((s,b)=>s+(v[b]||0)*(c.precos[b]||0),0);}
+/* ===== Plano odontológico =====
+   A tabela Hapvida traz DUAS colunas médicas: "Assistência Médica ¹" (com desconto,
+   quando o cliente contrata o odonto junto) e "Médica ²" (sem desconto). O catálogo
+   guarda a Médica ¹ sob o rótulo "+ Odonto" — mas o odonto em si é cobrado à parte,
+   na tabela PLANOS ODONTOLÓGICOS (rodapé da tabela: "os preços dos produtos Nosso
+   Médico, Nosso Plano e Mix abrangem exclusivamente a cobertura de assistência
+   médica"). odonto.json traz esse valor por praça x família de tabela. */
+let ODONTO={};
+function temOdonto(c){return /\+ Odonto/.test((c&&c.label)||'');}
+function odontoFam(c){return c.acomodacao==='Ambulatorial'?'Ambulatorial':'Hospitalar';}
+function odontoVal(c){ // R$ por vida/mês (VALOR PROMO)
+  if(!temOdonto(c))return 0;
+  const d=(ODONTO[c.praca]||{})[odontoFam(c)];
+  return d&&d.promo?d.promo:0;
+}
+function odontoFalta(c){return temOdonto(c)&&!odontoVal(c);}  // praça sem valor carregado
+function vidasCob(c){const v=vidasDe(c);return BANDS.reduce((s,b)=>s+(v[b]||0),0);}
+function planMed(c){const v=vidasDe(c);return BANDS.reduce((s,b)=>s+(v[b]||0)*(c.precos[b]||0),0);}
+function planOdo(c){return odontoVal(c)*vidasCob(c);}
+function planTotal(c){return planMed(c)+planOdo(c);}
 function totVidas(){return totCol(vidasHMO)+totCol(vidasPPO);}  // total do CONTRATO (porte e vidas mínimas)
 
 function buildCat(){document.getElementById('catSel').innerHTML=CATEGORIES.map(c=>`<option value="${c}" ${c===categoria?'selected':''}>${c}</option>`).join('');}
@@ -825,8 +847,12 @@ function setResHead(mista){
     :'Ranking dos planos selecionados (todas as operadoras), do menor para o maior custo mensal.';
 }
 function notaCopart(rows,note){
+  const avisos=[];
   const hasP=rows.some(r=>!r.c.coparticipacao.includes('Sem')),hasS=rows.some(r=>r.c.coparticipacao.includes('Sem'));
-  if(hasP&&hasS){note.style.display='block';note.innerHTML='Atenção: a comparação mistura planos <b>com coparticipação</b> (Hapvida = Parcial) e <b>sem coparticipação</b>. O custo mensal é só a mensalidade — nos planos com coparticipação há custo adicional conforme o uso.';}else note.style.display='none';
+  if(hasP&&hasS)avisos.push('A comparação mistura planos <b>com coparticipação</b> (Hapvida = Parcial) e <b>sem coparticipação</b>. O custo mensal é só a mensalidade — nos planos com coparticipação há custo adicional conforme o uso.');
+  const semOdo=[...new Set(rows.filter(r=>odontoFalta(r.c)).map(r=>r.c.label))];
+  if(semOdo.length)avisos.push('⚠ O valor do <b>plano odontológico</b> ainda não está carregado para esta praça — '+semOdo.join(', ')+' está sendo cotado <b>só com a assistência médica</b>. Confira no sistema antes de enviar a proposta.');
+  if(avisos.length){note.style.display='block';note.innerHTML=avisos.join('<br><br>');}else note.style.display='none';
 }
 // aviso quando o vendedor declarou "mista" mas ainda não montou os dois lados
 function pendMista(sel){
@@ -885,7 +911,10 @@ function calcResult(){
   kpis+=`<div class="kpi"><div class="lbl">Ganho em 12 meses</div><div class="val green">R$ ${fmt(econ*12)}</div><div class="foot">diferença anual (mensal × 12)</div></div></div>`;
   let t=`<div style="overflow-x:auto"><table class="res"><thead><tr><th>Plano</th><th>Produto</th><th>Acomodação</th><th>Copart.</th><th>Custo mensal</th><th>R$/vida</th><th>vs menor</th></tr></thead><tbody>`;
   rows.forEach((r,i)=>{const isHap=r.c.operadora==='Hapvida';const diff=r.total-min,pct=min?diff/min*100:0;const prod=(r.c.tipo==='Individual')?'Individual (PF)':'Empresarial (PME)';
-    t+=`<tr class="${i===0?'best':''} ${isHap?'haprow':''}"><td class="pn-cell"><span class="rank ${i===0?'g':''}">${i+1}</span><b>${r.c.label}</b><br><span class="op" style="margin-left:30px">${opDisp(r.c)}</span></td>
+    const odoTxt=temOdonto(r.c)?(odontoFalta(r.c)
+      ? ` <span style="color:#a32d2d">· odonto não carregado</span>`
+      : ` <span style="color:#6b6a66">· saúde R$ ${fmt(planMed(r.c))} + odonto R$ ${fmt(planOdo(r.c))}</span>`):'';
+    t+=`<tr class="${i===0?'best':''} ${isHap?'haprow':''}"><td class="pn-cell"><span class="rank ${i===0?'g':''}">${i+1}</span><b>${r.c.label}</b><br><span class="op" style="margin-left:30px">${opDisp(r.c)}${odoTxt}</span></td>
       <td>${prod}</td><td>${r.c.acomodacao}</td><td>${r.c.coparticipacao.includes('Sem')?'Sem':(r.c.coparticipacao.includes('Completa')?'Completa':'Parcial')}</td><td><b>R$ ${fmt(r.total)}</b></td><td>R$ ${fmt(r.total/tv)}</td>
       <td style="color:${diff===0?'#0f6e56':'#a32d2d'}">${diff===0?'—':'+R$ '+fmt(diff)+' ('+pct.toFixed(1)+'%)'}</td></tr>`;});
   t+='</tbody></table></div>';
@@ -903,6 +932,12 @@ function openDetail(id){
   const mostraTudo=totVidas()===0; // sem vidas informadas, mostra a tabela completa de preços
   const vd=vidasDe(c);
   BANDS.forEach(b=>{const q=vd[b]||0,p=c.precos[b]||0;if(!mostraTudo&&q===0)return;body+=`<tr><td>${b}</td><td>${q}</td><td>R$ ${fmt(p)}</td><td>R$ ${fmt(q*p)}</td></tr>`;});
+  if(temOdonto(c)&&!mostraTudo){
+    body+=`<tr><td>Plano de saúde</td><td>${vidasCob(c)}</td><td></td><td>R$ ${fmt(planMed(c))}</td></tr>`;
+    body+=odontoFalta(c)
+      ? `<tr><td colspan="4" style="color:#a32d2d">⚠ Valor do plano odontológico não carregado para ${c.praca}</td></tr>`
+      : `<tr><td>Plano odontológico</td><td>${vidasCob(c)}</td><td>R$ ${fmt(odontoVal(c))}</td><td>R$ ${fmt(planOdo(c))}</td></tr>`;
+  }
   body+=`<tr class="tot"><td>Total</td><td>${totVidas()}</td><td></td><td>R$ ${fmt(planTotal(c))}</td></tr></tbody></table>`;
   document.getElementById('detailBody').innerHTML=body;
   document.getElementById('detailOverlay').classList.add('show');
@@ -1029,11 +1064,18 @@ async function gerarFolder(){
   let trs=rows.map((r,i)=>{const cop=segLabel(r.c.coparticipacao);const prod=(r.c.tipo==='Individual')?'Individual (PF)':'Empresarial (PME)';
     const reembCell=temReemb?`<td>${r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]?REEMBOLSO[r.c.plano]:'—'}</td>`:'';
     return `<tr><td>${i+1}</td><td>${r.c.label}</td><td>${opDisp(r.c)}</td><td>${prod}</td><td>${r.c.acomodacao}</td><td>${cop}</td>${reembCell}<td>R$ ${fmt(r.total)}</td></tr>`;}).join('');
+  // linha de composição quando o plano leva odonto (espelha a cotação oficial:
+  // "Plano de saúde" + "Plano odontológico" = mensalidade)
+  const odoSub=r=>{
+    if(!temOdonto(r.c))return '';
+    if(odontoFalta(r.c))return `<div class="fd-hi-sub warn">⚠ Valor do plano odontológico não carregado para ${r.c.praca} — o total acima cobre apenas a assistência médica.</div>`;
+    return `<div class="fd-hi-sub">Plano de saúde <b>R$ ${fmt(planMed(r.c))}</b> · Plano odontológico <b>R$ ${fmt(planOdo(r.c))}</b> (R$ ${fmt(odontoVal(r.c))}/vida × ${vidasCob(r.c)})</div>`;
+  };
   let hi;
   if(hib){
     const best=cbs[0];
     const vd=q=>`${q} vida${q>1?'s':''}`;
-    const li=r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</span><b>R$ ${fmt(r.total)}</b></div>`;
+    const li=r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</span><b>R$ ${fmt(r.total)}</b></div>`+odoSub(r);
     if(cbs.length===1){
       hi=`<div class="fd-hi"><div class="fd-hi-t">Cotação mista — 1 contrato, ${tv} vidas</div>`+
          `<div class="fd-hi-grp">Hapvida (HMO) · ${vd(hL)}</div>${li(best.h)}`+
@@ -1046,15 +1088,18 @@ async function gerarFolder(){
     }
   } else if(rows.length===1){
     const r=rows[0];
-    hi=`<div class="fd-hi">Mensalidade: <span class="v">R$ ${fmt(r.total)}</span> — ${r.c.label} (${opDisp(r.c)}) · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</div>`;
+    hi=`<div class="fd-hi">Mensalidade: <span class="v">R$ ${fmt(r.total)}</span> — ${r.c.label} (${opDisp(r.c)}) · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}${odoSub(r)}</div>`;
   } else {
-    const items=rows.map(r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</span><b>R$ ${fmt(r.total)}</b></div>`).join('');
+    const items=rows.map(r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</span><b>R$ ${fmt(r.total)}</b></div>`+odoSub(r)).join('');
     hi=`<div class="fd-hi"><div class="fd-hi-t">${rows.length} opções cotadas</div>${items}</div>`;
   }
   // Tabela de valores completa (preço por faixa etária)
   const colHead=cols.map(c=>`<th>${c.label}<br><span style="font-weight:400;font-size:10px">${opDisp(c)} · ${c.acomodacao} · ${segLabel(c.coparticipacao)}</span></th>`).join('');
   const priceBody=BANDS.map(b=>`<tr class="${vidas[b]>0?'used':''}"><td>${b}${vidas[b]>0?` <span style="color:#5f5e5a;font-weight:400">(${vidas[b]} vida${vidas[b]>1?'s':''})</span>`:''}</td>`+cols.map(c=>{const q=(vidasDe(c)[b]||0);return `<td>R$ ${fmt(c.precos[b]||0)}${split&&q>0?` <span style="font-size:9.5px;color:#666">(${q})</span>`:''}</td>`;}).join('')+`</tr>`).join('');
-  const priceQt=`<tr class="grp"><td colspan="${cols.length+1}">${hib?`Cada plano sobre as vidas da sua coluna — contrato misto de ${tv} vida(s)`:`Mensalidade para a distribuição de vidas informada (${tv} vida(s))`}</td></tr><tr class="best"><td>${hib?'Subtotal do plano':'Total mensal'}</td>`+cols.map(c=>`<td>R$ ${fmt(planTotal(c))}</td>`).join('')+`</tr>`
+  const temOdo=cols.some(temOdonto);
+  const linhaOdo=temOdo?`<tr><td>Plano de saúde</td>`+cols.map(c=>`<td>R$ ${fmt(planMed(c))}</td>`).join('')+`</tr>`
+    +`<tr><td>Plano odontológico</td>`+cols.map(c=>`<td>${temOdonto(c)?(odontoFalta(c)?'—':'R$ '+fmt(planOdo(c))):'—'}</td>`).join('')+`</tr>`:'';
+  const priceQt=`<tr class="grp"><td colspan="${cols.length+1}">${hib?`Cada plano sobre as vidas da sua coluna — contrato misto de ${tv} vida(s)`:`Mensalidade para a distribuição de vidas informada (${tv} vida(s))`}</td></tr>`+linhaOdo+`<tr class="best"><td>${hib?'Subtotal do plano':'Total mensal'}</td>`+cols.map(c=>`<td>R$ ${fmt(planTotal(c))}</td>`).join('')+`</tr>`
     +(hib?`<tr class="best"><td colspan="${cols.length+1}" style="text-align:right">Total do contrato (${tv} vidas)${cbs.length>1?' — combinação mais econômica':''}: R$ ${fmt(cbs[0].total)}</td></tr>`:'');
   const priceTbl=`<table class="fd-tbl"><thead><tr><th>Faixa etária</th>${colHead}</tr></thead><tbody>${priceBody}${priceQt}</tbody></table>`;
   // Tabela de coparticipação (só planos Hapvida presentes na cotação)
@@ -1302,7 +1347,8 @@ function boot(){
 }
 document.getElementById('convOverlay').addEventListener('click',e=>{if(e.target.id==='convOverlay')closeConv();});
 document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')closeDetail();});
-fetch('catalog.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{CATALOG=d;boot();}).catch(e=>{var m=document.getElementById('matrix');if(m)m.innerHTML='<tr><td style=padding:20px>Erro ao carregar catálogo ('+e.message+'). Recarregue a página.</td></tr>';});
+fetch('odonto.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{ODONTO=d||{};}).catch(()=>{ODONTO={};})
+  .then(()=>fetch('catalog.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{CATALOG=d;boot();})).catch(e=>{var m=document.getElementById('matrix');if(m)m.innerHTML='<tr><td style=padding:20px>Erro ao carregar catálogo ('+e.message+'). Recarregue a página.</td></tr>';});
 
   /* deep-link de aba: /#area abre direto na Área de Comercialização — usado
      pelo card do app HapON Vendas, que aponta para uma aba específica.
