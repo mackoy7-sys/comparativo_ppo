@@ -594,10 +594,13 @@ function planLabels(opKey){const seen=[];plansOf(opKey).forEach(c=>{if(!seen.inc
 function acomsFor(opKey,label){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&!s.includes(c.acomodacao))s.push(c.acomodacao);});return s;}
 function segsFor(opKey,label,acom){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&c.acomodacao===acom&&!s.includes(c.coparticipacao))s.push(c.coparticipacao);});return s;}
 function segLabel(s){return s.includes('Sem')?'Sem coparticipação':(s.includes('Completa')?'Coparticipação completa':'Coparticipação parcial');}
+const MIN_VIDAS={'900 Care':2,'900':3,'Infinity':5}; // mínimo de vidas do CONTRATO (soma de todos os produtos cotados)
+function minVidas(c){return (c&&MIN_VIDAS[c.plano])||0;}
+function minVidasOk(c){const m=minVidas(c);if(!m)return true;const tv=totVidas();return tv===0||tv>=m;}
 function vidasOk(c){ if(c.vmin==null&&c.vmax==null) return true; const tv=totVidas(); if(tv===0) return true; return tv>=(c.vmin||0) && tv<=(c.vmax||1e9); }
 function resolved(ci,si){const col=matrixCols[ci];if(!col)return null;const x=col.slots[si];if(!(x&&x.plano&&x.acom&&x.seg))return null;
   const ms=CATALOG.filter(c=>c.operadora===col.op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c));
-  const cands=ms.filter(vidasOk);
+  const cands=ms.filter(c=>vidasOk(c)&&minVidasOk(c));
   if(!cands.length)return null;
   // preferir a tabela de porte MAIS ESPECÍFICA (1 vida > 2-29 > 30-99 > sem porte)
   const amp=c=>(c.vmin==null&&c.vmax==null)?1e9:((c.vmax==null?1e9:c.vmax)-(c.vmin||0));
@@ -661,11 +664,16 @@ function slotBlock(ci,si,x,v){
   let disp, tip='';
   if(noV) disp='informe vidas';
   else if(badTier){
+    const todos=CATALOG.filter(c=>c.operadora===op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c));
+    const mv=Math.max(0,...todos.map(minVidas));
     const rr=CATALOG.filter(c=>c.operadora===op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c)&&c.vmin!=null);
     const ranges=[...new Set(rr.map(c=>c.vmin+'–'+c.vmax))].join(' ou ');
     disp = ranges ? ('requer '+ranges+' vidas') : 'indisponível';
     const isOdo=/\+\s*Odonto/i.test(x.plano||'');
-    if(isOdo){const base=x.plano.replace(/\s*\+\s*Odonto.*$/i,'');
+    if(mv&&totVidas()<mv&&todos.some(c=>vidasOk(c))){
+      disp='mínimo de '+mv+' vidas';
+      tip=`O produto ${x.plano} exige contrato com no mínimo ${mv} vida${mv>1?'s':''}. O mínimo considera o TOTAL de vidas do contrato: se os demais produtos cotados somarem ${mv} ou mais vidas, ele pode ser incluído.`;
+    } else if(isOdo){const base=x.plano.replace(/\s*\+\s*Odonto.*$/i,'');
       tip=`O desconto na mensalidade médica por contratar o odonto junto só existe no porte PME (${ranges} vidas). Para menos vidas, use "${base}" — o preço do médico é o mesmo (o desconto, nesse porte, incide no plano odontológico, contratado à parte).`;}
     else tip=`Este plano tem tabela apenas para ${ranges} vidas.`;
   } else disp='R$ '+fmt(v);
