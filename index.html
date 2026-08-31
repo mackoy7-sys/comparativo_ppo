@@ -136,6 +136,7 @@
   .rchip b:hover{color:var(--red)}
   .mei-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
   .vidas-warn{background:#fff3df;border:1px solid #ffd9b8;color:#854f0b;border-radius:9px;padding:9px 13px;font-size:13px;margin-bottom:14px}
+  .mei-nota{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#8a6a17;background:#fdf3d8;border:1px solid #ecd9a4;border-radius:999px;padding:3px 10px;margin-left:6px;line-height:1.35;max-width:340px}
   .mei-lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
   /* plan cards */
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px;margin-top:22px}
@@ -789,7 +790,7 @@ function onAcom(ci,si,v){const col=matrixCols[ci];const x=col.slots[si];x.acom=v
   if(x.acom){const g=segsFor(col.op,x.plano,x.acom);if(g.length===1)x.seg=g[0];}recompute();}
 function onSeg(ci,si,v){matrixCols[ci].slots[si].seg=v||null;recompute();}
 function selectedPlans(){const ids=[];matrixCols.forEach((col,ci)=>col.slots.forEach((x,si)=>{const c=resolved(ci,si);if(c&&!ids.includes(c.id))ids.push(c.id);}));return ids.map(planById).filter(Boolean);}
-function recompute(){buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';}
+function recompute(){buildMeiChips();buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';}
 function reconcileSel(){
   matrixCols.forEach(col=>col.slots.forEach(x=>{
     if(x.plano&&!planLabels(col.op).includes(x.plano)){x.plano=null;x.acom=null;x.seg=null;}
@@ -811,10 +812,18 @@ function setProd(t){
   prodSel[t]=!prodSel[t];
   reconcileSel(); buildProdChips(); recompute();
 }
+/* A tabela promocional MEI existe só nas praças da Regional 2 (RMSP, Mogi das
+   Cruzes, São Bernardo, Santos, Jundiaí, Sorocaba, Campinas, Americana e Rio).
+   Nas demais o seletor não altera preço — avisar evita a dúvida "não dá a opção
+   no MEI" que chegou de Recife. */
+function pracaTemMEI(){return CATALOG.some(c=>(c.praca||'SP / RMSP')===pracaSel&&c.mei);}
 function buildMeiChips(){
   const opts=[[false,'Não-MEI'],[true,'MEI']];
   const el=document.getElementById('meiChips'); if(!el)return;
-  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${meiMode===v?'active':''}" data-mei="${v}">${l}</div>`).join('');
+  const semMei=CATALOG.length&&!pracaTemMEI();
+  const tip='A tabela promocional MEI existe apenas nas praças de SP e do Rio. Em '+pracaSel+' há uma tabela única: pode cotar normalmente, o valor é o mesmo para MEI e Não-MEI.';
+  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${meiMode===v?'active':''}" data-mei="${v}">${l}</div>`).join('')
+    +(semMei?`<span class="mei-nota" title="${tip}">${pracaSel} não tem tabela MEI — preço igual nos dois</span>`:'');
   el.querySelectorAll('[data-mei]').forEach(e=>e.onclick=()=>setMei(e.dataset.mei==='true'));
 }
 function setMei(v){
