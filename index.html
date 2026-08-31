@@ -136,8 +136,6 @@
   .rchip b:hover{color:var(--red)}
   .mei-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
   .vidas-warn{background:#fff3df;border:1px solid #ffd9b8;color:#854f0b;border-radius:9px;padding:9px 13px;font-size:13px;margin-bottom:14px}
-  .chips .chip.off{opacity:.4;cursor:not-allowed}
-  .mei-auto{font-size:11px;font-weight:700;color:var(--ndblue);background:#eef1fa;border:1px solid #c9d3ee;border-radius:999px;padding:3px 9px;margin-left:6px;white-space:nowrap}
   .mei-lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
   /* plan cards */
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px;margin-top:22px}
@@ -632,10 +630,10 @@ let prodSel = {Empresarial:true, Individual:true}; // filtro de produto (multi) 
    cotação caía numa tabela sem porte — preço que não é o de 1 vida. */
 const _pt=v=>(v==null?null:v);
 function hasMeiVariant(c){return CATALOG.some(x=>x.operadora===c.operadora&&x.label===c.label&&x.acomodacao===c.acomodacao&&x.coparticipacao===c.coparticipacao&&(x.categoria||'Geral')===(c.categoria||'Geral')&&(x.praca||'')===(c.praca||'')&&_pt(x.vmin)===_pt(c.vmin)&&_pt(x.vmax)===_pt(c.vmax)&&(!!x.mei)!==(!!c.mei));}
-/* Contrato de 1 vida só é vendido como MEI — a condição é aplicada sozinha. */
-function meiForcado(){return totVidas()===1;}
-function meiAtual(){return meiForcado()?true:meiMode;}
-function meiOk(c){return (!!c.mei===meiAtual()) || !hasMeiVariant(c);}
+/* A tabela de porte 1 vida é única (não tem versão MEI x Não-MEI) e vale para
+   os DOIS contratos — como não existe variante MEI dela, hasMeiVariant() é
+   false e ela passa no filtro qualquer que seja o seletor. */
+function meiOk(c){return (!!c.mei===meiMode) || !hasMeiVariant(c);}
 function tipoOk(c){return !!prodSel[c.tipo||'Empresarial'];}
 function pracaOk(c){return (c.praca||'SP / RMSP')===pracaSel;}
 function plansOf(opKey){return CATALOG.filter(c=>c.operadora===opKey && c.categoria===categoria && pracaOk(c) && tipoOk(c) && meiOk(c) && contratOk(c));}
@@ -791,7 +789,7 @@ function onAcom(ci,si,v){const col=matrixCols[ci];const x=col.slots[si];x.acom=v
   if(x.acom){const g=segsFor(col.op,x.plano,x.acom);if(g.length===1)x.seg=g[0];}recompute();}
 function onSeg(ci,si,v){matrixCols[ci].slots[si].seg=v||null;recompute();}
 function selectedPlans(){const ids=[];matrixCols.forEach((col,ci)=>col.slots.forEach((x,si)=>{const c=resolved(ci,si);if(c&&!ids.includes(c.id))ids.push(c.id);}));return ids.map(planById).filter(Boolean);}
-function recompute(){buildMeiChips();buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';}
+function recompute(){buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';}
 function reconcileSel(){
   matrixCols.forEach(col=>col.slots.forEach(x=>{
     if(x.plano&&!planLabels(col.op).includes(x.plano)){x.plano=null;x.acom=null;x.seg=null;}
@@ -816,11 +814,8 @@ function setProd(t){
 function buildMeiChips(){
   const opts=[[false,'Não-MEI'],[true,'MEI']];
   const el=document.getElementById('meiChips'); if(!el)return;
-  const trava=meiForcado(), atual=meiAtual();
-  const tip='Contrato de 1 vida é vendido apenas como MEI — a condição MEI é aplicada automaticamente.';
-  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${atual===v?'active':''}${trava&&v!==true?' off':''}" data-mei="${v}"${trava?` title="${tip}"`:''}>${l}</div>`).join('')
-    +(trava?`<span class="mei-auto" title="${tip}">MEI automático · 1 vida</span>`:'');
-  el.querySelectorAll('[data-mei]').forEach(e=>e.onclick=()=>{if(trava)return;setMei(e.dataset.mei==='true');});
+  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${meiMode===v?'active':''}" data-mei="${v}">${l}</div>`).join('');
+  el.querySelectorAll('[data-mei]').forEach(e=>e.onclick=()=>setMei(e.dataset.mei==='true'));
 }
 function setMei(v){
   if(meiMode===v)return; meiMode=v;
