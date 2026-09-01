@@ -643,9 +643,19 @@ function planLabels(opKey){const seen=[];plansOf(opKey).forEach(c=>{if(!seen.inc
 function acomsFor(opKey,label){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&!s.includes(c.acomodacao))s.push(c.acomodacao);});return s;}
 function segsFor(opKey,label,acom){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&c.acomodacao===acom&&!s.includes(c.coparticipacao))s.push(c.coparticipacao);});return s;}
 function segLabel(s){return s.includes('Sem')?'Sem coparticipação':(s.includes('Completa')?'Coparticipação completa':'Coparticipação parcial');}
-const MIN_VIDAS={'900 Care':2,'900':3,'Infinity':5}; // mínimo de vidas do CONTRATO (soma de todos os produtos cotados)
-function minVidas(c){return (c&&MIN_VIDAS[c.plano])||0;}
-function minVidasOk(c){const m=minVidas(c);if(!m)return true;const tv=totVidas();return tv===0||tv>=m;}
+/* Mínimo de vidas por produto PPO.
+   base:'categoria' -> as vidas têm de estar NO PRÓPRIO plano (não compõe com outros)
+   base:'contrato'  -> conta o TOTAL de vidas do contrato (pode compor)
+   Condição comercial NDI SP – PPO, vigente 01/09/2026: Premium 900 e Infinity 1000
+   caíram de 3 e 5 vidas para 2 vidas NA MESMA CATEGORIA — o comunicado veda
+   explicitamente 1 vida no Premium 900 + 1 no Infinity para fechar o mínimo.
+   Premium 900 Care segue na regra antiga (2 vidas somando o contrato). */
+const MIN_VIDAS={'900 Care':{n:2,base:'contrato'},'900':{n:2,base:'categoria'},'Infinity':{n:2,base:'categoria'}};
+function minRegra(c){return (c&&MIN_VIDAS[c.plano])||null;}
+function minVidas(c){const r=minRegra(c);return r?r.n:0;}
+function minBase(c){const r=minRegra(c);return r?r.base:null;}
+function minQtd(c){return minBase(c)==='categoria'?vidasCob(c):totVidas();} // vidas que contam para o mínimo
+function minVidasOk(c){const r=minRegra(c);if(!r)return true;const q=minQtd(c);return q===0||q>=r.n;}
 function vidasOk(c){ if(c.vmin==null&&c.vmax==null) return true; const tv=totVidas(); if(tv===0) return true; return tv>=(c.vmin||0) && tv<=(c.vmax||1e9); }
 function resolved(ci,si){const col=matrixCols[ci];if(!col)return null;const x=col.slots[si];if(!(x&&x.plano&&x.acom&&x.seg))return null;
   const ms=CATALOG.filter(c=>c.operadora===col.op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c));
@@ -700,7 +710,7 @@ function buildCotModeChips(){
   el.querySelectorAll('[data-cotm]').forEach(e=>e.onclick=()=>setCotMode(e.dataset.cotm));
   const h=document.getElementById('cotHint');
   if(h) h.innerHTML = cotMode==='mista'
-    ? 'Um <b>único contrato</b> com vidas divididas entre produtos Hapvida (HMO) e NotreDame Saúde (PPO). Os planos <b>se somam</b> — o resultado mostra o total do contrato. As vidas mínimas de Premium 900 Care (2), Premium 900 (3) e Infinity (5) olham o total das duas colunas.'
+    ? 'Um <b>único contrato</b> com vidas divididas entre produtos Hapvida (HMO) e NotreDame Saúde (PPO). Os planos <b>se somam</b> — o resultado mostra o total do contrato. <b>Premium 900</b> e <b>Infinity 1000</b> exigem 2 vidas <b>na coluna PPO</b> (mesma categoria, sem compor); <b>Premium 900 Care</b> exige 2 vidas somando as duas colunas.'
     : 'Os planos selecionados são <b>alternativas entre si</b>: todas as vidas vão para o mesmo plano e o resultado é um ranking do mais barato ao mais caro.';
 }
 function setCotMode(m){
@@ -771,9 +781,15 @@ function slotBlock(ci,si,x,v){
     const ranges=[...new Set(rr.map(c=>c.vmin+'–'+c.vmax))].join(' ou ');
     disp = ranges ? ('requer '+ranges+' vidas') : 'indisponível';
     const isOdo=/\+\s*Odonto/i.test(x.plano||'');
-    if(mv&&totVidas()<mv&&todos.some(c=>vidasOk(c))){
-      disp='mínimo de '+mv+' vidas';
-      tip=`O produto ${x.plano} exige contrato com no mínimo ${mv} vida${mv>1?'s':''}. O mínimo considera o TOTAL de vidas do contrato: se os demais produtos cotados somarem ${mv} ou mais vidas, ele pode ser incluído.`;
+    const cMin=todos.find(c=>minRegra(c));
+    if(mv&&cMin&&minQtd(cMin)<mv&&todos.some(c=>vidasOk(c))){
+      if(minBase(cMin)==='categoria'){
+        disp='mín. '+mv+' vidas neste plano';
+        tip=`Condição comercial NDI SP – PPO (vigente 01/09/2026): ${x.plano} exige no mínimo ${mv} vidas na MESMA categoria de plano — hoje há ${minQtd(cMin)}. Não vale compor 1 vida no Premium 900 com 1 no Infinity 1000 para atingir o mínimo.`;
+      } else {
+        disp='mínimo de '+mv+' vidas';
+        tip=`O produto ${x.plano} exige contrato com no mínimo ${mv} vida${mv>1?'s':''}. O mínimo considera o TOTAL de vidas do contrato: se os demais produtos cotados somarem ${mv} ou mais vidas, ele pode ser incluído.`;
+      }
     } else if(isOdo){const base=x.plano.replace(/\s*\+\s*Odonto.*$/i,'');
       tip=`O desconto na mensalidade médica por contratar o odonto junto só existe no porte PME (${ranges} vidas). Para menos vidas, use "${base}" — o preço do médico é o mesmo (o desconto, nesse porte, incide no plano odontológico, contratado à parte).`;}
     else tip=`Este plano tem tabela apenas para ${ranges} vidas.`;
@@ -929,8 +945,9 @@ function slotsSemTabela(){
     const todos=CATALOG.filter(c=>c.operadora===col.op&&c.label===x.plano&&c.acomodacao===x.acom
       &&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c));
     const mv=Math.max(0,...todos.map(minVidas),0);
+    const cMin=todos.find(c=>minRegra(c));
     const ranges=[...new Set(todos.filter(c=>c.vmin!=null).map(c=>c.vmin+'–'+c.vmax))].join(' ou ');
-    out.push({plano:x.plano,acom:x.acom,mv,ranges});
+    out.push({plano:x.plano,acom:x.acom,mv,ranges,base:cMin?minBase(cMin):null,qtd:cMin?minQtd(cMin):0});
   }));
   return out;
 }
@@ -944,7 +961,9 @@ function calcResult(){
     let msg;
     if(tv>0&&pend.length){
       msg='<div class="vidas-warn" style="display:block">'+pend.map(p=>{
-        if(p.mv&&tv<p.mv)return `⚠ <b>${p.plano}</b> exige contrato com no mínimo <b>${p.mv} vida${p.mv>1?'s':''}</b> — o contrato informado tem ${tv}.`;
+        if(p.mv&&p.qtd<p.mv)return p.base==='categoria'
+          ? `⚠ <b>${p.plano}</b> exige no mínimo <b>${p.mv} vidas na mesma categoria de plano</b> — há ${p.qtd}. Não vale compor 1 vida no Premium 900 com 1 no Infinity 1000 <span style="opacity:.8">(condição NDI SP – PPO, vigente 01/09/2026)</span>.`
+          : `⚠ <b>${p.plano}</b> exige contrato com no mínimo <b>${p.mv} vida${p.mv>1?'s':''}</b> — o contrato informado tem ${tv}.`;
         if(p.ranges)return `⚠ <b>${p.plano}</b> (${p.acom}) só tem tabela em <b>${pracaSel}</b> para <b>${p.ranges} vidas</b> — o contrato informado tem ${tv}. Ajuste as vidas ou escolha outro produto.`;
         return `⚠ <b>${p.plano}</b> (${p.acom}) não tem tabela em <b>${pracaSel}</b> para esta configuração.`;
       }).join('<br>')+'</div>';
