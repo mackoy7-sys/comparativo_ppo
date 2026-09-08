@@ -974,7 +974,10 @@
    "fonte": "PME 08/09 p22"
   },
   "Nosso Plano": {
-   "parcial": {},
+   "parcial": {
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "Valor fixo R$ 42,47"
+   },
    "total": {
     "Consultas eletivas": "30,00% Limitado a R$ 20,00",
     "Consultas de urgência": "30,00% Limitado a R$ 55,00",
@@ -1020,21 +1023,24 @@
     "Consultas de urgência": null,
     "Exames simples": null,
     "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null
-   },
-   "total": {
-    "Consultas eletivas": "Valor fixo R$ 43,63",
-    "Consultas de urgência": "Valor fixo R$ 61,82",
-    "Exames simples": "40,00% Limitado a R$ 51,52",
-    "Exames complexos": "40,00% Limitado a R$ 125,93",
     "Terapias especiais": "Valor fixo R$ 78,87",
     "Demais terapias": "Valor fixo R$ 42,47"
+   },
+   "total": {
+    "Consultas eletivas": "40,00%",
+    "Consultas de urgência": "40,00%",
+    "Exames simples": "40,00%",
+    "Exames complexos": "40,00%",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "40,00%"
    },
    "fonte": "PME 08/09 p23"
   },
   "Nosso Plano": {
-   "parcial": {},
+   "parcial": {
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "Valor fixo R$ 42,47"
+   },
    "total": {
     "Consultas eletivas": "Valor fixo R$ 43,63",
     "Consultas de urgência": "Valor fixo R$ 61,82",
@@ -1102,8 +1108,8 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
     "Internações": null
    },
    "fonte": "PME 08/09 p25"
@@ -1144,8 +1150,8 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
     "Internações": null
    },
    "fonte": "PME 08/09 p26"
@@ -1462,12 +1468,12 @@
     "Internações": null
    },
    "total": {
-    "Consultas eletivas": null,
-    "Consultas de urgência": null,
-    "Exames simples": null,
-    "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Consultas eletivas": "Valor fixo R$ 43,63",
+    "Consultas de urgência": "Valor fixo R$ 61,82",
+    "Exames simples": "40,00% Limitado a R$ 51,52",
+    "Exames complexos": "40,00% Limitado a R$ 125,93",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "Valor fixo R$ 42,47",
     "Internações": null
    },
    "fonte": "PME 08/09 p34"
@@ -1487,9 +1493,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p34"
   }
@@ -1531,9 +1537,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p35"
   }
@@ -1550,12 +1556,12 @@
     "Internações": null
    },
    "total": {
-    "Consultas eletivas": null,
-    "Consultas de urgência": null,
-    "Exames simples": null,
-    "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Consultas eletivas": "Valor fixo R$ 43,63",
+    "Consultas de urgência": "Valor fixo R$ 61,82",
+    "Exames simples": "40,00% Limitado a R$ 51,52",
+    "Exames complexos": "40,00% Limitado a R$ 125,93",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "Valor fixo R$ 42,47",
     "Internações": null
    },
    "fonte": "PME 08/09 p36"
@@ -1575,9 +1581,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p36"
   }
@@ -1594,12 +1600,12 @@
     "Internações": null
    },
    "total": {
-    "Consultas eletivas": null,
-    "Consultas de urgência": null,
-    "Exames simples": null,
-    "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Consultas eletivas": "Valor fixo R$ 43,63",
+    "Consultas de urgência": "Valor fixo R$ 61,82",
+    "Exames simples": "40,00% Limitado a R$ 51,52",
+    "Exames complexos": "40,00% Limitado a R$ 125,93",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "Valor fixo R$ 42,47",
     "Internações": null
    },
    "fonte": "PME 08/09 p37"
@@ -1619,9 +1625,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p37"
   }
@@ -1638,12 +1644,12 @@
     "Internações": null
    },
    "total": {
-    "Consultas eletivas": null,
-    "Consultas de urgência": null,
-    "Exames simples": null,
-    "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Consultas eletivas": "Valor fixo R$ 43,63",
+    "Consultas de urgência": "Valor fixo R$ 61,82",
+    "Exames simples": "40,00% Limitado a R$ 51,52",
+    "Exames complexos": "40,00% Limitado a R$ 125,93",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "Valor fixo R$ 42,47",
     "Internações": null
    },
    "fonte": "PME 08/09 p38"
@@ -1663,9 +1669,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p38"
   }
@@ -1707,9 +1713,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p39"
   }
@@ -1726,12 +1732,12 @@
     "Internações": null
    },
    "total": {
-    "Consultas eletivas": null,
-    "Consultas de urgência": null,
-    "Exames simples": null,
-    "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Consultas eletivas": "40,00% Limitado a R$ 40,00",
+    "Consultas de urgência": "40,00% Limitado a R$ 80,00",
+    "Exames simples": "40,00% Limitado a R$ 29,00",
+    "Exames complexos": "40,00% Limitado a R$ 120,00",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "40,00% Limitado a R$ 60,00",
     "Internações": null
    },
    "fonte": "PME 08/09 p40"
@@ -1751,9 +1757,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p40"
   },
@@ -1789,12 +1795,12 @@
     "Internações": null
    },
    "total": {
-    "Consultas eletivas": null,
-    "Consultas de urgência": null,
-    "Exames simples": null,
-    "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Consultas eletivas": "40,00% Limitado a R$ 40,00",
+    "Consultas de urgência": "40,00% Limitado a R$ 80,00",
+    "Exames simples": "40,00% Limitado a R$ 29,00",
+    "Exames complexos": "40,00% Limitado a R$ 120,00",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "40,00% Limitado a R$ 60,00",
     "Internações": null
    },
    "fonte": "PME 08/09 p41"
@@ -1814,9 +1820,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p41"
   },
@@ -1852,12 +1858,12 @@
     "Internações": null
    },
    "total": {
-    "Consultas eletivas": null,
-    "Consultas de urgência": null,
-    "Exames simples": null,
-    "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Consultas eletivas": "40,00% Limitado a R$ 40,00",
+    "Consultas de urgência": "40,00% Limitado a R$ 80,00",
+    "Exames simples": "40,00% Limitado a R$ 29,00",
+    "Exames complexos": "40,00% Limitado a R$ 120,00",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "40,00% Limitado a R$ 60,00",
     "Internações": null
    },
    "fonte": "PME 08/09 p42"
@@ -1877,9 +1883,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p42"
   },
@@ -1915,12 +1921,12 @@
     "Internações": null
    },
    "total": {
-    "Consultas eletivas": null,
-    "Consultas de urgência": null,
-    "Exames simples": null,
-    "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Consultas eletivas": "40,00% Limitado a R$ 40,00",
+    "Consultas de urgência": "40,00% Limitado a R$ 80,00",
+    "Exames simples": "40,00% Limitado a R$ 29,00",
+    "Exames complexos": "40,00% Limitado a R$ 120,00",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "40,00% Limitado a R$ 60,00",
     "Internações": null
    },
    "fonte": "PME 08/09 p43"
@@ -1940,9 +1946,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p43"
   },
@@ -1978,12 +1984,12 @@
     "Internações": null
    },
    "total": {
-    "Consultas eletivas": null,
-    "Consultas de urgência": null,
-    "Exames simples": null,
-    "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Consultas eletivas": "40,00% Limitado a R$ 40,00",
+    "Consultas de urgência": "40,00% Limitado a R$ 80,00",
+    "Exames simples": "40,00% Limitado a R$ 29,00",
+    "Exames complexos": "40,00% Limitado a R$ 120,00",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "40,00% Limitado a R$ 60,00",
     "Internações": null
    },
    "fonte": "PME 08/09 p44"
@@ -2003,9 +2009,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p44"
   },
@@ -2041,12 +2047,12 @@
     "Internações": null
    },
    "total": {
-    "Consultas eletivas": null,
-    "Consultas de urgência": null,
-    "Exames simples": null,
-    "Exames complexos": null,
-    "Terapias especiais": null,
-    "Demais terapias": null,
+    "Consultas eletivas": "40,00% Limitado a R$ 40,00",
+    "Consultas de urgência": "40,00% Limitado a R$ 80,00",
+    "Exames simples": "40,00% Limitado a R$ 29,00",
+    "Exames complexos": "40,00% Limitado a R$ 120,00",
+    "Terapias especiais": "Valor fixo R$ 78,87",
+    "Demais terapias": "40,00% Limitado a R$ 60,00",
     "Internações": null
    },
    "fonte": "PME 08/09 p45"
@@ -2066,9 +2072,9 @@
     "Consultas de urgência": "30,00%",
     "Exames simples": "30,00%",
     "Exames complexos": "30,00%",
-    "Terapias especiais": null,
-    "Demais terapias": null,
-    "Internações": null
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "R$ 180,00"
    },
    "fonte": "PME 08/09 p45"
   },
@@ -2300,7 +2306,8 @@
     "Exames simples": "30,00% Limitado a R$ 20,00",
     "Exames complexos": "30,00% Limitado a R$ 100,00",
     "Terapias especiais": "Valor fixo R$ 79,00",
-    "Demais terapias": "Valor fixo R$ 42,00"
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "Valor fixo R$ 180,00"
    },
    "fonte": "PME Sul 08/09 p1"
   }
@@ -2401,7 +2408,8 @@
     "Exames simples": "30,00% Limitado a R$ 20,00",
     "Exames complexos": "30,00% Limitado a R$ 100,00",
     "Terapias especiais": "Valor fixo R$ 79,00",
-    "Demais terapias": "Valor fixo R$ 42,00"
+    "Demais terapias": "Valor fixo R$ 42,00",
+    "Internações": "Valor fixo R$ 180,00"
    },
    "fonte": "PME Sul 08/09 p3"
   }
@@ -2413,7 +2421,8 @@
     "Consultas de urgência": null,
     "Exames simples": null,
     "Exames complexos": null,
-    "Terapias especiais": "Valor fixo R$ 79,00"
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00"
    },
    "total": {
     "Consultas eletivas": "30,00% Limitado a R$ 20,00",
@@ -2432,7 +2441,8 @@
     "Consultas de urgência": null,
     "Exames simples": null,
     "Exames complexos": null,
-    "Terapias especiais": "Valor fixo R$ 79,00"
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00"
    },
    "total": {
     "Consultas eletivas": "30,00% Limitado a R$ 20,00",
@@ -2451,7 +2461,8 @@
     "Consultas de urgência": null,
     "Exames simples": null,
     "Exames complexos": null,
-    "Terapias especiais": "Valor fixo R$ 79,00"
+    "Terapias especiais": "Valor fixo R$ 79,00",
+    "Demais terapias": "Valor fixo R$ 42,00"
    },
    "total": {
     "Consultas eletivas": "30,00% Limitado a R$ 20,00",

@@ -150,6 +150,16 @@ def parse_box(page, box, praca, fonte, produtos_praca):
             for nome,ci in prod_lbls:
                 if ci<=gi: atual=nome
             col_prod[gi]=atual or prod_lbls[0][0]
+    # Em algumas pracas cada grupo ocupa DUAS subcolunas (percentual | valor) e o
+    # valor cai na segunda. Ler so a subcoluna onde o rotulo caiu devolve vazio
+    # (visto em Sao Carlos e Jaboticabal, produto Integrado). Entao a leitura vai
+    # do inicio do grupo ate o inicio do PROXIMO grupo rotulado.
+    dcols_ord = sorted(grupos)
+    span = {}
+    for idx, gi in enumerate(dcols_ord):
+        fim = lims[dcols_ord[idx + 1]][0] if idx + 1 < len(dcols_ord) else lims[-1][1]
+        span[gi] = (lims[gi][0], fim)
+
     dados={}
     for r in rows_of([w for w in ws if w['top']>=yi-1]):
         rot=' '.join(w['text'] for w in r['w'] if w['x0']<lims[0][1])
@@ -157,10 +167,17 @@ def parse_box(page, box, praca, fonte, produtos_praca):
         if not p: continue
         for gi,(a,bb) in enumerate(lims):
             if gi not in grupos: continue
-            cel=[w['text'] for w in r['w'] if a-3<=w['x0']<bb]
-            val=re.sub(r'\s+',' ',' '.join(cel)).strip()
-            val=re.sub(r'^[-–]\s*','',val).strip()
-            dados.setdefault((col_prod.get(gi),grupos[gi]),{})[p]= val_ok(val)
+            def leia(x0c, x1c):
+                cel=[w['text'] for w in r['w'] if x0c-3<=w['x0']<x1c]
+                v=re.sub(r'\s+',' ',' '.join(cel)).strip()
+                return val_ok(re.sub(r'^[-–]\s*','',v).strip())
+            got = leia(a, bb)
+            if got is None and span[gi][1] > bb:
+                # fallback: grupo com DUAS subcolunas (percentual | valor) e o valor
+                # na segunda. So tenta quando a leitura estreita veio vazia, para nao
+                # engolir a caixa de texto lateral do ultimo grupo.
+                got = leia(a, span[gi][1])
+            dados.setdefault((col_prod.get(gi),grupos[gi]),{})[p]= got
     if not dados: return {}
     rotulados=[p for p,_ in prod_lbls if p!='__DEMAIS__']
     demais=[p for p in pg_prods if p not in rotulados]
@@ -243,8 +260,27 @@ def main():
                 cur=out.setdefault(pr,{})
                 nnovo=sum(1 for g in ('parcial','total') for x in (v.get(g) or {}).values() if x)
                 if not nnovo: continue
-                if prod not in cur or prio<cur[prod].get('_prio',9) or (prio==cur[prod].get('_prio',9) and nnovo>cur[prod].get('_n',0)):
+                prev=cur.get(prod)
+                if prev is None:
                     v['_prio']=prio; v['_n']=nnovo; cur[prod]=v
+                else:
+                    # A fonte de maior prioridade manda no VALOR, mas nao pode apagar
+                    # o que so a outra tem: no interior de SP o PME traz so o parcial
+                    # e substituia inteiro o Individual, que e quem tem o "total".
+                    # Entao: valor conflitante fica com a prioritaria; lacuna e
+                    # preenchida por quem tiver.
+                    melhor = (prio<prev.get('_prio',9) or
+                              (prio==prev.get('_prio',9) and nnovo>prev.get('_n',0)))
+                    base, outro = (v, prev) if melhor else (prev, v)
+                    for g in ('parcial','total'):
+                        bg = dict(base.get(g) or {})
+                        for k,val in (outro.get(g) or {}).items():
+                            if val and not bg.get(k): bg[k]=val
+                        base[g]=bg
+                    base['_prio']=min(prio, prev.get('_prio',9))
+                    base['_n']=sum(1 for g in ('parcial','total')
+                                   for x in (base.get(g) or {}).values() if x)
+                    cur[prod]=base
             n+=1
         print(f'{tag:<12} páginas com quadro: {n}')
     # herança: produto sem dados herda de produto cujo nome é prefixo (Nosso Plano Municipal <- Nosso Plano)
