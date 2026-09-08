@@ -91,21 +91,50 @@ def parse_box(page, box, praca, fonte, produtos_praca):
     lims=list(zip(ed[:-1],ed[1:]))
     ws=[w for w in page.extract_words(x_tolerance=1.2) if ed[0]-2<=w['x0']<=x1 and yh-16<=w['top']<=yf]
     pg_prods=produtos_da_pagina(page,produtos_praca)
-    grupos={}; prod_lbls=[]
-    for r in rows_of([w for w in ws if w['top']<yi-1]):
+    hdr_rows=rows_of([w for w in ws if w['top']<yi-1])
+    grupos={}
+    for r in hdr_rows:
         txt=sq(' '.join(w['text'] for w in r['w']))
         if 'COPARTIC' in txt and ('PARCIAL' in txt or txt.count('COPARTIC')>=1):
             for gi,(a,bb) in enumerate(lims):
                 cel=sq(' '.join(w['text'] for w in r['w'] if a-3<=w['x0']<bb))
                 if 'PARCIAL' in cel: grupos[gi]='parcial'
                 elif 'COPARTIC' in cel and 'PROCEDIMENTO' not in cel: grupos[gi]='total'
-        # rótulos de produto: detectar POR CÉLULA (a linha pode conter 'COPARTICIPAÇÃO' na 1ª coluna)
+
+    # --- rotulos de produto ---
+    # Duas armadilhas que zeravam a coluna "total" no interior de SP:
+    #  (1) o rotulo pode vir PARTIDO entre colunas ("NOSSO"|"MEDICO", "DEMAIS"|"PRODUTOS"),
+    #      entao ler celula a celula nunca casa o nome -> juntar a linha e agrupar por lacuna de x;
+    #  (2) linhas ACIMA do quadro (banner de outra tabela, ex.: "NOSSO PLANO PLENO") eram lidas
+    #      como rotulo e grudavam o quadro inteiro num produto so -> usar SO a linha imediatamente
+    #      anterior a linha PROCEDIMENTO.
+    prod_lbls=[]
+    lin_prod=None
+    for r in hdr_rows:
+        if any(sq(w['text'])=='PROCEDIMENTO' for w in r['w']):
+            break
+        lin_prod=r
+    if lin_prod is not None:
         cands=[(p,sq(p)) for p in sorted(produtos_praca,key=lambda x:-len(x))]+[('__DEMAIS__','DEMAIS PRODUTOS')]
-        for gi,(a,bb) in enumerate(lims):
-            cel=sq(' '.join(w['text'] for w in r['w'] if a-3<=w['x0']<bb))
-            if not cel or 'COPARTIC' in cel or 'PROCEDIMENTO' in cel: continue
+        pal=[w for w in lin_prod['w'] if w['x0']>=lims[0][1]-3 and sq(w['text']) not in ('COPARTICIPACAO','PROCEDIMENTO')]
+        grupos_pal, atual = [], []
+        for w in pal:
+            if atual and w['x0']-atual[-1]['x1']>14:
+                grupos_pal.append(atual); atual=[]
+            atual.append(w)
+        if atual: grupos_pal.append(atual)
+        for g in grupos_pal:
+            cel=sq(' '.join(w['text'] for w in g))
+            if not cel or 'COPARTIC' in cel: continue
             for nome,chave in cands:
                 if cel==chave or (chave in cel and len(chave)>6):
+                    # o rotulo e CENTRALIZADO sobre o par de colunas do produto
+                    # (parcial+total), entao a borda esquerda mais proxima cai na
+                    # coluna errada. Vale a coluna que CONTEM o inicio do rotulo.
+                    xi=g[0]['x0']
+                    gi=next((i for i,(a,b) in enumerate(lims) if a-3<=xi<b), None)
+                    if gi is None:
+                        gi=min(range(len(lims)),key=lambda i:abs(lims[i][0]-xi))
                     prod_lbls.append((nome,gi)); break
     if not grupos:  # quadro sem nível parcial/total (ex.: NDI Minas) -> coluna por produto = total
         for gi,(a,bb) in enumerate(lims):
@@ -164,15 +193,25 @@ def parse_page(page, praca, fonte, produtos_praca):
     return agg
 
 FONTES=[
- ('/Users/marcoscorrea/Downloads/OneDrive_1_24-08-2026/20260824 a 20260930 - PME.pdf','PME 24/08',1),
- ('/Users/marcoscorrea/Downloads/OneDrive_1_24-08-2026/20260824 a 20260930 - Super Simples 2 a 29 vidas.pdf','SS 24/08',2),
- ('/Users/marcoscorrea/Downloads/OneDrive_1_12-08-2026/20260801 a 20260930 - PME (2).pdf','PME 01/08',3),
- ('/Users/marcoscorrea/Downloads/OneDrive_1_12-08-2026/20260801 a 20260930 - Super Simples 2 a 29 vidas (2).pdf','SS 01/08',4),
+ # --- carga de SETEMBRO (prioridade alta: prio menor vence) ---
+ ('/Users/marcoscorrea/Downloads/OneDrive_1_08-09-2026/20260908 a 20260930 - PME.pdf','PME 08/09',1),
+ ('/Users/marcoscorrea/Downloads/OneDrive_1_08-09-2026/20260908 a 20260930 - Super Simples 2 a 29 vidas.pdf','SS 08/09',2),
+ ('/Users/marcoscorrea/Downloads/OneDrive_4_08-09-2026/20260908 a 20260930 - PME.pdf','PME Minas 08/09',1),
+ ('/Users/marcoscorrea/Downloads/OneDrive_4_08-09-2026/20260908 a 20260930 - Super Simples.pdf','SS Minas 08/09',2),
+ ('/Users/marcoscorrea/Downloads/OneDrive_3_08-09-2026/20260908 a 20260930 - PME.pdf','PME Sul 08/09',1),
+ ('/Users/marcoscorrea/Downloads/OneDrive_3_08-09-2026/20260908 a 20260930 - Super Simples.pdf','SS Sul 08/09',2),
+ ('/Users/marcoscorrea/Downloads/OneDrive_2_08-09-2026/20260901 a 20260930 - Individual (4).pdf','Individual 09',8),
+ ('/Users/marcoscorrea/Downloads/OneDrive_2_08-09-2026/20260701 a 20260930 - Tabela Promocional Individual - Ambulatorial.pdf','Ind Amb',8),
+ # --- carga de AGOSTO (fallback do que nao veio em setembro: RS, etc.) ---
+ ('/Users/marcoscorrea/Downloads/OneDrive_1_24-08-2026/20260824 a 20260930 - PME.pdf','PME 24/08',5),
+ ('/Users/marcoscorrea/Downloads/OneDrive_1_24-08-2026/20260824 a 20260930 - Super Simples 2 a 29 vidas.pdf','SS 24/08',6),
+ ('/Users/marcoscorrea/Downloads/OneDrive_1_12-08-2026/20260801 a 20260930 - PME (2).pdf','PME 01/08',7),
+ ('/Users/marcoscorrea/Downloads/OneDrive_1_12-08-2026/20260801 a 20260930 - Super Simples 2 a 29 vidas (2).pdf','SS 01/08',7),
  ('/Users/marcoscorrea/Downloads/OneDrive_1_12-08-2026/20260701 a 20260930 - Individual.pdf','Individual',9),
- ('/Users/marcoscorrea/Downloads/OneDrive_2_12-08-2026/20260801 a 20260930 - PME NDI Minas (2).pdf','PME Minas',1),
- ('/Users/marcoscorrea/Downloads/OneDrive_2_12-08-2026/20260801 a 20260930 - Super Simples (2).pdf','SS Minas',2),
- ('/Users/marcoscorrea/Downloads/OneDrive_3_12-08-2026/20260724 a 20260930 - PME (1).pdf','PME Sul',1),
- ('/Users/marcoscorrea/Downloads/OneDrive_3_12-08-2026/20260724 a 20260930 - Super Simples.pdf','SS Sul',2),
+ ('/Users/marcoscorrea/Downloads/OneDrive_2_12-08-2026/20260801 a 20260930 - PME NDI Minas (2).pdf','PME Minas',5),
+ ('/Users/marcoscorrea/Downloads/OneDrive_2_12-08-2026/20260801 a 20260930 - Super Simples (2).pdf','SS Minas',6),
+ ('/Users/marcoscorrea/Downloads/OneDrive_3_12-08-2026/20260724 a 20260930 - PME (1).pdf','PME Sul',5),
+ ('/Users/marcoscorrea/Downloads/OneDrive_3_12-08-2026/20260724 a 20260930 - Super Simples.pdf','SS Sul',6),
  ('/Users/marcoscorrea/Downloads/OneDrive_4_12-08-2026/20260724 a 20260930 - PME.pdf','PME RS',1),
  ('/Users/marcoscorrea/Downloads/OneDrive_4_12-08-2026/20260724 a 20260930 - Super Simples - 2 a 29 vidas.pdf','SS RS',2),
 ]
