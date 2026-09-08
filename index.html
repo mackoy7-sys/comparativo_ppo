@@ -650,7 +650,11 @@ function segLabel(s){return s.includes('Sem')?'Sem coparticipação':(s.includes
    caíram de 3 e 5 vidas para 2 vidas NA MESMA CATEGORIA — o comunicado veda
    explicitamente 1 vida no Premium 900 + 1 no Infinity para fechar o mínimo.
    Premium 900 Care segue na regra antiga (2 vidas somando o contrato). */
-const MIN_VIDAS={'900 Care':{n:2,base:'contrato'},'900':{n:2,base:'categoria'},'Infinity':{n:2,base:'categoria'}};
+const MIN_VIDAS={'900':{n:2,base:'categoria'},'Infinity':{n:2,base:'categoria'}};
+/* 08/09/2026: o Premium 900 Care ganhou tabela de 1 vida (18 entradas de porte
+   1-1 nas 9 praças NDI), então saiu do MIN_VIDAS — não exige mais mínimo algum.
+   Premium 900 e Infinity seguem exigindo 2 vidas na mesma categoria porque
+   continuam sem tabela de 1 vida no catálogo. */
 function minRegra(c){return (c&&MIN_VIDAS[c.plano])||null;}
 function minVidas(c){const r=minRegra(c);return r?r.n:0;}
 function minBase(c){const r=minRegra(c);return r?r.base:null;}
