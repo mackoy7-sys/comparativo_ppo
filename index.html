@@ -621,7 +621,11 @@ function buildPracaChips(){
   el.querySelectorAll('[data-praca]').forEach(e=>e.onclick=()=>setPraca(e.dataset.praca));
 }
 function setPraca(p){ if(pracaSel===p) return; pracaSel=p; reconcileSel(); buildPracaChips(); recompute(); }
-let meiMode = false; // false = Não-MEI (padrão), true = MEI. Aplica-se só à Hapvida.
+/* Padrão MEI (pedido do usuário em 09/09): o MEI é MAIS CARO em todos os 283
+   pares comparáveis do catálogo (+16,7% em média), então abrir em Não-MEI fazia
+   o consultor passar o valor menor sem perceber. Melhor abrir no mais caro e o
+   consultor baixar conscientemente do que o contrário. */
+let meiMode = true; // true = MEI (padrão), false = Não-MEI. Aplica-se só à Hapvida.
 let contratMode = 'Compulsório'; // modalidade das tabelas PME 30-99 (Compulsório | Adesão)
 function contratOk(c){return !c.contratacao || c.contratacao===contratMode;}
 let prodSel = {Empresarial:true, Individual:true}; // filtro de produto (multi) — default ambos
