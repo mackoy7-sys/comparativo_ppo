@@ -647,7 +647,7 @@ function setPraca(p){ if(pracaSel===p) return; pracaSel=p; reconcileSel(); build
    O CEP PREENCHE o seletor de praça, não o substitui: os chips de Filial e
    Praça continuam clicáveis e a linha de status sempre mostra o que foi
    resolvido, para o consultor conferir antes de cotar.                      */
-const RANKING_BAIRROS=[{"b":"Leblon","uf":"RJ","r":1,"m2":26446},{"b":"Ipanema","uf":"RJ","r":2,"m2":25819},{"b":"Itaim Bibi","uf":"SP","r":3,"m2":19569},{"b":"Pinheiros","uf":"SP","r":4,"m2":18295},{"b":"Jardins","uf":"SP","r":5,"m2":17504},{"b":"Lagoa","uf":"RJ","r":6,"m2":17406},{"b":"Moema","uf":"SP","r":7,"m2":16174},{"b":"Vila Mariana","uf":"SP","r":8,"m2":14762},{"b":"Barra da Tijuca","uf":"RJ","r":9,"m2":14127},{"b":"Paraíso","uf":"SP","r":10,"m2":14010},{"b":"Copacabana","uf":"RJ","r":11,"m2":13079},{"b":"Botafogo","uf":"RJ","r":12,"m2":13037},{"b":"Perdizes","uf":"SP","r":13,"m2":13217},{"b":"Bela Vista","uf":"SP","r":14,"m2":12564},{"b":"Flamengo","uf":"RJ","r":15,"m2":12321},{"b":"Brooklin","uf":"SP","r":16,"m2":12200},{"b":"Vila Olímpia","uf":"SP","r":17,"m2":12100},{"b":"Campo Belo","uf":"SP","r":18,"m2":12050},{"b":"Higienópolis","uf":"SP","r":19,"m2":12000},{"b":"Laranjeiras","uf":"RJ","r":20,"m2":11900},{"b":"Humaitá","uf":"RJ","r":21,"m2":11850},{"b":"Jardim Botânico","uf":"RJ","r":22,"m2":11800},{"b":"Consolação","uf":"SP","r":23,"m2":11750},{"b":"Morumbi","uf":"SP","r":24,"m2":11700},{"b":"Santo Amaro","uf":"SP","r":25,"m2":11650},{"b":"Jardim Paulista","uf":"SP","r":26,"m2":11600},{"b":"Santana","uf":"SP","r":27,"m2":11550},{"b":"Tatuapé","uf":"SP","r":28,"m2":11500},{"b":"Recreio dos Bandeirantes","uf":"RJ","r":29,"m2":11450},{"b":"Catete","uf":"RJ","r":30,"m2":11400},{"b":"Glória","uf":"RJ","r":31,"m2":11350},{"b":"Urca","uf":"RJ","r":32,"m2":11300},{"b":"Gávea","uf":"RJ","r":33,"m2":11250},{"b":"São Conrado","uf":"RJ","r":34,"m2":11200},{"b":"Itaguaçu","uf":"SP","r":35,"m2":11150},{"b":"Alto de Pinheiros","uf":"SP","r":36,"m2":11100},{"b":"Sumaré","uf":"SP","r":37,"m2":11050},{"b":"Vila Madalena","uf":"SP","r":38,"m2":11000},{"b":"Mooca","uf":"SP","r":39,"m2":10950},{"b":"Cerqueira César","uf":"SP","r":40,"m2":10900},{"b":"Aclimação","uf":"SP","r":41,"m2":10850},{"b":"Chácara Klabin","uf":"SP","r":42,"m2":10800},{"b":"Jardim Europa","uf":"SP","r":43,"m2":10750},{"b":"Jardim América","uf":"SP","r":44,"m2":10700},{"b":"Granja Julieta","uf":"SP","r":45,"m2":10650},{"b":"Interlagos","uf":"SP","r":46,"m2":10600},{"b":"Vila Nova Conceição","uf":"SP","r":47,"m2":10550},{"b":"Pacaembu","uf":"SP","r":48,"m2":10500},{"b":"Jardim Guedala","uf":"SP","r":49,"m2":10450}];
+const RANKING_BAIRROS=[{"b":"Leblon","uf":"RJ","r":1,"m2":26446,"fx":[[22440,22441],[22450,22450]]},{"b":"Ipanema","uf":"RJ","r":2,"m2":25819,"fx":[[22410,22411],[22421,22421],[22430,22430]]},{"b":"Itaim Bibi","uf":"SP","r":3,"m2":19569,"fx":[[1453,1453],[4530,4534],[4542,4542]]},{"b":"Pinheiros","uf":"SP","r":4,"m2":18295,"fx":[[5402,5402],[5405,5410],[5412,5412],[5414,5425],[5427,5429],[5432,5432]]},{"b":"Jardins","uf":"SP","r":5,"m2":17504,"fx":[]},{"b":"Lagoa","uf":"RJ","r":6,"m2":17406,"fx":[[22471,22471]]},{"b":"Moema","uf":"SP","r":7,"m2":16174,"fx":[[4028,4029],[4062,4063],[4074,4076],[4079,4082],[4084,4090],[4521,4524]]},{"b":"Vila Mariana","uf":"SP","r":8,"m2":14762,"fx":[[4007,4027],[4030,4032],[4035,4042],[4044,4044],[4101,4102],[4105,4107],[4110,4113],[4115,4117],[4119,4122],[4126,4126],[4128,4128],[4139,4139]]},{"b":"Barra da Tijuca","uf":"RJ","r":9,"m2":14127,"fx":[[22620,22621],[22630,22631],[22640,22640],[22776,22776],[22793,22793]]},{"b":"Paraíso","uf":"SP","r":10,"m2":14010,"fx":[[4001,4006],[4103,4104]]},{"b":"Copacabana","uf":"RJ","r":11,"m2":13079,"fx":[[22010,22010],[22021,22021],[22031,22031],[22061,22061],[22070,22071],[22081,22081]]},{"b":"Botafogo","uf":"RJ","r":12,"m2":13037,"fx":[[22231,22231],[22250,22251],[22260,22260],[22270,22271],[22281,22281],[22290,22290]]},{"b":"Perdizes","uf":"SP","r":13,"m2":13217,"fx":[[5004,5026]]},{"b":"Bela Vista","uf":"SP","r":14,"m2":12564,"fx":[[1306,1306],[1308,1308],[1310,1322],[1324,1328],[1330,1333]]},{"b":"Flamengo","uf":"RJ","r":15,"m2":12321,"fx":[[22221,22221],[22230,22230]]},{"b":"Brooklin","uf":"SP","r":16,"m2":12200,"fx":[[4555,4555],[4557,4571],[4575,4576],[4578,4578],[4580,4583],[4601,4602],[4610,4611],[4621,4623]]},{"b":"Vila Olímpia","uf":"SP","r":17,"m2":12100,"fx":[[4545,4553]]},{"b":"Campo Belo","uf":"SP","r":18,"m2":12050,"fx":[[4605,4609],[4612,4620],[4624,4624]]},{"b":"Higienópolis","uf":"SP","r":19,"m2":12000,"fx":[[1238,1242],[1244,1244]]},{"b":"Laranjeiras","uf":"RJ","r":20,"m2":11900,"fx":[[22240,22241],[22245,22245]]},{"b":"Humaitá","uf":"RJ","r":21,"m2":11850,"fx":[[22261,22261]]},{"b":"Jardim Botânico","uf":"RJ","r":22,"m2":11800,"fx":[[22460,22461]]},{"b":"Consolação","uf":"SP","r":23,"m2":11750,"fx":[[1243,1243],[1301,1305],[1307,1307],[1309,1309],[1415,1415]]},{"b":"Morumbi","uf":"SP","r":24,"m2":11700,"fx":[[5601,5602],[5607,5607],[5613,5621],[5650,5658],[5661,5662],[5670,5676],[5684,5687],[5693,5693]]},{"b":"Santo Amaro","uf":"SP","r":25,"m2":11650,"fx":[[4603,4604],[4626,4627],[4662,4662],[4701,4704],[4707,4710],[4713,4713],[4715,4715],[4723,4724],[4733,4740],[4742,4748],[4750,4755]]},{"b":"Jardim Paulista","uf":"SP","r":26,"m2":11600,"fx":[[1401,1409],[1420,1425],[1428,1429],[1432,1433],[1435,1435],[4503,4504]]},{"b":"Santana","uf":"SP","r":27,"m2":11550,"fx":[[2001,2001],[2010,2013],[2016,2022],[2032,2045],[2085,2085],[2401,2406]]},{"b":"Tatuapé","uf":"SP","r":28,"m2":11500,"fx":[[3063,3068],[3070,3071],[3076,3077],[3080,3080],[3084,3084],[3089,3089],[3309,3322],[3337,3338],[3401,3402],[3404,3407],[3417,3417],[3442,3442],[3501,3501]]},{"b":"Recreio dos Bandeirantes","uf":"RJ","r":29,"m2":11450,"fx":[[22790,22790],[22795,22795]]},{"b":"Catete","uf":"RJ","r":30,"m2":11400,"fx":[[22220,22220]]},{"b":"Glória","uf":"RJ","r":31,"m2":11350,"fx":[[22210,22211]]},{"b":"Urca","uf":"RJ","r":32,"m2":11300,"fx":[[22291,22291]]},{"b":"Gávea","uf":"RJ","r":33,"m2":11250,"fx":[[22451,22451],[22470,22470]]},{"b":"São Conrado","uf":"RJ","r":34,"m2":11200,"fx":[[22610,22611]]},{"b":"Itaguaçu","uf":"SP","r":35,"m2":11150,"fx":[]},{"b":"Alto de Pinheiros","uf":"SP","r":36,"m2":11100,"fx":[[5446,5446],[5454,5455],[5458,5467],[5469,5472],[5477,5477]]},{"b":"Sumaré","uf":"SP","r":37,"m2":11050,"fx":[[1251,1259]]},{"b":"Vila Madalena","uf":"SP","r":38,"m2":11000,"fx":[[5433,5445],[5447,5453]]},{"b":"Mooca","uf":"SP","r":39,"m2":10950,"fx":[[3103,3105],[3107,3107],[3109,3109],[3114,3114],[3116,3120],[3122,3122],[3149,3149],[3164,3166],[3176,3176],[3178,3178],[3183,3183],[3193,3193],[3195,3195]]},{"b":"Cerqueira César","uf":"SP","r":40,"m2":10900,"fx":[[1410,1414],[1416,1416],[1418,1419],[1426,1426],[5401,5401],[5403,5404],[5411,5411],[5413,5413]]},{"b":"Aclimação","uf":"SP","r":41,"m2":10850,"fx":[[1526,1526],[1528,1534],[4108,4109],[4114,4114]]},{"b":"Chácara Klabin","uf":"SP","r":42,"m2":10800,"fx":[]},{"b":"Jardim Europa","uf":"SP","r":43,"m2":10750,"fx":[[1443,1452],[1454,1457],[4536,4536]]},{"b":"Jardim América","uf":"SP","r":44,"m2":10700,"fx":[[1427,1427],[1430,1431],[1434,1434],[1436,1442]]},{"b":"Granja Julieta","uf":"SP","r":45,"m2":10650,"fx":[[4714,4714],[4716,4722]]},{"b":"Interlagos","uf":"SP","r":46,"m2":10600,"fx":[[4777,4777],[4783,4783],[4786,4786],[4788,4789],[4792,4792],[4802,4802],[4815,4815]]},{"b":"Vila Nova Conceição","uf":"SP","r":47,"m2":10550,"fx":[[4501,4502],[4505,4513],[4535,4535],[4537,4538],[4543,4544]]},{"b":"Pacaembu","uf":"SP","r":48,"m2":10500,"fx":[[1234,1237],[1245,1250]]},{"b":"Jardim Guedala","uf":"SP","r":49,"m2":10450,"fx":[[5603,5605],[5608,5612]]}];
 /* Os 39 municípios da Região Metropolitana de SP. Só entram aqui as cidades
    SEM praça própria: São Bernardo do Campo e Mogi das Cruzes têm tabela
    separada no catálogo e são resolvidas antes, por casamento exato. */
@@ -661,17 +661,31 @@ function pracaDoCEP(cidade,uf){
   if(uf==='SP'&&RMSP_CIDADES.some(x=>_n(x)===c)&&PRACAS.includes('SP / RMSP')) return 'SP / RMSP';
   return null;
 }
-/* O bairro é casado por NOME (o que o ViaCEP devolve), e não pelo CEP de
-   referência da planilha: conferi os 50 e só 22 caem no bairro que nomeiam
-   (o de Leblon cai em Ipanema, o de Moema no Planalto Paulista), então
-   comparar CEP com CEP daria falso negativo na maior parte dos casos.
-   O prefixo exige limite de palavra: "Brooklin Paulista" casa com Brooklin,
-   mas "Jardim Paulistano" NÃO casa com "Jardim Paulista".                  */
-function bairroNoRanking(bairro,uf){
-  const b=_n(bairro); if(!b) return null;
-  let h=RANKING_BAIRROS.find(x=>x.uf===uf&&_n(x.b)===b); if(h) return h;
-  return RANKING_BAIRROS.find(x=>{const n=_n(x.b);
+/* O bairro é casado por FAIXA DE CEP, não por nome. Conferi os 50 CEPs de
+   referência da planilha e só 22 caem no bairro que nomeiam; pior, o nome que o
+   CEP devolve costuma ser o SUB-bairro: 05615-000 ("Morumbi" na planilha) volta
+   como "Vila Progredior", 04570 como "Brooklin Paulista", 05653 como "Jardim
+   Leonor". Por isso `fx` traz as faixas de prefixo de cada bairro, levantadas de
+   uma varredura de 6.000 prefixos da base dos Correios (SP capital e Rio) —
+   ver scratchpad/faixas2.py, que documenta como cada faixa foi montada.
+   O casamento por nome fica como reserva, para CEP fora da área varrida.       */
+/* faixas de prefixo efetivamente varridas: SP capital e Rio Zona Sul/Barra.
+   Dentro delas a tabela `fx` é a palavra final — inclusive para dizer NÃO. */
+function _varrido(p){return (p>=1000&&p<=5999)||(p>=22000&&p<=22999);}
+function bairroNoRanking(cep,bairro,uf){
+  const p=parseInt(String(cep).replace(/\D/g,'').slice(0,5),10);
+  const b=_n(bairro);
+  /* 1) nome EXATO ganha da faixa: um prefixo pode cobrir dois bairros (22430 tem
+     Ipanema e Leblon), e nesse caso o nome do próprio CEP é mais preciso. */
+  if(b){const h=RANKING_BAIRROS.find(x=>x.uf===uf&&_n(x.b)===b); if(h) return h;}
+  /* 2) faixa de CEP — é o que resolve o sub-bairro (Vila Progredior -> Morumbi). */
+  if(p){const h=RANKING_BAIRROS.find(x=>x.uf===uf&&x.fx.some(f=>p>=f[0]&&p<=f[1])); if(h) return h;}
+  /* 3) nome por prefixo, SÓ fora da área varrida. Dentro dela seria falso
+     positivo: "Jardim América da Penha" (03090, zona leste) não é o Jardim
+     América dos Jardins, e a faixa acima já sabe disso. */
+  if(b&&!_varrido(p)) return RANKING_BAIRROS.find(x=>{const n=_n(x.b);
     return x.uf===uf&&b.length>n.length&&b.startsWith(n)&&b[n.length]===' ';})||null;
+  return null;
 }
 function _cepMsg(cls,txt){const el=document.getElementById('cepMsg');if(el){el.className='cep-msg '+cls;el.innerHTML=txt;}}
 function limparCEP(){_cepMsg('','');const r=document.getElementById('ppoReco');if(r)r.style.display='none';}
@@ -714,13 +728,16 @@ async function buscarCEP(){
   }else{
     _cepMsg('warn',onde+' — não há tabela de preços para esta cidade no catálogo. Selecione a praça manualmente abaixo.');
   }
-  const hit=bairroNoRanking(bairro,uf);
+  const hit=bairroNoRanking(cep,bairro,uf);
   const box=document.getElementById('ppoReco');
   if(box){
     if(hit){
       box.style.display='flex';
       box.innerHTML='<span class="star">★</span><span>Produto recomendado: <b>NotreDame Saúde</b>. '+
-        '<b>'+hit.b+'</b> está entre os 50 bairros de maior valor imobiliário de SP e RJ — '+
+        /* mostra o bairro do cliente E o do ranking quando diferem: quem mora na
+           Vila Progredior precisa entender por que apareceu "Morumbi". */
+        '<b>'+(bairro&&_n(bairro)!==_n(hit.b)?bairro+'</b> ('+hit.b+')':hit.b+'</b>')+
+        ' está entre os 50 bairros de maior valor imobiliário de SP e RJ — '+
         (hit.r)+'º do ranking, R$ '+hit.m2.toLocaleString('pt-BR')+'/m². '+
         'Perfil aderente ao portfólio NotreDame (Advance, Premium e Infinity).</span>';
     }else{ box.style.display='none'; }
