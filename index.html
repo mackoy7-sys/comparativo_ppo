@@ -137,6 +137,15 @@
   .mei-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
   .vidas-warn{background:#fff3df;border:1px solid #ffd9b8;color:#854f0b;border-radius:9px;padding:9px 13px;font-size:13px;margin-bottom:14px}
   .mei-nota{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--ndblue);background:#eef1fa;border:1px solid #c9d3ee;border-radius:999px;padding:3px 10px;margin-left:6px;line-height:1.35;max-width:340px}
+  .cep-in{width:118px;padding:7px 11px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;color:var(--txt);letter-spacing:.5px}
+  .cep-in:focus{outline:none;border-color:var(--hap)}
+  .cep-msg{font-size:12.5px;line-height:1.4}
+  .cep-msg.ok{color:var(--ndblue);font-weight:600}
+  .cep-msg.warn{color:#854f0b}
+  .cep-msg.err{color:#a12a2a}
+  .ppo-reco{display:flex;gap:10px;align-items:flex-start;background:#eef1fa;border:1px solid #c9d3ee;border-left:4px solid var(--ndblue);border-radius:9px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#22305e}
+  .ppo-reco b{color:var(--ndblue)}
+  .ppo-reco .star{font-size:16px;line-height:1.2}
   .mei-lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
   /* plan cards */
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px;margin-top:22px}
@@ -364,6 +373,14 @@
             <div class="subh" style="margin-bottom:0">Seleção de operadoras e planos</div>
             <button class="btn clear" onclick="novaCotacao()">Nova cotação</button>
           </div>
+          <div class="mei-row">
+            <span class="mei-lbl" title="Informe o CEP do cliente para o cotador selecionar a praça (tabela de preços) correspondente">CEP do cliente</span>
+            <input id="cepInput" class="cep-in" placeholder="00000-000" inputmode="numeric" maxlength="9"
+                   autocomplete="postal-code" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarCEP();}">
+            <button class="btn" onclick="buscarCEP()">Buscar praça</button>
+            <span id="cepMsg" class="cep-msg"></span>
+          </div>
+          <div id="ppoReco" class="ppo-reco" style="display:none"></div>
           <div class="mei-row">
             <span class="mei-lbl">Filial</span>
             <div class="chips" id="filialChips"></div>
@@ -608,7 +625,7 @@ function buildFilialChips(){
   const el=document.getElementById('filialChips'); if(!el) return;
   el.innerHTML=FILIAIS.map(f=>{const n=PRACAS.filter(p=>pracaRegiao(p)===f).length;
     return `<div class="chip ${filialSel===f?'active':''}" data-fil="${f}">${f} <small style="opacity:.6">(${n})</small></div>`;}).join('');
-  el.querySelectorAll('[data-fil]').forEach(e=>e.onclick=()=>setFilial(e.dataset.fil));
+  el.querySelectorAll('[data-fil]').forEach(e=>e.onclick=()=>{limparCEP();setFilial(e.dataset.fil);});
 }
 function setFilial(f){ if(filialSel===f) return; filialSel=f;
   const list=pracasDaFilial();
@@ -618,9 +635,98 @@ function setFilial(f){ if(filialSel===f) return; filialSel=f;
 function buildPracaChips(){
   const el=document.getElementById('pracaChips'); if(!el) return;
   el.innerHTML=pracasDaFilial().map(p=>`<div class="chip ${pracaSel===p?'active':''}" data-praca="${p}">${p}</div>`).join('');
-  el.querySelectorAll('[data-praca]').forEach(e=>e.onclick=()=>setPraca(e.dataset.praca));
+  el.querySelectorAll('[data-praca]').forEach(e=>e.onclick=()=>{limparCEP();setPraca(e.dataset.praca);});
 }
 function setPraca(p){ if(pracaSel===p) return; pracaSel=p; reconcileSel(); buildPracaChips(); recompute(); }
+/* ===================== BUSCA POR CEP =====================================
+   Pedido do usuário (10/09): informar o CEP como alternativa de entrada, para
+   (a) trazer a tabela de preços da praça daquele CEP e (b) recomendar o
+   NotreDame Saúde quando o cliente mora num dos 50 bairros de maior valor
+   imobiliário de SP e RJ (planilha ranking_bairros_PPO.xlsx).
+
+   O CEP PREENCHE o seletor de praça, não o substitui: os chips de Filial e
+   Praça continuam clicáveis e a linha de status sempre mostra o que foi
+   resolvido, para o consultor conferir antes de cotar.                      */
+const RANKING_BAIRROS=[{"b":"Leblon","uf":"RJ","r":1,"m2":26446},{"b":"Ipanema","uf":"RJ","r":2,"m2":25819},{"b":"Itaim Bibi","uf":"SP","r":3,"m2":19569},{"b":"Pinheiros","uf":"SP","r":4,"m2":18295},{"b":"Jardins","uf":"SP","r":5,"m2":17504},{"b":"Lagoa","uf":"RJ","r":6,"m2":17406},{"b":"Moema","uf":"SP","r":7,"m2":16174},{"b":"Vila Mariana","uf":"SP","r":8,"m2":14762},{"b":"Barra da Tijuca","uf":"RJ","r":9,"m2":14127},{"b":"Paraíso","uf":"SP","r":10,"m2":14010},{"b":"Copacabana","uf":"RJ","r":11,"m2":13079},{"b":"Botafogo","uf":"RJ","r":12,"m2":13037},{"b":"Perdizes","uf":"SP","r":13,"m2":13217},{"b":"Bela Vista","uf":"SP","r":14,"m2":12564},{"b":"Flamengo","uf":"RJ","r":15,"m2":12321},{"b":"Brooklin","uf":"SP","r":16,"m2":12200},{"b":"Vila Olímpia","uf":"SP","r":17,"m2":12100},{"b":"Campo Belo","uf":"SP","r":18,"m2":12050},{"b":"Higienópolis","uf":"SP","r":19,"m2":12000},{"b":"Laranjeiras","uf":"RJ","r":20,"m2":11900},{"b":"Humaitá","uf":"RJ","r":21,"m2":11850},{"b":"Jardim Botânico","uf":"RJ","r":22,"m2":11800},{"b":"Consolação","uf":"SP","r":23,"m2":11750},{"b":"Morumbi","uf":"SP","r":24,"m2":11700},{"b":"Santo Amaro","uf":"SP","r":25,"m2":11650},{"b":"Jardim Paulista","uf":"SP","r":26,"m2":11600},{"b":"Santana","uf":"SP","r":27,"m2":11550},{"b":"Tatuapé","uf":"SP","r":28,"m2":11500},{"b":"Recreio dos Bandeirantes","uf":"RJ","r":29,"m2":11450},{"b":"Catete","uf":"RJ","r":30,"m2":11400},{"b":"Glória","uf":"RJ","r":31,"m2":11350},{"b":"Urca","uf":"RJ","r":32,"m2":11300},{"b":"Gávea","uf":"RJ","r":33,"m2":11250},{"b":"São Conrado","uf":"RJ","r":34,"m2":11200},{"b":"Itaguaçu","uf":"SP","r":35,"m2":11150},{"b":"Alto de Pinheiros","uf":"SP","r":36,"m2":11100},{"b":"Sumaré","uf":"SP","r":37,"m2":11050},{"b":"Vila Madalena","uf":"SP","r":38,"m2":11000},{"b":"Mooca","uf":"SP","r":39,"m2":10950},{"b":"Cerqueira César","uf":"SP","r":40,"m2":10900},{"b":"Aclimação","uf":"SP","r":41,"m2":10850},{"b":"Chácara Klabin","uf":"SP","r":42,"m2":10800},{"b":"Jardim Europa","uf":"SP","r":43,"m2":10750},{"b":"Jardim América","uf":"SP","r":44,"m2":10700},{"b":"Granja Julieta","uf":"SP","r":45,"m2":10650},{"b":"Interlagos","uf":"SP","r":46,"m2":10600},{"b":"Vila Nova Conceição","uf":"SP","r":47,"m2":10550},{"b":"Pacaembu","uf":"SP","r":48,"m2":10500},{"b":"Jardim Guedala","uf":"SP","r":49,"m2":10450}];
+/* Os 39 municípios da Região Metropolitana de SP. Só entram aqui as cidades
+   SEM praça própria: São Bernardo do Campo e Mogi das Cruzes têm tabela
+   separada no catálogo e são resolvidas antes, por casamento exato. */
+const RMSP_CIDADES=["Arujá","Barueri","Biritiba-Mirim","Caieiras","Cajamar","Carapicuíba","Cotia","Diadema","Embu das Artes","Embu-Guaçu","Ferraz de Vasconcelos","Francisco Morato","Franco da Rocha","Guararema","Guarulhos","Itapecerica da Serra","Itapevi","Itaquaquecetuba","Jandira","Juquitiba","Mairiporã","Mauá","Mogi das Cruzes","Osasco","Pirapora do Bom Jesus","Poá","Ribeirão Pires","Rio Grande da Serra","Salesópolis","Santa Isabel","Santana de Parnaíba","Santo André","São Bernardo do Campo","São Caetano do Sul","São Lourenço da Serra","São Paulo","Suzano","Taboão da Serra","Vargem Grande Paulista"];
+function _n(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
+/* praça -> "cidade" comparável. 'SP / RMSP' não é cidade e fica de fora. */
+function _cidadeDaPraca(p){const m=(p||'').match(/^(.*?)\s*-\s*([A-Z]{2})$/);return m?{cid:_n(m[1]),uf:m[2]}:null;}
+function pracaDoCEP(cidade,uf){
+  const c=_n(cidade);
+  for(const p of PRACAS){const d=_cidadeDaPraca(p); if(d&&d.uf===uf&&d.cid===c) return p;}
+  if(uf==='SP'&&RMSP_CIDADES.some(x=>_n(x)===c)&&PRACAS.includes('SP / RMSP')) return 'SP / RMSP';
+  return null;
+}
+/* O bairro é casado por NOME (o que o ViaCEP devolve), e não pelo CEP de
+   referência da planilha: conferi os 50 e só 22 caem no bairro que nomeiam
+   (o de Leblon cai em Ipanema, o de Moema no Planalto Paulista), então
+   comparar CEP com CEP daria falso negativo na maior parte dos casos.
+   O prefixo exige limite de palavra: "Brooklin Paulista" casa com Brooklin,
+   mas "Jardim Paulistano" NÃO casa com "Jardim Paulista".                  */
+function bairroNoRanking(bairro,uf){
+  const b=_n(bairro); if(!b) return null;
+  let h=RANKING_BAIRROS.find(x=>x.uf===uf&&_n(x.b)===b); if(h) return h;
+  return RANKING_BAIRROS.find(x=>{const n=_n(x.b);
+    return x.uf===uf&&b.length>n.length&&b.startsWith(n)&&b[n.length]===' ';})||null;
+}
+function _cepMsg(cls,txt){const el=document.getElementById('cepMsg');if(el){el.className='cep-msg '+cls;el.innerHTML=txt;}}
+function limparCEP(){_cepMsg('','');const r=document.getElementById('ppoReco');if(r)r.style.display='none';}
+/* Devolve {ok:dados} | {vazio:true} (CEP não existe) | {off:true} (serviço fora
+   do ar ou bloqueado na rede). São três mensagens diferentes: um CEP digitado
+   errado não pode parecer queda do serviço. O ViaCEP responde 200 com
+   {"erro":true} para CEP inexistente; o opencep responde 404. */
+async function _consultaCEP(cep){
+  const urls=['https://viacep.com.br/ws/'+cep+'/json/','https://opencep.com/v1/'+cep];
+  let respondeu=false;
+  for(const u of urls){
+    try{const r=await fetch(u,{cache:'no-cache'});
+      if(r.status===404){respondeu=true;continue;}
+      if(!r.ok) continue;
+      const d=await r.json(); respondeu=true;
+      if(d&&!d.erro&&d.localidade) return {ok:d};
+    }catch(e){}
+  }
+  return respondeu?{vazio:true}:{off:true};
+}
+async function buscarCEP(){
+  const inp=document.getElementById('cepInput'); if(!inp) return;
+  const cep=(inp.value||'').replace(/\D/g,'');
+  /* limpa a recomendação ANTES de consultar: sem isso, um CEP inválido ou uma
+     falha de rede deixavam na tela o banner do CEP anterior. */
+  const _box=document.getElementById('ppoReco'); if(_box)_box.style.display='none';
+  if(cep.length!==8){_cepMsg('err','Informe os 8 dígitos do CEP.');return;}
+  inp.value=cep.slice(0,5)+'-'+cep.slice(5);
+  _cepMsg('','Consultando…');
+  const res=await _consultaCEP(cep);
+  if(res.vazio){_cepMsg('err','CEP não encontrado. Confira o número ou selecione a praça manualmente abaixo.');return;}
+  if(res.off){_cepMsg('err','Não consegui consultar o CEP agora (serviço dos Correios indisponível ou bloqueado na rede). Selecione a praça manualmente abaixo.');return;}
+  const d=res.ok;
+  const cidade=d.localidade, uf=(d.uf||'').toUpperCase(), bairro=d.bairro||'';
+  const praca=pracaDoCEP(cidade,uf);
+  const onde=(bairro?bairro+', ':'')+cidade+' - '+uf;
+  if(praca){
+    if(praca!==pracaSel){pracaSel=praca;filialSel=pracaRegiao(praca);reconcileSel();buildFilialChips();buildPracaChips();recompute();}
+    _cepMsg('ok',onde+' → praça <b>'+praca+'</b>');
+  }else{
+    _cepMsg('warn',onde+' — não há tabela de preços para esta cidade no catálogo. Selecione a praça manualmente abaixo.');
+  }
+  const hit=bairroNoRanking(bairro,uf);
+  const box=document.getElementById('ppoReco');
+  if(box){
+    if(hit){
+      box.style.display='flex';
+      box.innerHTML='<span class="star">★</span><span>Produto recomendado: <b>NotreDame Saúde</b>. '+
+        '<b>'+hit.b+'</b> está entre os 50 bairros de maior valor imobiliário de SP e RJ — '+
+        (hit.r)+'º do ranking, R$ '+hit.m2.toLocaleString('pt-BR')+'/m². '+
+        'Perfil aderente ao portfólio NotreDame (Advance, Premium e Infinity).</span>';
+    }else{ box.style.display='none'; }
+  }
+}
+
 /* Padrão MEI (pedido do usuário em 09/09): o MEI é MAIS CARO em todos os 283
    pares comparáveis do catálogo (+16,7% em média), então abrir em Não-MEI fazia
    o consultor passar o valor menor sem perceber. Melhor abrir no mais caro e o
