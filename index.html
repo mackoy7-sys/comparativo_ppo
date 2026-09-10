@@ -1358,7 +1358,7 @@ async function gerarFolder(){
     if(rcols.length){
       const ks=new Set();
       rcols.forEach(x=>{const m=PLAN_COV[x.key];for(const k in m) if(cov(m[k])) ks.add(k);});
-      const keys=[...ks].map(k=>({k,h:REDE_HOSP[k]||{}})).sort((a,b)=>(a.h.regiao||'').localeCompare(b.h.regiao||'')||(a.h.nome||'').localeCompare(b.h.nome||''));
+      const keys=[...ks].map(k=>({k,h:REDE_HOSP[k]||{}})).sort((a,b)=>cmpRegiao(a.h.regiao,b.h.regiao)||(a.h.nome||'').localeCompare(b.h.nome||''));
       const ncol=2+rcols.length; let body='',curReg=null;
       keys.forEach(({k,h})=>{
         if(h.regiao!==curReg){curReg=h.regiao;body+=`<tr class="grp"><td colspan="${ncol}">${curReg||'—'}</td></tr>`;}
@@ -1483,6 +1483,15 @@ function afterRedeSelChange(){redeState.reg='Todas';const rr=document.getElement
 function addRedePlan(op,p){if(!p)return;if(!redeSel[op].includes(p))redeSel[op].push(p);afterRedeSelChange();}
 function removeRedePlan(op,p){redeSel[op]=redeSel[op].filter(x=>x!==p);afterRedeSelChange();}
 function clearRede(){OPS.forEach(o=>redeSel[o.key]=[]);redeState.reg='Todas';redeState.q='';const s=document.getElementById('redeSearch');if(s)s.value='';redeState.show='todos';document.querySelectorAll('#redeShow .chip').forEach(c=>c.classList.toggle('active',c.dataset.sh==='todos'));afterRedeSelChange();}
+/* Ordem das regiões no folder e na aba Rede (pedido do usuário em 10/09):
+   primeiro as zonas da capital, depois ABC, Grande SP, Interior e o restante.
+   Antes era alfabético, o que jogava ABCD e Alto Tietê na frente da capital.
+   Região que não estiver nesta lista vai para o fim, em ordem alfabética —
+   assim uma região nova entra sem quebrar nada. */
+const REDE_REG_ORDEM=['São Paulo - Centro','São Paulo - Zona Sul','São Paulo - Zona Oeste',
+  'São Paulo - Zona Norte','São Paulo - Zona Leste','ABCD','Grande SP','Grande SP - Sul','Interior'];
+function _regRank(r){const i=REDE_REG_ORDEM.indexOf(r||'');return i<0?REDE_REG_ORDEM.length:i;}
+function cmpRegiao(a,b){return _regRank(a)-_regRank(b)||(a||'').localeCompare(b||'');}
 function redeCols(){return redeVisibleOps().flatMap(o=>(redeSel[o.key]||[]).map(p=>({op:o.key,label:o.label,color:o.color,plano:p,key:o.key+'|'+p,isHap:o.key==='Hapvida'})));}
 function buildRedeOpChips(){
   const el=document.getElementById('redeOpChips');if(!el)return;
@@ -1493,7 +1502,7 @@ function buildRedeOpChips(){
 function setRedeOpMode(m){if(redeOpMode===m)return;redeOpMode=m;buildRedeOpChips();afterRedeSelChange();}
 function redeKeys(cols){const s=new Set();cols.forEach(c=>{const m=PLAN_COV[c.key]||{};for(const k in m)s.add(k);});return [...s];}
 function buildRegOptions(){
-  const cols=redeCols();const regs=[...new Set(redeKeys(cols).map(k=>REDE_HOSP[k]&&REDE_HOSP[k].regiao).filter(Boolean))].sort();
+  const cols=redeCols();const regs=[...new Set(redeKeys(cols).map(k=>REDE_HOSP[k]&&REDE_HOSP[k].regiao).filter(Boolean))].sort(cmpRegiao);
   document.getElementById('redeReg').innerHTML=`<option value="Todas">Todas as regiões</option>`+regs.map(r=>`<option value="${r}">${r}</option>`).join('');
 }
 function renderRede(){
@@ -1523,7 +1532,7 @@ function renderRede(){
     if(redeState.show==='dif'&&flags.every(f=>f===flags[0]))return false;
     if(redeState.show==='exh'){if(!hapCol)return false;const hc=isCov(hapCol,r.k);const others=cols.filter(c=>!c.isHap).some(c=>isCov(c,r.k));if(!(hc&&!others))return false;}
     return true;
-  }).sort((a,b)=>(a.h.regiao||'').localeCompare(b.h.regiao||'')||(a.h.nome||'').localeCompare(b.h.nome||''));
+  }).sort((a,b)=>cmpRegiao(a.h.regiao,b.h.regiao)||(a.h.nome||'').localeCompare(b.h.nome||''));
   cnt.textContent=`${rows.length} de ${keys.length} hospitais exibidos.`;
   let head=`<thead><tr><th>Hospital</th><th>Bairro</th><th>Região</th>`+
     cols.map(c=>`<th class="cov-head" style="background:${c.color}">${c.label}<br><span style="font-weight:400;font-size:10px">${pdisp(c.op,c.plano)}</span></th>`).join('')+`</tr></thead>`;
