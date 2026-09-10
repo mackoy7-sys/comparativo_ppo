@@ -1438,7 +1438,10 @@ function ensureCopart(){
 function ensureRede(){
   return new Promise(res=>{
     if(REDE){ if(!redeIndexBuilt){buildRedeIndex();redeIndexBuilt=true;} return res(true); }
-    fetch('rede.json').then(r=>r.json()).then(d=>{REDE=d;buildRedeIndex();redeIndexBuilt=true;res(true);}).catch(()=>res(false));
+    /* no-cache como nos outros 3 JSON: era o único sem, e o navegador segurava
+       a rede antiga depois do deploy — a inclusão do Nipo Brasileiro no Advance
+       700 (10/09) não aparecia até limpar o cache. */
+    fetch('rede.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{REDE=d;buildRedeIndex();redeIndexBuilt=true;res(true);}).catch(()=>res(false));
   });
 }
 function loadRede(){
