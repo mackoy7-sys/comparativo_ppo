@@ -736,9 +736,11 @@ async function buscarCEP(){
       box.innerHTML='<span class="star">★</span><span>Produto recomendado: <b>NotreDame Saúde</b>. '+
         /* mostra o bairro do cliente E o do ranking quando diferem: quem mora na
            Vila Progredior precisa entender por que apareceu "Morumbi". */
-        '<b>'+(bairro&&_n(bairro)!==_n(hit.b)?bairro+'</b> ('+hit.b+')':hit.b+'</b>')+
-        ' está entre os 50 bairros de maior valor imobiliário de SP e RJ — '+
-        (hit.r)+'º do ranking, R$ '+hit.m2.toLocaleString('pt-BR')+'/m². '+
+        '<b>'+(bairro&&_n(bairro)!==_n(hit.b)?bairro+'</b> ('+hit.b+')':hit.b+'</b>')+'. '+
+        /* 10/09: a pedido do usuário, o banner deixou de citar a posição no
+           ranking e o preço do m². Os campos `r` e `m2` seguem na tabela
+           RANKING_BAIRROS — é de onde as faixas de CEP foram montadas, e a
+           frase volta com uma linha se for pedida de novo. */
         'Perfil aderente ao portfólio NotreDame (Advance, Premium e Infinity).</span>';
     }else{ box.style.display='none'; }
   }
