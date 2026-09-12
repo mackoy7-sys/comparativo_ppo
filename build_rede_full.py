@@ -228,6 +228,27 @@ CASAR = {
     ("Pronto Atendimento Taboão da Serra", "TABOAO DA SERRA"): "PRONTO ATEND TABOAO DA SERRA",
     ("Pronto Atendimento Várzea Paulista", "VARZEA PAULISTA"): "PRONTO ATEND VARZEA PAULISTA",
 }
+# O folder de agosto nao tem coluna de bairro, e nenhuma destas 11 unidades
+# existe na base do Dash (procurei tambem entre clinicas e laboratorios) nem
+# tem bairro util no rede.json. Os tres primeiros saem do rede.json, casando
+# pelo nome; os oito restantes foram informados pelo usuario em 12/09.
+BAIRRO_DEST = {
+    # do rede.json (base curada interna)
+    ("Hospital e Maternidade Cruz Azul", "SAO PAULO"): "Cambuci",
+    ("Hospital Santa Izildinha", "SAO PAULO"): "São Mateus",
+    # rede.json traz esta unidade como "CC NDI - São Miguel"
+    ("Pronto Atendimento São Miguel", "SAO PAULO"): "São Miguel Paulista",
+    # informados pelo usuario
+    ("AMICO Saúde", "CAIEIRAS"): "Caieiras",
+    ("Pronto Atendimento Diadema", "DIADEMA"): "Diadema",
+    ("CEMA Hospital - Guarulhos", "GUARULHOS"): "Vila Itapegica",
+    ("Hospital HAOC", "INDAIATUBA"): "Centro",
+    ("Pronto Atendimento Nova Vida - Jandira I", "JANDIRA"): "Centro",
+    ("Hospital e Maternidade BP Santo André", "SANTO ANDRE"): "Vila Bastos",
+    ("CEMA Hospital - São Paulo", "SAO PAULO"): "Mooca",
+    ("CEMA Hospital - Taboao", "TABOAO DA SERRA"): "Jardim Helena",
+}
+
 # conferidas e que NAO existem na base — entram como linha nova, sem duplicar
 NOVAS_OK = {
     ("AMICO Saúde", "CAIEIRAS"),
@@ -286,7 +307,7 @@ def destaques(existentes):
             for k, m in planos.items():
                 alvo["p"][k] = alvo["p"].get(k, 0) | m
         else:
-            reg = {"n": d["n"], "b": "", "c": d["c"], "u": "SP",
+            reg = {"n": d["n"], "b": BAIRRO_DEST.get(ch, ""), "c": d["c"], "u": "SP",
                    "r": "Destaques RMSP", "p": planos}
             novas.append(reg)
             porcidade.setdefault(d["c"], []).append(reg)
@@ -295,8 +316,11 @@ def destaques(existentes):
         raise SystemExit("unidade do folder sem casamento exato e fora do de-para "
                          "(conferir a mão antes de publicar):\n  " +
                          "\n  ".join(f"{a} [{b}]" for a, b in sem_regra))
+    sem_bairro = [f'{r["n"]} [{r["c"]}]' for r in novas if not r["b"]]
     print(f"  destaques RMSP: {len(dest)} do folder — {exato} casaram por nome idêntico, "
           f"{curado} pelo de-para conferido, {len(novas)} entraram como novas")
+    if sem_bairro:
+        print(f"  ! sem bairro ({len(sem_bairro)}), sai '—' no folder: " + "; ".join(sem_bairro))
     return novas
 
 
