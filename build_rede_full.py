@@ -324,6 +324,105 @@ def destaques(existentes):
     return novas
 
 
+# --- região de SP (agrupamento do folder) -------------------------------
+# O folder antigo abria a rede de SP por ZONA (Centro, Zona Sul, Zona Oeste,
+# Zona Norte, Zona Leste, ABCD, Grande SP, Grande SP - Sul, Interior e depois
+# as demais em ordem alfabética). O Dash só tem cidade e bairro, então a região
+# vem do rede.json, que carrega esse campo, em camadas:
+#   1) mesmo nome de unidade (e mesmo lado: capital x cidade)  — o mais preciso
+#   2) bairro, para a capital, por maioria (o rede.json tem 14 bairros com mais
+#      de uma zona, todos com maioria clara na Zona Leste)
+#   3) cidade, fora da capital
+#   4) o que sobrar em SP é Interior — são cidades pequenas (Viradouro,
+#      Buritama, Ilha Solteira...) que nenhuma outra região reivindica
+REDE = os.path.expanduser("~/comparativo-ppo/rede.json")
+
+# seis unidades da capital que nenhuma camada resolve. Decididas pelo ENDEREÇO
+# da própria base do Dash, não por palpite:
+ZONA_MANUAL = {
+    # R Verbo Divino 290, Chácara Santo Antônio
+    "SANTA ISABELLA": "São Paulo - Zona Sul",
+    # R Dr Galvão Guimarães, Jd Santa Adélia (São Mateus)
+    "MASTER CLIN": "São Paulo - Zona Leste",
+    # R Rafael Monteiro Valeiro, Jd Tuá (Itaim Paulista)
+    "HOSP MAT 8 DE MAIO": "São Paulo - Zona Leste",
+    # Av Raimundo Pereira de Magalhães 1257, Pirituba. ⚠ a coordenada do Dash
+    # para esta unidade é um fallback arredondado e aponta para o sul — o
+    # endereço é que vale
+    "HOSPITAL PREVINA PLENA SAUDE": "São Paulo - Zona Norte",
+    # R Jaguaribe 144, Vila Buarque
+    "SANTA CASA DE MISERICORDIA SP": "São Paulo - Centro",
+    # Av Nossa Senhora do Sabará 2375, Vila Santana
+    "HOSP MAT VIDAS": "São Paulo - Zona Sul",
+}
+# as 11 unidades que vieram só do folder de agosto não estão no rede.json
+ZONA_DESTAQUES = {
+    "Hospital e Maternidade Cruz Azul": "São Paulo - Centro",
+    "Hospital Santa Izildinha": "São Paulo - Zona Leste",
+    "Pronto Atendimento São Miguel": "São Paulo - Zona Leste",
+    "CEMA Hospital - São Paulo": "São Paulo - Zona Leste",
+    "AMICO Saúde": "Grande SP",
+    "Pronto Atendimento Diadema": "ABCD",
+    "CEMA Hospital - Guarulhos": "Grande SP",
+    "Hospital HAOC": "Campinas e Região",
+    "Pronto Atendimento Nova Vida - Jandira I": "Grande SP",
+    "Hospital e Maternidade BP Santo André": "ABCD",
+    "CEMA Hospital - Taboao": "Grande SP",
+}
+
+def _maioria(c):
+    return c.most_common(1)[0][0] if c else None
+
+def marca_regiao(unidades):
+    """Preenche o campo 'g' (região) das unidades de SP."""
+    if not os.path.exists(REDE):
+        print("  ! rede.json ausente — folder de SP fica agrupado por cidade")
+        return
+    from collections import Counter, defaultdict
+    R = json.load(open(REDE, encoding="utf-8"))
+    por_nome_cap, por_nome_cid = defaultdict(Counter), defaultdict(Counter)
+    por_bairro, por_cidade = defaultdict(Counter), defaultdict(Counter)
+    for v in R.values():
+        for h in v["hospitais"]:
+            r = h.get("regiao") or ""
+            if not r:
+                continue
+            nome, bairro = n(h["nome"]), n(h["bairro"])
+            if r.startswith("São Paulo -"):
+                por_nome_cap[nome][r] += 1
+                por_bairro[bairro][r] += 1
+            else:
+                # fora da capital o campo "bairro" do rede.json traz a cidade
+                por_nome_cid[(nome, bairro)][r] += 1
+                por_cidade[bairro][r] += 1
+
+    cont = Counter()
+    for u in unidades:
+        if u["u"] != "SP":
+            continue
+        nome = n(u["n"])
+        capital = u["c"] == "SAO PAULO"
+        g = None
+        if u.get("r") == "Destaques RMSP":
+            g = ZONA_DESTAQUES.get(u["n"]); cont["folder"] += 1 if g else 0
+        if not g and capital and nome in ZONA_MANUAL:
+            g = ZONA_MANUAL[nome]; cont["endereço"] += 1
+        if not g:
+            g = _maioria(por_nome_cap[nome] if capital else por_nome_cid[(nome, u["c"])])
+            if g: cont["nome"] += 1
+        if not g and capital:
+            for b in (n(x) for x in u["b"].split(" / ") if x):
+                g = _maioria(por_bairro.get(b))
+                if g: cont["bairro"] += 1; break
+        if not g and not capital:
+            g = _maioria(por_cidade.get(u["c"]))
+            if g: cont["cidade"] += 1
+        if not g:
+            g = "Interior"; cont["Interior (resto de SP)"] += 1
+        u["g"] = g
+    print("  região de SP: " + ", ".join(f"{v} por {k}" for k, v in cont.most_common()))
+
+
 # --- geografia ----------------------------------------------------------
 def km(a, b):
     (la1, lo1), (la2, lo2) = a, b
@@ -425,6 +524,7 @@ def main():
             r["b"] = " / ".join(r.pop("_bs"))
         return out
     unidades, labs = funde(unidades), funde(labs)
+    marca_regiao(unidades)
     for lst in (unidades, labs):
         lst.sort(key=lambda x: (x["u"], x["c"], x["b"], x["n"]))
 

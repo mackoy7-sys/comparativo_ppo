@@ -1453,20 +1453,30 @@ async function folderRedeFull(cols){
   const pr=rfPraca(hc[0].c); if(!pr)return '';
   const cid=new Set(pr.cidades), uf=pr.uf, MIN=REDE_FULL.meta.min_praca;
   const temp=u=>u.u===uf&&hc.some(x=>(u.p[x.k]||0)&7);
-  /* a sede da praça vai na frente: numa cotação de SP/RMSP o folder tem de
-     abrir por São Paulo, não por Arujá (a base vem ordenada por cidade). */
-  const ordem=(a,b)=>(a.c===pr.sede?0:1)-(b.c===pr.sede?0:1)||a.c.localeCompare(b.c)
-                     ||(a.b||'').localeCompare(b.b||'')||a.n.localeCompare(b.n);
-  const naPraca=REDE_FULL.unidades.filter(u=>temp(u)&&cid.has(u.c)).sort(ordem);
-  const noEstado=(naPraca.length<MIN)?REDE_FULL.unidades.filter(u=>temp(u)&&!cid.has(u.c)).sort(ordem):[];
+  let naPraca=REDE_FULL.unidades.filter(u=>temp(u)&&cid.has(u.c));
+  let noEstado=(naPraca.length<MIN)?REDE_FULL.unidades.filter(u=>temp(u)&&!cid.has(u.c)):[];
   if(!naPraca.length&&!noEstado.length)return '';
+  /* Em SP o folder abre por ZONA — Centro, Zona Sul, Zona Oeste, Zona Norte,
+     Zona Leste, ABCD, Grande SP, Grande SP - Sul, Interior e depois as demais
+     em ordem alfabética. É como era o folder antigo, e `cmpRegiao` já carrega
+     essa ordem (REDE_REG_ORDEM). O campo `g` vem do build; fora de SP não
+     existe, e aí o agrupamento continua por cidade, com a sede da praça na
+     frente (senão uma cotação de SP/RMSP abriria por Arujá). */
+  const porRegiao=naPraca.concat(noEstado).some(u=>u.g);
+  const grupo=u=>u.g||_tc(u.c);
+  const ordem=porRegiao
+    ? (a,b)=>cmpRegiao(a.g,b.g)||a.n.localeCompare(b.n)
+    : (a,b)=>(a.c===pr.sede?0:1)-(b.c===pr.sede?0:1)||a.c.localeCompare(b.c)
+             ||(a.b||'').localeCompare(b.b||'')||a.n.localeCompare(b.n);
+  naPraca=naPraca.sort(ordem); noEstado=noEstado.sort(ordem);
 
   const ncol=2+hc.length;
   const secao=(titulo,lista)=>{
     if(!lista.length)return '';
     let html=`<tr class="grp"><td colspan="${ncol}">${titulo}</td></tr>`,cur=null;
     lista.forEach(u=>{
-      if(u.c!==cur){cur=u.c;html+=`<tr class="used"><td colspan="${ncol}">${_esc(_tc(u.c))}</td></tr>`;}
+      const g=grupo(u);
+      if(g!==cur){cur=g;html+=`<tr class="used"><td colspan="${ncol}">${_esc(g)}</td></tr>`;}
       html+=`<tr><td>${_esc(_tc(u.n))}</td><td>${u.b?_esc(_tc(u.b)):'—'}</td>`
            +hc.map(x=>{const cd=rfCode(u.p[x.k]||0);
               return cd?`<td class="fd-cov">${cd}</td>`:'<td class="fd-cov no">—</td>';}).join('')+'</tr>';
