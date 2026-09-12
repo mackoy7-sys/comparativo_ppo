@@ -32,6 +32,18 @@ O comparativo com concorrentes (aba "Rede de atendimento") continua no
 rede.json: a Rede Full nao tem Amil/Bradesco/Porto/SulAmerica, e trocar so o
 lado Hapvida deixaria o lado a lado com bases diferentes.
 
+Fonte COMPLEMENTAR (12/09): o folder oficial "Destaques de Rede RMSP - HMO"
+(destaques.json, gerado pelo build_destaques.py). A base do Dash nao tem varios
+hospitais que esse folder lista -- Cruz Azul, Santa Izildinha, Rubem Berta,
+Hospital Universitario Sao Francisco, Previna. Cada unidade do folder e casada
+contra o Dash pelo nome (na mesma cidade) para NAO duplicar: se ja existe, os
+bits sao somados por OR; se nao existe, entra como unidade nova.
+
+E, por decisao comercial do usuario, os hospitais do folder tambem entram na
+linha PPO (Advance 600/700, Premium 900, 900 Care, Infinity) com a UNIAO das 4
+colunas HMO -- a uniao, e nao a coluna Smart Prime, porque em Suzano o Saint
+Nicholas tem PS no Smart UP e nao no Smart Prime.
+
 Saida: ~/comparativo-ppo/rede_full.json (hospitais) e rede_full_labs.json
 (laboratorios; arquivo separado porque sozinho tem ~6,5 mil unidades e o
 folder so precisa dele na hora de imprimir).
@@ -166,6 +178,128 @@ def chave(plano, label, acom, cid):
     if plano == "Nosso Plano":  return nosso_plano(acom, cid, "s/ Obstetrícia" in (label or ""))
     return None
 
+# --- folder Destaques de Rede RMSP (fonte complementar) -----------------
+DEST = os.path.expanduser("~/comparativo-ppo/destaques.json")
+PPO_KEYS = ["A6A", "A6E", "A7A", "A7E", "P9A", "P9CA", "I1A"]
+HMO_COLS = ["NMRMSP", "SUP", "SFX", "SPRA"]
+
+# O casamento automatico por sobreposicao de palavras erra feio: "Cruz Azul"
+# casou com "Oswaldo Cruz" pelo token CRUZ, e "Pronto Atendimento Aruja" com
+# "Hospital Ipiranga Aruja" pelo nome da cidade. Entao a regra e dupla:
+#   1) casa sozinho SO quando o nome normalizado e IDENTICO (63 dos 97);
+#   2) os outros 34 foram conferidos um a um contra a base e estao aqui.
+# O que nao esta em nenhuma das duas entra como unidade NOVA.
+ABREV = {"HOSP": "HOSPITAL", "STA": "SANTA", "STO": "SANTO", "MAT": "MATERNIDADE",
+         "CLIN": "CLINICA", "CLINICAS": "CLINICA", "UNIV": "UNIVERSITARIO",
+         "ESPEC": "ESPECIALIZADO", "MED": "MEDICO", "ATEND": "ATENDIMENTO"}
+RUIDO = {"DE", "DA", "DO", "DOS", "DAS", "E", "A", "O"}
+
+def _tok(s):
+    t = re.sub(r"[^A-Z0-9 ]", " ", n(s)).split()
+    return frozenset(ABREV.get(w, w) for w in t if w not in RUIDO)
+
+# (nome no folder, cidade) -> nome na base do Dash. Conferido a mao em 12/09.
+CASAR = {
+    ("Hospital São Francisco Americana", "AMERICANA"): "HOSP SAO FRANCISCO AMER",
+    ("CEMA Hospital - Barueri", "BARUERI"): "CEMA HOSP ESPEC",
+    ("Santa Casa de Bragança Paulista", "BRAGANCA PAULISTA"): "SANTA CASA BRAGANCA",
+    ("Hospital e Maternidade Celso Pierro", "CAMPINAS"): "HOSPITAL E MATERNIDADE CELSO P",
+    ("Hospital Madre Theodora Campinas", "CAMPINAS"): "HOSP MADRE THEODORA",
+    ("Hospital e Maternidade Keila", "GUARULHOS"): "HOSPITAL KEILA FERREIRA",
+    ("Pronto Atendimento Mogi das Cruzes", "MOGI DAS CRUZES"): "PRONTO ATEND MOGI DAS CRUZES",
+    ("Assoc Benef Sagrado Coração de Jesus", "MONTE MOR"): "HOSP SAGRADO CORACAO",
+    ("CEMA Hospital - Osasco", "OSASCO"): "CEMA HOSP ESPEC",
+    ("Pronto Atendimento Ribeirão Pires", "RIBEIRAO PIRES"): "PRONTO ATEND RIBEIRAO PIRES",
+    ("Hospital e Maternidade Christóvão da Gama", "SANTO ANDRE"): "HOSP CHRISTOVAO DA GAMA",
+    # unidade própria Hapvida em Santo André — o folder chama de "Unidade
+    # Avançada", a base de "Pronto Atendimento"
+    ("Unidade Avançada Santo André", "SANTO ANDRE"): "PRONTO ATENDIMENTO SANTO ANDRE",
+    ("Hospital Notrecare ABC", "SAO BERNARDO DO CAMPO"): "MATERNIDADE NOTRECARE ABC",
+    # único "Santa Rita" da base em SP (Vila Mariana); sem bairro no folder para
+    # cruzar, mas criar uma segunda linha "Santa Rita" pareceria duplicata
+    ("Casa de Saúde Santa Rita", "SAO PAULO"): "HOSPITAL SANTA RITA",
+    ("Hospital Albert Sabin - Lapa", "SAO PAULO"): "HOSPITAL ALBERT SABIN",
+    ("Hospital das Clínicas da FMUSP", "SAO PAULO"): "HOSPITAL DAS CLINICAS SP",
+    ("Hospital Nossa Sra. Rosário", "SAO PAULO"): "HOSPITAL NOSSA SENHORA ROSARIO",
+    ("Hospital Rubem Berta", "SAO PAULO"): "INSTITUTO RUBEM BERTA",
+    ("Hospital Sant Patrick (Portinari)", "SAO PAULO"): "HOSP SAINT PATRICK",
+    ("Pronto Atendimento Zona Sul", "SAO PAULO"): "PRONTO ATENDIMENTO ZONA SUL SP",
+    ("Hospital Saint Nicholas", "SUZANO"): "HOSP SAINT NICHOLAS MEDICAL",
+    ("Pronto Atendimento Taboão da Serra", "TABOAO DA SERRA"): "PRONTO ATEND TABOAO DA SERRA",
+    ("Pronto Atendimento Várzea Paulista", "VARZEA PAULISTA"): "PRONTO ATEND VARZEA PAULISTA",
+}
+# conferidas e que NAO existem na base — entram como linha nova, sem duplicar
+NOVAS_OK = {
+    ("AMICO Saúde", "CAIEIRAS"),
+    ("Pronto Atendimento Diadema", "DIADEMA"),
+    ("CEMA Hospital - Guarulhos", "GUARULHOS"),
+    ("Hospital HAOC", "INDAIATUBA"),
+    ("Pronto Atendimento Nova Vida - Jandira I", "JANDIRA"),
+    ("Hospital e Maternidade BP Santo André", "SANTO ANDRE"),
+    ("CEMA Hospital - São Paulo", "SAO PAULO"),
+    ("Hospital e Maternidade Cruz Azul", "SAO PAULO"),
+    ("Hospital Santa Izildinha", "SAO PAULO"),
+    ("Pronto Atendimento São Miguel", "SAO PAULO"),
+    ("CEMA Hospital - Taboao", "TABOAO DA SERRA"),
+}
+
+def destaques(existentes):
+    """Funde o folder da RMSP com a base do Dash, sem duplicar hospital."""
+    if not os.path.exists(DEST):
+        print("  ! destaques.json ausente — folder da RMSP não entrou")
+        return []
+    dest = json.load(open(DEST, encoding="utf-8"))["unidades"]
+    porcidade = {}
+    for u in existentes:
+        if u["u"] == "SP":
+            porcidade.setdefault(u["c"], []).append(u)
+
+    novas, exato, curado, sem_regra = [], 0, 0, []
+    for d in dest:
+        cob = 0
+        for k in HMO_COLS:
+            cob |= d["p"].get(k, 0)
+        planos = dict(d["p"])
+        if d["p"].get("SPRA"):
+            planos["SPRE"] = d["p"]["SPRA"]
+        for k in PPO_KEYS:      # regra comercial 12/09: o PPO inclui a rede HMO
+            planos[k] = planos.get(k, 0) | cob
+
+        ch = (d["n"], d["c"])
+        vizinhos = porcidade.get(d["c"], [])
+        alvo = None
+        if ch in CASAR:
+            alvo = next((u for u in vizinhos if n(u["n"]) == n(CASAR[ch])), None)
+            if alvo is None:
+                raise SystemExit(f"de-para aponta para nome inexistente: {ch} -> {CASAR[ch]}")
+            curado += 1
+        elif ch in NOVAS_OK:
+            pass
+        else:
+            alvo = next((u for u in vizinhos if _tok(u["n"]) == _tok(d["n"])), None)
+            if alvo is not None:
+                exato += 1
+            else:
+                sem_regra.append(ch)
+
+        if alvo is not None:
+            for k, m in planos.items():
+                alvo["p"][k] = alvo["p"].get(k, 0) | m
+        else:
+            reg = {"n": d["n"], "b": "", "c": d["c"], "u": "SP",
+                   "r": "Destaques RMSP", "p": planos}
+            novas.append(reg)
+            porcidade.setdefault(d["c"], []).append(reg)
+
+    if sem_regra:
+        raise SystemExit("unidade do folder sem casamento exato e fora do de-para "
+                         "(conferir a mão antes de publicar):\n  " +
+                         "\n  ".join(f"{a} [{b}]" for a, b in sem_regra))
+    print(f"  destaques RMSP: {len(dest)} do folder — {exato} casaram por nome idêntico, "
+          f"{curado} pelo de-para conferido, {len(novas)} entraram como novas")
+    return novas
+
+
 # --- geografia ----------------------------------------------------------
 def km(a, b):
     (la1, lo1), (la2, lo2) = a, b
@@ -231,6 +365,9 @@ def main():
             unidades.append(reg)
         elif (r["uf"], n(r["ci"])) in cidades_ok and any(v & 16 for v in pl.values()):
             labs.append(reg)
+    # ---- folder "Destaques de Rede RMSP" entra como complemento ----
+    unidades += destaques(unidades)
+
     # A base do Dash traz uma linha por ENDEREÇO: o Hospital e Maternidade
     # Ipiranga de Arujá, por exemplo, aparece duas vezes (nº 90 e nº 208), cada
     # uma com parte dos serviços. No Dash isso é detalhe de unidade; num folder
@@ -238,15 +375,30 @@ def main():
     # Aqui as linhas de mesma (unidade, bairro, cidade, UF) viram uma só, com os
     # bits somados por OR.
     def funde(lst):
+        """Uma linha por (unidade, cidade) — o folder do cliente não repete hospital.
+
+        A base traz uma linha por ENDEREÇO, o que gera dois tipos de repetição:
+        o mesmo prédio em números diferentes (H. e Mat. Ipiranga de Arujá, nº 90
+        e nº 208) e filiais do mesmo nome em bairros diferentes (H. Carlos
+        Chagas no Centro e na Vila Vicentina, em Guarulhos). Nos dois casos a
+        cobertura vem PARTIDA entre as linhas — o H. Evangélico de BH aparece
+        com H numa e PS na outra. Fundindo por nome+cidade, com OR dos bits, o
+        vendedor vê a cobertura real. Os bairros distintos são preservados na
+        própria célula, para não esconder que são endereços diferentes."""
         ix, out = {}, []
         for r in lst:
-            k = (r["u"], r["c"], r["b"], r["n"])
+            k = (r["u"], r["c"], r["n"])
             if k in ix:
                 alvo = ix[k]
                 for pk, m in r["p"].items(): alvo["p"][pk] = alvo["p"].get(pk, 0) | m
                 if r["r"] == "Própria": alvo["r"] = "Própria"
+                if r["b"] and r["b"] not in alvo["_bs"]:
+                    alvo["_bs"].append(r["b"])
             else:
+                r["_bs"] = [r["b"]] if r["b"] else []
                 ix[k] = r; out.append(r)
+        for r in out:
+            r["b"] = " / ".join(r.pop("_bs"))
         return out
     unidades, labs = funde(unidades), funde(labs)
     for lst in (unidades, labs):

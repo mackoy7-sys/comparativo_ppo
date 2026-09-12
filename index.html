@@ -300,13 +300,6 @@
   .fd-tbl tr.grp td{background:#13315c;color:#fff;font-weight:600;text-align:left;font-size:12px}
   .fd-tbl tr.used td{background:#e6e9ee;font-weight:600}
   .fd-rede th,.fd-rede td{font-size:10.5px;padding:5px 7px}
-  /* Bloco de laboratórios (V4): lista longa, então vai em colunas e em corpo
-     menor — 1.150 unidades na RMSP não cabem numa tabela linha a linha. */
-  .fd-labs{column-count:3;column-gap:14px;font-size:9.5px;line-height:1.45;color:#333}
-  .fd-labs .cid{break-inside:avoid;margin-bottom:7px}
-  .fd-labs .cid b{display:block;color:var(--navy);font-size:10px;border-bottom:1px solid #d9dee7;margin-bottom:2px}
-  .fd-labs .bai{break-inside:avoid}
-  .fd-labs .bai i{font-style:normal;color:#8a8880}
   .fd-cov{text-align:center} .fd-cov.no{color:#bbb}
   .fd-note{font-size:11px;color:#666;margin:6px 0 8px}
   @media print{
@@ -1403,7 +1396,7 @@ async function gerarFolder(){
     ${copHtml}
     ${carHtml}
     ${redeHtml}
-    <div class="fd-foot">Mensalidade = soma de (vidas × preço por faixa etária) por plano. Planos Hapvida com coparticipação parcial; concorrentes em geral sem coparticipação — o valor é apenas a mensalidade, sem o custo de uso. Rede: hospitais, prontos-socorros, maternidades e unidades de diagnóstico credenciados na praça cotada, conforme a rede vigente (mesma base do painel Rede Full); pode haver unidades não listadas e a rede é sujeita a alteração. Valores referenciais, sujeitos a condições contratuais e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato. Emitido em ${hoje}.</div>`;
+    <div class="fd-foot">Mensalidade = soma de (vidas × preço por faixa etária) por plano. Planos Hapvida com coparticipação parcial; concorrentes em geral sem coparticipação — o valor é apenas a mensalidade, sem o custo de uso. Rede: unidades de internação, pronto-socorro e maternidade credenciadas na praça cotada, conforme a rede vigente (mesma base do painel Rede Full); pode haver unidades não listadas e a rede é sujeita a alteração. Valores referenciais, sujeitos a condições contratuais e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato. Emitido em ${hoje}.</div>`;
   const t0=document.title;
   document.title='Cotacao'+(nome?(' - '+nome):'');
   // garante que os logos (data-URI) estejam decodificados antes do print — senão saem em branco no PDF
@@ -1423,15 +1416,13 @@ async function gerarFolder(){
    rede.json: a Rede Full não tem Amil/Bradesco/Porto/SulAmérica, e trocar só o
    lado Hapvida deixaria o comparativo com duas bases diferentes.
 
-   Dois arquivos porque o de laboratório sozinho tem ~6,4 mil unidades e só é
-   preciso na hora de imprimir o folder.                                      */
-let REDE_FULL=null, REDE_LABS=null;
+   O build também gera um rede_full_labs.json com os laboratórios, mas ele NÃO
+   é carregado aqui: por ora o folder traz só internação/PS/maternidade.      */
+let REDE_FULL=null;
 function _fetchJson(arq,cb){return new Promise(res=>{
   fetch(arq,{cache:'no-cache'}).then(r=>r.json()).then(d=>{cb(d);res(true);}).catch(()=>{cb(false);res(false);});});}
 function ensureRedeFull(){return REDE_FULL!==null?Promise.resolve(!!REDE_FULL)
   :_fetchJson('rede_full.json',d=>{REDE_FULL=d;});}
-function ensureRedeLabs(){return REDE_LABS!==null?Promise.resolve(!!REDE_LABS)
-  :_fetchJson('rede_full_labs.json',d=>{REDE_LABS=d?d.labs:false;});}
 
 /* plano do cotador -> chave de plano da Rede Full (o de-para foi montado no
    build_rede_full.py, conferido contra as 3.966 linhas Hapvida do catálogo). */
@@ -1441,15 +1432,17 @@ function rfKey(c){
   const obst=/s\/ Obstetrícia/.test(c.label||'')?'SO':'CO';
   return REDE_FULL.planos[praca+'|'+c.plano+'|'+c.acomodacao+'|'+obst]||null;
 }
-/* bitmask do Dash -> código. O bit 8 (consultórios/clínicas) fica de fora da
-   tabela de propósito: está em quase toda unidade e não ajuda o vendedor. */
-const RF_BITS=[[1,'H'],[2,'PS'],[4,'M'],[16,'L']];
+/* bitmask do Dash -> código. Por ora a tabela traz SÓ os três atendimentos que
+   o cliente pergunta: internação, pronto-socorro e maternidade. Os bits 8
+   (consultórios/clínicas) e 16 (SADT/laboratório) ficam fora — o 16 aparecia em
+   96,8% dos hospitais, então como código não distinguia nada. */
+const RF_BITS=[[1,'H'],[2,'PS'],[4,'MT']];
 function rfCode(m){return m?RF_BITS.filter(b=>m&b[0]).map(b=>b[1]).join(','):'';}
 function rfPraca(c){return (REDE_FULL&&REDE_FULL.pracas[c.praca||'SP / RMSP'])||null;}
 function _esc(t){return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 /* a base do Dash vem toda em caixa alta e sem acento; conectivo fica minúsculo
    para não sair "Hospital E Maternidade Sao Luiz" no folder do cliente */
-const _TC_MIN=new Set(['e','de','da','do','das','dos','em','no','na','dr','sao']);
+const _TC_MIN=new Set(['e','de','da','do','das','dos','em','no','na']);
 function _tc(t){return (t||'').toLowerCase().replace(/(^|[\s\/\-\(])([a-zà-ú]+)/g,
   (m,a,w)=>a+((a&&_TC_MIN.has(w))?w:w.charAt(0).toUpperCase()+w.slice(1)));}
 
@@ -1474,7 +1467,7 @@ async function folderRedeFull(cols){
     let html=`<tr class="grp"><td colspan="${ncol}">${titulo}</td></tr>`,cur=null;
     lista.forEach(u=>{
       if(u.c!==cur){cur=u.c;html+=`<tr class="used"><td colspan="${ncol}">${_esc(_tc(u.c))}</td></tr>`;}
-      html+=`<tr><td>${_esc(_tc(u.n))}</td><td>${_esc(_tc(u.b))}</td>`
+      html+=`<tr><td>${_esc(_tc(u.n))}</td><td>${u.b?_esc(_tc(u.b)):'—'}</td>`
            +hc.map(x=>{const cd=rfCode(u.p[x.k]||0);
               return cd?`<td class="fd-cov">${cd}</td>`:'<td class="fd-cov no">—</td>';}).join('')+'</tr>';
     });
@@ -1486,48 +1479,13 @@ async function folderRedeFull(cols){
   const head=`<tr><th>Unidade</th><th>Bairro</th>`+hc.map(x=>`<th>${x.c.label}</th>`).join('')+`</tr>`;
   const n=naPraca.length+noEstado.length;
   let html=`<div class="fd-sec">Rede de atendimento — ${n} unidade${n>1?'s':''}</div>
-    <div class="fd-note">Hospitais, prontos-socorros e maternidades credenciados para o(s) plano(s) cotado(s)
+    <div class="fd-note">Unidades de internação, pronto-socorro e maternidade credenciadas para o(s) plano(s) cotado(s)
       em <b>${_esc(nomePraca)}</b>${noEstado.length?(naPraca.length?' e demais cidades do estado':' — que não tem unidade hospitalar própria, por isso a lista traz as demais cidades do estado'):''}.
-      Legenda: <b>H</b> Hospital · <b>PS</b> Pronto-socorro · <b>M</b> Maternidade ·
-      <b>L</b> a unidade também faz exames (laboratório/SADT) · — não credenciado para aquele plano.
+      Legenda: <b>H</b> Internação · <b>PS</b> Pronto Socorro · <b>MT</b> Maternidade ·
+      — não credenciado para aquele plano.
       Fonte: rede credenciada vigente (Rede Full).</div>
     <table class="fd-tbl fd-rede"><thead>${head}</thead><tbody>${body}</tbody></table>`;
-  html+=await folderLabs(hc,cid,uf,nomePraca);
   return html;
-}
-
-/* Bloco de laboratórios INDEPENDENTES (SADT que não é hospital). Existe porque
-   96,8% dos hospitais também são SADT — ou seja, o "L" da tabela acima sozinho
-   quase não informa; o que o cliente pergunta é onde ele coleta exame. */
-async function folderLabs(hc,cid,uf,nomePraca){
-  if(!await ensureRedeLabs())return '';
-  const ls=REDE_LABS.filter(u=>u.u===uf&&cid.has(u.c)&&hc.some(x=>(u.p[x.k]||0)&16));
-  if(!ls.length)return '';
-  /* com mais de um plano cotado, marca só quem NÃO vale para todos */
-  const multi=hc.length>1;
-  const marca=u=>{
-    if(!multi)return '';
-    const on=hc.map((x,i)=>((u.p[x.k]||0)&16)?i+1:0).filter(Boolean);
-    /* separador explícito: sem ele dois planos viravam "23", que se lê como
-       vinte e três em vez de "planos 2 e 3" */
-    return on.length===hc.length?'':`<i><sup>${on.join(',')}</sup></i>`;
-  };
-  const porCidade={};
-  ls.forEach(u=>{(porCidade[u.c]=porCidade[u.c]||{})[u.b||'—']=(porCidade[u.c][u.b||'—']||[]).concat(u);});
-  const sede=(REDE_FULL.pracas[nomePraca]||{}).sede;
-  const blocos=Object.keys(porCidade).sort((a,b)=>(a===sede?0:1)-(b===sede?0:1)||a.localeCompare(b)).map(c=>{
-    const bs=Object.keys(porCidade[c]).sort().map(b=>
-      `<div class="bai"><i>${_esc(_tc(b))}:</i> `
-      +porCidade[c][b].map(u=>_esc(_tc(u.n))+marca(u)).join(' · ')+'</div>').join('');
-    return `<div class="cid"><b>${_esc(_tc(c))}</b>${bs}</div>`;
-  }).join('');
-  const nota=multi
-    ? ` O expoente indica os planos que cobrem a unidade quando ela não vale para todos (${hc.map((x,i)=>`<sup>${i+1}</sup> ${x.c.label}`).join(' · ')}).`
-    : '';
-  return `<div class="fd-sec">Laboratórios e centros de diagnóstico — ${ls.length} unidades</div>
-    <div class="fd-note">Unidades de exame e diagnóstico (SADT) credenciadas em <b>${_esc(nomePraca)}</b>,
-      além dos hospitais listados acima.${nota}</div>
-    <div class="fd-labs">${blocos}</div>`;
 }
 
 /* ================= TAB 3: REDE DE ATENDIMENTO ================= */
