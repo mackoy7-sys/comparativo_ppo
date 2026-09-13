@@ -356,6 +356,13 @@
   .opc-foot{border-top:1px solid var(--line);padding-top:14px;margin:14px 0 0}
   .opc-foot input{min-width:200px}
   .btn.solid.hap{background:var(--hap);border-color:var(--hap);font-weight:700;padding:10px 20px} .btn.solid.hap:hover{background:var(--hap-dark);border-color:var(--hap-dark)}
+  /* as duas imagens trazem height inline (42 e 34px) — sem !important o cabeçalho
+     saía com uma marca maior que a outra */
+  /* .dual do folder vive dentro de @media print — na tela o span ficava inline e
+     as marcas empilhavam; aqui o flex em linha é explícito */
+  #brandLogo{display:block} #brandLogo .dual{display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:12px}
+  #brandLogo .dual img{height:36px !important;width:auto;padding:4px 10px !important;border-radius:7px;background:#fff}
+  @media(max-width:520px){#brandLogo .dual img{height:28px !important;padding:3px 7px !important}}
   .rede-panel iframe{width:100%;height:78vh;min-height:560px;border:0;border-radius:12px;background:#fff;display:block}
   .rede-aviso{background:#fff3df;border:1px solid #ffd9b8;color:#854f0b;border-radius:9px;padding:9px 13px;font-size:13px;margin:12px 0}
   @media(max-width:820px){.ctx-sep,.ctx-fill{display:none} .opc-meta{white-space:normal}}
@@ -1560,7 +1567,9 @@ function loadRede(){
 }
 
 /* init */
-document.getElementById('brandLogo').innerHTML=LOGO_SVG;
+/* as duas marcas no cabeçalho (pedido de 12/09): Hapvida e NotreDame Saúde.
+   Reusa a classe .dual do folder; o tamanho de cabeçalho fica em #brandLogo. */
+document.getElementById('brandLogo').innerHTML='<span class="dual">'+LOGO_SVG+NOTRE_LOGO_SVG+'</span>';
 // pré-carrega o logo NotreDame (data-URI) para o print/PDF não pegá-lo sem decodificar
 {const pre=document.createElement('div');pre.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;opacity:0';pre.innerHTML=NOTRE_LOGO_SVG;document.body.appendChild(pre);}
 function boot(){
