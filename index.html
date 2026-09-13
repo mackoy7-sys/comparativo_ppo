@@ -1419,9 +1419,14 @@ async function gerarFolder(){
    O build também gera um rede_full_labs.json com os laboratórios, mas ele NÃO
    é carregado aqui: por ora o folder traz só internação/PS/maternidade.      */
 let REDE_FULL=null;
+/* Em falha NÃO guarda `false`: se guardasse, uma oscilação de rede derrubava a
+   seção de rede do folder até o vendedor recarregar a página, porque o estado
+   "deu erro" era indistinguível de "já carregou". Volta para null e a próxima
+   tentativa refaz o fetch. */
 function _fetchJson(arq,cb){return new Promise(res=>{
-  fetch(arq,{cache:'no-cache'}).then(r=>r.json()).then(d=>{cb(d);res(true);}).catch(()=>{cb(false);res(false);});});}
-function ensureRedeFull(){return REDE_FULL!==null?Promise.resolve(!!REDE_FULL)
+  fetch(arq,{cache:'no-cache'}).then(r=>r.json()).then(d=>{cb(d);res(true);})
+    .catch(()=>{cb(null);res(false);});});}
+function ensureRedeFull(){return (REDE_FULL&&REDE_FULL.unidades)?Promise.resolve(true)
   :_fetchJson('rede_full.json',d=>{REDE_FULL=d;});}
 
 /* plano do cotador -> chave de plano da Rede Full (o de-para foi montado no

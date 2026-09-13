@@ -423,6 +423,39 @@ def marca_regiao(unidades):
     print("  região de SP: " + ", ".join(f"{v} por {k}" for k, v in cont.most_common()))
 
 
+# --- correcoes sobre a rede montada ------------------------------------
+# Beneficencia Portuguesa: o usuario mandou tirar o BP do Nosso Medico e, na
+# sequencia, "deixe somente no adv 700" (12/09). A regra vale SO para o BP
+# MIRANTE -- foi a linha que ele estava revisando no folder da RMSP.
+#
+# Nao estender para os outros BP foi decisao dele, conferida caso a caso:
+#   - BP Paulista (Liberdade) so tem Infinity, Premium 900 e 900 Care: a regra
+#     o apagaria inteiro do folder, porque ele nao tem Advance 700;
+#   - BP Santo Andre aparece no folder oficial de agosto com H-PS no Smart UP,
+#     Smart Flex e Smart Prime -- restringi-lo contrariaria a fonte;
+#   - Petropolis, Teresopolis, Amparo e Pelotas sao outras pracas, fora do
+#     assunto (e Pelotas tambem sumiria, por nao ter Advance 700).
+SO_ADV700 = ("BP MIRANTE",)
+ADV700 = {"A7A", "A7E"}   # apartamento e enfermaria sao o mesmo produto
+
+def aplica_correcoes(unidades):
+    tirados = []
+    for u in unidades:
+        if not any(p in n(u["n"]) for p in SO_ADV700):
+            continue
+        fora = sorted(k for k in u["p"] if k not in ADV700)
+        for k in fora:
+            del u["p"][k]
+        if fora:
+            tirados.append(f'{u["n"]} [{u["c"]}]: saiu de {", ".join(fora)}')
+    for t in tirados:
+        print(f"  BP restrito ao Advance 700 — {t}")
+    antes = len(unidades)
+    unidades[:] = [u for u in unidades if u["p"]]
+    if len(unidades) != antes:
+        raise SystemExit("a regra do BP deixou unidade sem nenhum plano — conferir")
+
+
 # --- geografia ----------------------------------------------------------
 def km(a, b):
     (la1, lo1), (la2, lo2) = a, b
@@ -524,6 +557,7 @@ def main():
             r["b"] = " / ".join(r.pop("_bs"))
         return out
     unidades, labs = funde(unidades), funde(labs)
+    aplica_correcoes(unidades)
     marca_regiao(unidades)
     for lst in (unidades, labs):
         lst.sort(key=lambda x: (x["u"], x["c"], x["b"], x["n"]))
