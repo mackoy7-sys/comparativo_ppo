@@ -1,0 +1,17 @@
+{
+  "artboards": [
+    { "file": "Atual.dc.html", "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Hoje" },
+    { "file": "Main.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 900, "title": "Proposta" }
+  ],
+  "annotations": [
+    { "id": "nota-hoje", "x": 0, "y": -210, "w": 520,
+      "text": "HOJE — medido em 1440×900\n\nA praça ocupa 30 chips em 5 linhas (192 px). A matriz, que é onde o vendedor realmente trabalha, só começa em 720 px — e o botão Gerar folder fica em 1235 px. A página inteira tem 1522 px: 1,7 tela.\n\nNa barra de filtros o rótulo OPERADORAS fica na ponta direita e suas opções caem na linha de baixo, coladas em PME 30-99." },
+    { "id": "nota-proposta", "x": 1560, "y": -210, "w": 520,
+      "text": "PROPOSTA — mesmos controles, mesma ordem\n\nNada foi removido, nada mudou de função. Só o arranjo:\n\n1. A praça escolhida vira um resumo de uma linha; a grade de 30 chips volta ao clicar em trocar.\n2. Cada filtro é um bloco fechado (rótulo + opções), então nenhum rótulo fica órfão.\n3. Vidas em duas colunas, ao lado das opções — as duas coisas mudam juntas.\n4. Tudo cabe numa tela só." },
+    { "id": "nota-colunas", "x": 1560, "y": 950, "w": 640,
+      "text": "As colunas passam a se chamar Opção 1, 2 e 3 — hoje a faixa laranja repete Hapvida três vezes, o que não distingue nada quando o filtro é Somente Hapvida. A marca continua visível na tarja do canto e volta a nomear a coluna quando há concorrente na cotação.\n\nO preço aparece uma vez só, grande, com o valor por vida embaixo — hoje ele sai pequeno no cartão e repetido como Total logo abaixo." },
+    { "id": "nota-escopo", "x": 0, "y": 950, "w": 640,
+      "text": "O que NÃO muda: a ordem dos passos, os campos, os filtros, o cálculo e o folder. É só rearranjo visual — nenhuma alteração de processo." }
+  ],
+  "launch": { "view": "canvas" }
+}
