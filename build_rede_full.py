@@ -370,6 +370,30 @@ ZONA_DESTAQUES = {
     "CEMA Hospital - Taboao": "Grande SP",
 }
 
+def regiao_da_sede(pracas, unidades):
+    """Região da cidade-sede de cada praça, para o folder abrir por ela.
+
+    Numa cotação de São Bernardo o folder abria por "São Paulo - Centro" e o
+    ABCD, onde o cliente mora, só aparecia em 6º. Com isso a região do cliente
+    vai para a frente e o resto segue a ordem fixa de sempre.
+
+    A capital fica de fora de propósito: "São Paulo" não tem uma região só (são
+    cinco zonas) e, na ordem fixa, as zonas da capital já vêm primeiro."""
+    from collections import Counter, defaultdict
+    porcidade = defaultdict(Counter)
+    for u in unidades:
+        if u.get("g"):
+            porcidade[(u["u"], u["c"])][u["g"]] += 1
+    out = {}
+    for nome, (uf, _cids, sede) in pracas.items():
+        if uf != "SP" or sede == "SAO PAULO":
+            continue
+        c = porcidade.get((uf, sede))
+        if c:
+            out[nome] = c.most_common(1)[0][0]
+    return out
+
+
 def _maioria(c):
     return c.most_common(1)[0][0] if c else None
 
@@ -562,6 +586,11 @@ def main():
     for lst in (unidades, labs):
         lst.sort(key=lambda x: (x["u"], x["c"], x["b"], x["n"]))
 
+    gsede = regiao_da_sede(pracas, unidades)
+    if gsede:
+        print(f"  região da sede em {len(gsede)} praças de SP "
+              f"(ex.: {', '.join(f'{k} → {v}' for k, v in list(gsede.items())[:3])})")
+
     out = {
         "meta": {
             "gerado": datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -572,7 +601,8 @@ def main():
             "legenda": {"H": "Hospital", "PS": "Pronto-socorro", "M": "Maternidade",
                         "C": "Consultórios/clínicas", "L": "Laboratório/SADT"},
         },
-        "pracas": {p: {"uf": uf, "cidades": cids, "sede": sede}
+        "pracas": {p: dict({"uf": uf, "cidades": cids, "sede": sede},
+                            **({"gsede": gsede[p]} if p in gsede else {}))
                    for p, (uf, cids, sede) in pracas.items()},
         "planos": planos,
         "unidades": unidades,

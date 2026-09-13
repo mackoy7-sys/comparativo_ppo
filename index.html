@@ -1469,8 +1469,13 @@ async function folderRedeFull(cols){
      frente (senão uma cotação de SP/RMSP abriria por Arujá). */
   const porRegiao=naPraca.concat(noEstado).some(u=>u.g);
   const grupo=u=>u.g||_tc(u.c);
+  /* A região da praça cotada vem na frente; o resto segue a ordem fixa. Sem
+     isso, uma cotação de São Bernardo abria por "São Paulo - Centro" e o ABCD,
+     onde o cliente mora, caía para 6º. `gsede` não existe para SP / RMSP — na
+     capital a ordem fixa já começa pelas zonas dela. */
+  const gs=pr.gsede||null;
   const ordem=porRegiao
-    ? (a,b)=>cmpRegiao(a.g,b.g)||a.n.localeCompare(b.n)
+    ? (a,b)=>(a.g===gs?0:1)-(b.g===gs?0:1)||cmpRegiao(a.g,b.g)||a.n.localeCompare(b.n)
     : (a,b)=>(a.c===pr.sede?0:1)-(b.c===pr.sede?0:1)||a.c.localeCompare(b.c)
              ||(a.b||'').localeCompare(b.b||'')||a.n.localeCompare(b.n);
   naPraca=naPraca.sort(ordem); noEstado=noEstado.sort(ordem);
