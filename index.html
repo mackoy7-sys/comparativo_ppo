@@ -427,6 +427,13 @@
     <!-- 3. Área de trabalho: vidas e opções lado a lado, na primeira dobra -->
     <div class="calcgrid">
       <div class="panel vidas-card">
+        <!-- Tipo de cotação vem ANTES das vidas (pedido de 14/09): a escolha
+             "mista" muda a grade — abre as colunas HMO/PPO — então decide-se
+             o tipo primeiro e só depois se lançam as vidas. -->
+        <div class="mei-lbl" style="margin-bottom:7px">Tipo de cotação</div>
+        <div class="chips" id="cotModeChips" style="margin-bottom:8px"></div>
+        <div class="cot-hint" id="cotHint" style="margin-bottom:0"></div>
+        <div class="vsep"></div>
         <div class="subh" style="margin-bottom:2px">Distribuição de vidas</div>
         <div class="cot-hint" style="margin:0 0 10px">Quantidade de vidas por faixa etária</div>
         <div class="vidas" id="vidasGrid"></div>
@@ -437,10 +444,6 @@
             <button class="btn" onclick="zerar()">Zerar</button>
           </div>
         </div>
-        <div class="vsep"></div>
-        <div class="mei-lbl" style="margin-bottom:7px">Tipo de cotação</div>
-        <div class="chips" id="cotModeChips" style="margin-bottom:8px"></div>
-        <div class="cot-hint" id="cotHint" style="margin-bottom:0"></div>
       </div>
 
       <div class="panel opcoes-card">
