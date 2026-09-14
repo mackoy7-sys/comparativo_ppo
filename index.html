@@ -437,6 +437,7 @@
         <div class="subh" style="margin-bottom:2px">Distribuição de vidas</div>
         <div class="cot-hint" style="margin:0 0 10px">Quantidade de vidas por faixa etária</div>
         <div class="vidas" id="vidasGrid"></div>
+        <div id="mistaWarn" class="vidas-warn" style="display:none;margin:10px 0 0"></div>
         <div class="vbar">
           <div class="totvidas">Total de vidas <b id="totVidas">0</b> <span id="totVidasSplit"></span></div>
           <div class="vbtns">
@@ -615,7 +616,21 @@ function vidasDe(c){
   // na cotação mista o concorrente é alternativa ao CONTRATO INTEIRO — cobre HMO+PPO
   if(cotMode==='mista'&&c&&!isPPO(c)&&!isHapHMO(c)&&totCol(vidasHMO)>0&&totCol(vidasPPO)>0) return vidas;
   const ppo=isPPO(c);const own=ppo?vidasPPO:vidasHMO;const other=ppo?vidasHMO:vidasPPO;
+  /* Na mista, plano Hapvida (HMO ou PPO) conta SÓ a própria coluna. Antes havia
+     um recuo para a outra coluna: com as vidas todas na HMO, o Adv 600 saía
+     precificado com essas vidas e o folder imprimia "2 opções cotadas" sem
+     somar nada — foi o que o usuário reportou em 14/09. Na comparativa o recuo
+     continua, porque lá as colunas não têm significado. */
+  if(cotMode==='mista'&&c&&(isPPO(c)||isHapHMO(c))) return own;
   return totCol(own)>0?own:(totCol(other)>0?other:own);}
+/* mista declarada, com plano HMO e PPO escolhidos, mas vidas em uma coluna só */
+function mistaIncompleta(sel){sel=sel||selectedPlans();
+  if(cotMode!=='mista'||!sel.some(isHapHMO)||!sel.some(isPPO)) return null;
+  const h=totCol(vidasHMO),p=totCol(vidasPPO);
+  if(h>0&&p>0) return null;
+  if(h===0&&p===0) return null;            // sem vidas nenhuma: o aviso geral já cobre
+  return h===0?'HMO':'PPO';                 // qual coluna está vazia
+}
 let opMode='hapvida'; // default: só Hapvida (colunas). 'todas' = Hapvida + concorrentes
 let matrixCols=[];
 function emptySlot(){return {plano:null,acom:null,seg:null};}
@@ -963,7 +978,10 @@ function slotBlock(ci,si,x,v){
   const noV=totVidas()===0&&done;
   const badTier=done&&totVidas()>0&&!resolved(ci,si);
   let disp, tip='';
+  const rc0=done?resolved(ci,si):null;
+  const semColuna=cotMode==='mista'&&rc0&&(isPPO(rc0)||isHapHMO(rc0))&&vidasCob(rc0)===0&&totVidas()>0;
   if(noV) disp='informe vidas';
+  else if(semColuna){ disp='informe vidas '+(isPPO(rc0)?'PPO':'HMO'); tip='Cotação mista: este plano é precificado só com as vidas da coluna '+(isPPO(rc0)?'PPO':'HMO')+'. Lance as vidas dele lá para somar ao contrato.'; }
   else if(badTier){
     const todos=CATALOG.filter(c=>c.operadora===op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c));
     const mv=Math.max(0,...todos.map(minVidas));
@@ -996,7 +1014,11 @@ function onAcom(ci,si,v){const col=matrixCols[ci];const x=col.slots[si];x.acom=v
   if(x.acom){const g=segsFor(col.op,x.plano,x.acom);if(g.length===1)x.seg=g[0];}recompute();}
 function onSeg(ci,si,v){matrixCols[ci].slots[si].seg=v||null;recompute();}
 function selectedPlans(){const ids=[];matrixCols.forEach((col,ci)=>col.slots.forEach((x,si)=>{const c=resolved(ci,si);if(c&&!ids.includes(c.id))ids.push(c.id);}));return ids.map(planById).filter(Boolean);}
-function recompute(){buildMeiChips();buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';}
+function recompute(){buildMeiChips();buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';
+  const mw=document.getElementById('mistaWarn');
+  if(mw){const vz=mistaIncompleta();
+    mw.style.display=vz?'block':'none';
+    if(vz) mw.innerHTML=`⚠ <b>Cotação mista incompleta</b> — as vidas estão só na coluna <b>${vz==='HMO'?'PPO':'HMO'}</b>. Lance na coluna <b>${vz}</b> as vidas do plano ${vz==='PPO'?'NotreDame Saúde':'Hapvida'} para o contrato somar as duas partes.`;}}
 function reconcileSel(){
   matrixCols.forEach(col=>col.slots.forEach(x=>{
     if(x.plano&&!planLabels(col.op).includes(x.plano)){x.plano=null;x.acom=null;x.seg=null;}
@@ -1253,6 +1275,8 @@ function isPPOsel(sel){return sel.some(c=>/^(Adv|Advance|Premium|Infinity)/i.tes
 async function gerarFolder(){
   const sel=selectedPlans(); const tv=totVidas();
   if(!sel.length||tv===0){alert('Informe as vidas e selecione ao menos um plano na matriz antes de gerar o folder.');return;}
+  const vazia=mistaIncompleta(sel);
+  if(vazia){alert('Cotação mista incompleta: as vidas estão só na coluna '+(vazia==='HMO'?'PPO':'HMO')+'. Lance as vidas da coluna '+vazia+' para o folder somar as duas partes do contrato — ou mude para "Cotação comparativa" se os planos forem alternativas.');return;}
   const nome=(document.getElementById('clienteNome').value||'').trim();
   const consultor=(document.getElementById('consultorNome').value||'').trim();
   const hoje=new Date().toLocaleDateString('pt-BR');
