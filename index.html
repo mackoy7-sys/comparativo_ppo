@@ -350,6 +350,7 @@
   .praca-picker{padding:12px 18px;margin-bottom:12px;border-color:#c9d3ee;background:#f7f9ff}
   .cid-wrap{position:relative}
   .cid-in{width:190px}
+  .cid-in.pend{border-color:#ecd9a4;background:#fdf3d8}
   .cid-sug{position:absolute;top:calc(100% + 4px);left:0;z-index:40;min-width:260px;max-height:290px;overflow-y:auto;
     background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(15,39,64,.13);padding:4px}
   .cid-sug .it{padding:7px 10px;border-radius:7px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
@@ -423,7 +424,8 @@
         <span class="mei-lbl">Cidade</span>
         <div class="cid-wrap">
           <input id="cidadeInput" class="cep-in cid-in" placeholder="digite a cidade…" autocomplete="off"
-                 oninput="cidadeSugestoes()" onfocus="cidadeSugestoes()" onkeydown="cidadeTecla(event)">
+                 oninput="cidadeSugestoes()" onfocus="cidadeSugestoes()" onkeydown="cidadeTecla(event)"
+                 onblur="setTimeout(cidadeConfere,180)">
           <div id="cidadeSug" class="cid-sug" style="display:none"></div>
         </div>
         <span id="cidadeMsg" class="cep-msg"></span>
@@ -729,7 +731,7 @@ function buildPracaResumo(){
   const ci=document.getElementById('cidadeInput'), cm=document.getElementById('cidadeMsg');
   if(ci&&ci.value){const d=_cidadeDaPraca(pracaSel); const alvo=_n(ci.value.replace(/\s*-\s*[A-Z]{2}$/,''));
     const ok=cidadeIndice().some(x=>x.busca===alvo&&x.praca===pracaSel);
-    if(!ok){ci.value='';if(cm){cm.className='cep-msg';cm.innerHTML='';}}}
+    if(!ok){ci.value='';ci.classList.remove('pend');if(cm){cm.className='cep-msg';cm.innerHTML='';}}}
 }
 function togglePracaPicker(){ pracaPickerAberto=!pracaPickerAberto; buildPracaResumo(); }
 
@@ -769,9 +771,27 @@ function cidadeSugestoes(){
   box.style.display='block';
 }
 function cidadeFecha(){const b=document.getElementById('cidadeSug'); if(b)b.style.display='none'; cidadeSel=-1;}
+/* Sair do campo sem escolher deixava o texto parado enquanto a praça seguia
+   outra — o vendedor via "São Bernardo do Campo" e cotava a tabela da RMSP
+   (reportado com print em 14/09). Agora: match único aplica sozinho; ambíguo
+   ou inexistente fica VISIVELMENTE não aplicado, nunca silencioso. */
+function cidadeConfere(){
+  const inp=document.getElementById('cidadeInput'); if(!inp) return;
+  const m=document.getElementById('cidadeMsg');
+  const txt=(inp.value||'').trim();
+  if(!txt){inp.classList.remove('pend'); if(m){m.className='cep-msg';m.innerHTML='';} return;}
+  const alvo=_n(txt.replace(/\s*-\s*[A-Z]{2}$/,''));
+  if(cidadeIndice().some(x=>x.busca===alvo&&x.praca===pracaSel)){inp.classList.remove('pend');return;}
+  const ms=cidadeMatches();
+  const exatos=ms.filter(x=>x.busca===alvo);
+  if(exatos.length===1||ms.length===1){inp.classList.remove('pend');cidadeEscolhe(ms.indexOf(exatos[0]||ms[0]));return;}
+  inp.classList.add('pend');
+  if(m){m.className='cep-msg warn';
+    m.innerHTML=ms.length?'<b>não aplicado</b> — escolha uma cidade na lista':'cidade não encontrada no catálogo';}
+}
 function cidadeEscolhe(i){
   const x=cidadeMatches()[i]; if(!x) return;
-  const inp=document.getElementById('cidadeInput'); inp.value=x.nome+' - '+x.uf;
+  const inp=document.getElementById('cidadeInput'); inp.value=x.nome+' - '+x.uf; inp.classList.remove('pend');
   cidadeFecha(); limparCEP();
   if(x.praca!==pracaSel){pracaSel=x.praca;filialSel=pracaRegiao(x.praca);reconcileSel();buildFilialChips();buildPracaChips();recompute();}
   else buildPracaResumo();
