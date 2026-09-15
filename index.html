@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cotador HapOn — Hapvida vs Operadoras</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root{
     --hap:#FF6B00; --hap-dark:#cc5500; --navy:#0f2740; --navy2:#1c3a5e; --ndblue:#1e2a5c;
@@ -28,7 +27,7 @@
   .panel .step{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--hap);color:#fff;font-size:13px;font-weight:700;margin-right:4px}
   .panel .desc{font-size:13px;color:var(--muted);margin-bottom:16px}
   /* calc layout */
-  .calcgrid{display:grid;grid-template-columns:230px 1fr;gap:28px;align-items:start}
+  .calcgrid{display:grid;grid-template-columns:286px minmax(0,1fr);gap:16px;align-items:start}
   @media(max-width:820px){.calcgrid{grid-template-columns:1fr}}
   /* item de grid não encolhe abaixo do conteúdo sem isto — era o que fazia a
      matriz de 680px empurrar a página inteira para o lado no celular */
@@ -37,12 +36,14 @@
   .subh-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
   .btn.clear{border-color:#ffd9b8;color:var(--hap);background:#fff7f0}
   .btn.clear:hover{background:var(--hap);color:#fff;border-color:var(--hap)}
-  .vidas{display:flex;flex-direction:column;gap:8px}
+  .vidas{display:grid;grid-template-columns:1fr;gap:7px}
   .vcell{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;gap:8px}
   .vcell.vhead span{font-size:11px;font-weight:800;letter-spacing:.4px;text-align:center;color:#fff;background:var(--navy);border-radius:6px;padding:3px 0}
   .vcell.vhead span:last-child{background:var(--ndblue)}
   .vcell input[data-col="PPO"]{border-color:#c9d3ee;background:#f7f9ff}
-  .vidas.single .vcell{grid-template-columns:1fr 64px}
+  .vidas.single{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:column;grid-template-rows:repeat(5,auto);gap:7px 10px}
+  .vidas.single .vcell{grid-template-columns:1fr 60px}
+  .vidas.single .vcell label{font-size:12px;font-weight:600;color:var(--muted)}
   .cot-hint{font-size:12px;color:var(--muted);margin:2px 0 16px;line-height:1.55}
   .cot-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 10px;border-radius:999px;vertical-align:middle;margin-left:10px}
   .cot-badge.mista{background:#eef1fa;color:var(--ndblue);border:1px solid #c9d3ee}
@@ -51,7 +52,9 @@
   .vcell label{font-size:12.5px;font-weight:700;color:var(--navy)}
   .vcell input{width:100%;padding:8px;border:1px solid var(--line);border-radius:9px;font-size:15px;text-align:center;color:var(--txt)}
   .vcell input:focus{outline:none;border-color:var(--hap);box-shadow:0 0 0 3px rgba(255,107,0,.12)}
-  .vbar{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin-top:16px}
+  .vbar{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-top:12px}
+  .vbtns{display:flex;gap:7px} .vbtns .btn{flex-grow:1;padding:7px 10px;font-size:12.5px}
+  .vsep{border-top:1px solid var(--line);margin:12px 0}
   .vbar .totvidas{margin-bottom:4px}
   .totvidas{font-size:14px;color:var(--muted)} .totvidas b{font-size:22px;color:var(--navy);margin-left:6px}
   .btn{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s}
@@ -61,7 +64,9 @@
   .matrix-wrap{overflow-x:auto}
   table.matrix{width:100%;border-collapse:separate;border-spacing:6px;table-layout:fixed;min-width:680px}
   table.matrix th.rowlabel{width:120px;text-align:right;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;padding-right:8px;background:none}
-  table.matrix .ophead{border-radius:8px;padding:9px 6px;text-align:center;font-size:13.5px;font-weight:700;color:#fff}
+  table.matrix .ophead{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--navy);border-radius:8px;padding:7px 12px;color:#fff}
+  .ophead .opn{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+  .ophead .optag{font-size:11px;font-weight:600;border-radius:5px;padding:2px 8px;color:#fff;white-space:nowrap}
   table.matrix select{display:block;width:100%;min-width:0;padding:7px 6px;font-size:12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--txt);cursor:pointer;margin-bottom:5px}
   table.matrix select:last-child{margin-bottom:0}
   table.matrix select:focus{outline:none;border-color:var(--hap)}
@@ -128,8 +133,11 @@
   .cslot-val b:hover{color:var(--red)}
   .cadd{border:1px dashed var(--line);background:#fff;color:var(--hap);font-weight:600;font-size:12.5px;border-radius:9px;padding:8px;cursor:pointer}
   .cadd:hover{border-color:var(--hap);background:#fff7f0}
-  .ctot{text-align:right;font-weight:700;font-size:14px;color:var(--navy);border-top:2px solid var(--navy);padding-top:6px}
-  .ctot.has{color:var(--hap-dark)}
+  .ctot{display:flex;flex-direction:column;gap:1px;text-align:left;border-top:1px solid var(--line);padding-top:8px}
+  .ctot-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+  .ctot-v{font-size:24px;font-weight:700;color:var(--muted);letter-spacing:-.4px;line-height:1.15}
+  .ctot-s{font-size:11.5px;color:var(--muted);min-height:16px}
+  .ctot.has .ctot-v{color:var(--navy)}
   .rchips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
   .rchip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--navy);background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:3px 6px 3px 10px}
   .rchip b{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px;line-height:1}
@@ -328,6 +336,49 @@
   .ac-hint{background:#fff3df;border:1px solid #ffd9b8;color:#854f0b;border-radius:9px;padding:9px 13px;font-size:13px;margin:0 0 14px}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
   @media(max-width:680px){.vidas{grid-template-columns:repeat(3,1fr)}.cmp-head{grid-template-columns:1fr}.vs{flex-direction:row}}
+
+  /* ===== layout 12/09: contexto em uma linha, filtros em blocos, opções ===== */
+  .ctx-bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 18px;margin-bottom:12px}
+  .ctx-grp{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .ctx-sep{width:1px;height:28px;background:var(--line)}
+  .ctx-fill{flex-grow:1}
+  .praca-resumo{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .praca-resumo .pr-pill{display:inline-flex;align-items:center;gap:7px;background:var(--navy);color:#fff;border-radius:9px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer}
+  .praca-resumo .pr-trocar{font-size:12.5px;color:var(--muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer;background:none;border:0;padding:0;font-family:inherit}
+  .praca-resumo .pr-trocar:hover{color:var(--hap)}
+  .praca-resumo .pr-meta{font-size:12px;color:#a8b2c1}
+  .praca-picker{padding:12px 18px;margin-bottom:12px;border-color:#c9d3ee;background:#f7f9ff}
+  .cid-wrap{position:relative}
+  .cid-in{width:190px}
+  .cid-in.pend{border-color:#ecd9a4;background:#fdf3d8}
+  .cid-sug{position:absolute;top:calc(100% + 4px);left:0;z-index:40;min-width:260px;max-height:290px;overflow-y:auto;
+    background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(15,39,64,.13);padding:4px}
+  .cid-sug .it{padding:7px 10px;border-radius:7px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+  .cid-sug .it:hover,.cid-sug .it.sel{background:#eef1fa}
+  .cid-sug .it b{font-weight:600;color:var(--txt)}
+  .cid-sug .it small{color:var(--muted);font-size:11.5px;white-space:nowrap}
+  .cid-sug .vazio{padding:9px 10px;font-size:12.5px;color:var(--muted)}
+  @media(max-width:820px){.cid-in{width:100%} .cid-sug{min-width:0;width:100%}}
+  .filt-bar{display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding:11px 18px;margin-bottom:12px}
+  .fblock{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .vidas-card,.opcoes-card{margin-bottom:0;padding:16px 18px}
+  .calcgrid{margin-bottom:22px}
+  .opc-meta{font-size:12px;color:#a8b2c1;white-space:nowrap}
+  .opc-foot{border-top:1px solid var(--line);padding-top:14px;margin:14px 0 0}
+  .opc-foot input{min-width:200px}
+  .btn.solid.hap{background:var(--hap);border-color:var(--hap);font-weight:700;padding:10px 20px} .btn.solid.hap:hover{background:var(--hap-dark);border-color:var(--hap-dark)}
+  /* as duas imagens trazem height inline (42 e 34px) — sem !important o cabeçalho
+     saía com uma marca maior que a outra */
+  /* .dual do folder vive dentro de @media print — na tela o span ficava inline e
+     as marcas empilhavam; aqui o flex em linha é explícito */
+  #brandLogo{display:block} #brandLogo .dual{display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:12px}
+  #brandLogo .dual img{height:36px !important;width:auto;padding:4px 10px !important;border-radius:7px;background:#fff}
+  @media(max-width:520px){#brandLogo .dual img{height:28px !important;padding:3px 7px !important}}
+  .rede-panel iframe{width:100%;height:78vh;min-height:560px;border:0;border-radius:12px;background:#fff;display:block}
+  .rede-aviso{background:#fff3df;border:1px solid #ffd9b8;color:#854f0b;border-radius:9px;padding:9px 13px;font-size:13px;margin:12px 0}
+  @media(max-width:820px){.ctx-sep,.ctx-fill{display:none} .opc-meta{white-space:normal}}
+  /* abaixo de 420px as duas colunas de vidas ficam com ~150px cada — volta a uma */
+  @media(max-width:420px){.vidas.single{grid-template-columns:1fr;grid-auto-flow:row;grid-template-rows:none}}
 </style>
 </head>
 <body>
@@ -335,74 +386,109 @@
   <header class="top">
     <div>
       <h1>Cotador HapOn</h1>
-      <div class="sub">Hapvida NotreDame vs Amil · Bradesco · Porto Seguro · SulAmérica — planos PME</div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
       <span id="brandLogo"></span>
-      <div class="upd">NotreDame · Vendas Digital · atualizado em 08/09/2026</div>
+      <div class="upd">Vendas Digital · atualizado em 12/09/2026</div>
     </div>
   </header>
 
   <div class="tabs">
     <button class="tab active" data-tab="calc" onclick="switchTab('calc')">Calculadora de cotação</button>
-    <button class="tab" data-tab="comp" onclick="switchTab('comp')">Comparativo de planos</button>
     <button class="tab" data-tab="rede" onclick="switchTab('rede')">Rede de atendimento</button>
     <button class="tab" data-tab="area" onclick="switchTab('area')">Área de comercialização</button>
   </div>
 
   <!-- ============ TAB CALCULADORA ============ -->
   <div class="tabpane active" id="pane-calc">
-    <div class="panel">
-      <div class="calcgrid">
-        <!-- item 1 -->
-        <div>
-          <div class="subh">Tipo de cotação</div>
-          <div class="chips" id="cotModeChips" style="margin-bottom:8px"></div>
-          <div class="cot-hint" id="cotHint"></div>
-          <div class="subh">Distribuição de vidas</div>
-          <div class="vidas" id="vidasGrid"></div>
-          <div class="vbar">
-            <div class="totvidas">Total de vidas <b id="totVidas">0</b> <span id="totVidasSplit"></span></div>
-            <button class="btn" onclick="openConv()">Conversor de datas de nascimento</button>
-            <button class="btn" onclick="zerar()">Zerar vidas</button>
+    <!-- 1. Faixa de contexto (uma linha). A praça escolhida vira um resumo; a
+         grade de Filial/Praça — 30 chips em 5 linhas na Sudeste — só abre ao
+         clicar em "trocar". Era o que empurrava a matriz para 720px. -->
+    <div class="panel ctx-bar">
+      <div class="ctx-grp">
+        <span class="mei-lbl" title="Informe o CEP do cliente para o cotador selecionar a praça (tabela de preços) correspondente">CEP do cliente</span>
+        <input id="cepInput" class="cep-in" placeholder="00000-000" inputmode="numeric" maxlength="9"
+               autocomplete="postal-code" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarCEP();}">
+        <button class="btn" onclick="buscarCEP()">Buscar praça</button>
+        <span id="cepMsg" class="cep-msg"></span>
+      </div>
+      <div class="ctx-sep"></div>
+      <div class="ctx-grp">
+        <span class="mei-lbl">Praça</span>
+        <div id="pracaResumo" class="praca-resumo"></div>
+      </div>
+      <div class="ctx-sep"></div>
+      <!-- Busca por cidade (14/09): terceira porta de entrada da praça, ao lado
+           do CEP e dos chips. Resolve para a mesma praça que o CEP resolveria. -->
+      <div class="ctx-grp cid-grp">
+        <span class="mei-lbl">Cidade</span>
+        <div class="cid-wrap">
+          <input id="cidadeInput" class="cep-in cid-in" placeholder="digite a cidade…" autocomplete="off"
+                 oninput="cidadeSugestoes()" onfocus="cidadeSugestoes()" onkeydown="cidadeTecla(event)"
+                 onblur="setTimeout(cidadeConfere,180)">
+          <div id="cidadeSug" class="cid-sug" style="display:none"></div>
+        </div>
+        <span id="cidadeMsg" class="cep-msg"></span>
+      </div>
+      <div class="ctx-fill"></div>
+      <button class="btn clear" onclick="novaCotacao()">Nova cotação</button>
+    </div>
+    <div id="pracaPicker" class="panel praca-picker" style="display:none">
+      <div class="mei-row"><span class="mei-lbl">Filial</span><div class="chips" id="filialChips"></div></div>
+      <div class="mei-row" style="margin-bottom:0"><span class="mei-lbl">Praça</span><div class="chips" id="pracaChips"></div></div>
+    </div>
+    <div id="ppoReco" class="ppo-reco" style="display:none"></div>
+
+    <!-- 2. Filtros: cada grupo é um bloco fechado (rótulo + opções), então o
+         rótulo nunca fica órfão numa linha com as opções na seguinte. -->
+    <div class="panel filt-bar">
+      <div class="fblock"><span class="mei-lbl">Produto</span><div class="chips" id="prodChips"></div></div>
+      <div class="fblock"><span class="mei-lbl">Contrato</span><div class="chips" id="meiChips"></div></div>
+      <div class="fblock"><span class="mei-lbl">Operadoras</span><div class="chips" id="opChipsCalc"></div></div>
+      <div class="fblock"><span class="mei-lbl" title="Modalidade de contratação das tabelas PME de 30 a 99 vidas">PME 30-99</span><div class="chips" id="contratChips"></div></div>
+    </div>
+
+    <!-- 3. Área de trabalho: vidas e opções lado a lado, na primeira dobra -->
+    <div class="calcgrid">
+      <div class="panel vidas-card">
+        <!-- Tipo de cotação vem ANTES das vidas (pedido de 14/09): a escolha
+             "mista" muda a grade — abre as colunas HMO/PPO — então decide-se
+             o tipo primeiro e só depois se lançam as vidas. -->
+        <div class="mei-lbl" style="margin-bottom:7px">Tipo de cotação</div>
+        <div class="chips" id="cotModeChips" style="margin-bottom:8px"></div>
+        <div class="cot-hint" id="cotHint" style="margin-bottom:0"></div>
+        <div class="vsep"></div>
+        <div class="subh" style="margin-bottom:2px">Distribuição de vidas</div>
+        <div class="cot-hint" style="margin:0 0 10px">Quantidade de vidas por faixa etária</div>
+        <div class="vidas" id="vidasGrid"></div>
+        <div id="mistaWarn" class="vidas-warn" style="display:none;margin:10px 0 0"></div>
+        <div class="vbar">
+          <div class="totvidas">Total de vidas <b id="totVidas">0</b> <span id="totVidasSplit"></span></div>
+          <div class="vbtns">
+            <button class="btn" onclick="openConv()">Conversor de datas</button>
+            <button class="btn" onclick="zerar()">Zerar</button>
           </div>
         </div>
-        <!-- item 2 -->
-        <div>
-          <div class="subh-row">
-            <div class="subh" style="margin-bottom:0">Seleção de operadoras e planos</div>
-            <button class="btn clear" onclick="novaCotacao()">Nova cotação</button>
+      </div>
+
+      <div class="panel opcoes-card">
+        <div class="subh-row">
+          <div>
+            <div class="subh" style="margin-bottom:0">Opções para apresentar ao cliente</div>
+            <div class="cot-hint" style="margin:2px 0 0">Até três produtos, lado a lado</div>
           </div>
-          <div class="mei-row">
-            <span class="mei-lbl" title="Informe o CEP do cliente para o cotador selecionar a praça (tabela de preços) correspondente">CEP do cliente</span>
-            <input id="cepInput" class="cep-in" placeholder="00000-000" inputmode="numeric" maxlength="9"
-                   autocomplete="postal-code" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarCEP();}">
-            <button class="btn" onclick="buscarCEP()">Buscar praça</button>
-            <span id="cepMsg" class="cep-msg"></span>
-          </div>
-          <div id="ppoReco" class="ppo-reco" style="display:none"></div>
-          <div class="mei-row">
-            <span class="mei-lbl">Filial</span>
-            <div class="chips" id="filialChips"></div>
-          </div>
-          <div class="mei-row">
-            <span class="mei-lbl">Praça</span>
-            <div class="chips" id="pracaChips"></div>
-          </div>
-          <div class="mei-row">
-            <span class="mei-lbl">Produto</span>
-            <div class="chips" id="prodChips"></div>
-            <span class="mei-lbl" style="margin-left:12px">Contrato</span>
-            <div class="chips" id="meiChips"></div>
-            <span class="mei-lbl" style="margin-left:12px">Operadoras</span>
-            <div class="chips" id="opChipsCalc"></div>
-            <span class="mei-lbl" style="margin-left:12px" title="Modalidade de contratação das tabelas PME de 30 a 99 vidas">PME 30-99</span>
-            <div class="chips" id="contratChips"></div>
-          </div>
-          <div id="vidasWarn" class="vidas-warn" style="display:none">⚠ Informe a <b>Distribuição de vidas</b> (ao lado) para calcular os valores — sem vidas informadas, os preços ficam zerados.</div>
-          <div class="matrix-wrap"><table class="matrix"><tbody id="matrix"></tbody></table></div>
-          <div class="matrix-hint">Adicione <b>quantos planos quiser</b> por operadora ("+ adicionar plano"; use o × para remover). Em cada plano escolha <b>acomodação</b> e <b>segmentação</b> (coparticipação parcial / completa; concorrentes: sem coparticipação) — quando há só uma opção, é preenchida automaticamente. O seletor <b>Não-MEI / MEI</b> troca a tabela de preços das operadoras que têm MEI (Hapvida, Amil, Porto); as demais mantêm a mesma tabela. Valores usam a distribuição de vidas ao lado; Total = soma da coluna.</div>
-          <div class="cards" id="planCards"></div>
+          <span class="opc-meta" id="opcMeta"></span>
+        </div>
+        <div id="vidasWarn" class="vidas-warn" style="display:none">⚠ Informe a <b>Distribuição de vidas</b> (ao lado) para calcular os valores — sem vidas informadas, os preços ficam zerados.</div>
+        <div class="matrix-wrap"><table class="matrix"><tbody id="matrix"></tbody></table></div>
+        <div class="matrix-hint">Adicione <b>quantos planos quiser</b> por opção ("+ adicionar plano"; use o × para remover). Em cada plano escolha <b>acomodação</b> e <b>segmentação</b> (coparticipação parcial / completa; concorrentes: sem coparticipação) — quando há só uma opção, é preenchida automaticamente. O seletor <b>Não-MEI / MEI</b> troca a tabela de preços das operadoras que têm MEI (Hapvida, Amil, Porto); as demais mantêm a mesma tabela. Valores usam a distribuição de vidas ao lado; a mensalidade da opção é a soma dos planos da coluna.</div>
+        <div class="cards" id="planCards"></div>
+        <!-- "Gerar folder" mora onde as opções são montadas (pedido de 12/09,
+             como no mockup); antes ficava no painel de resultado, a 1256px. -->
+        <div class="folder-bar opc-foot">
+          <input id="clienteNome" placeholder="Nome do cliente (aparece no folder)">
+          <input id="consultorNome" placeholder="Consultor de Vendas (aparece no folder)">
+          <button class="btn solid hap" onclick="gerarFolder()"><i></i>Gerar folder (PDF)</button>
         </div>
       </div>
     </div>
@@ -410,52 +496,26 @@
     <div class="panel">
       <h2 id="resTitle">Resultado consolidado</h2>
       <div class="desc" id="resDesc">Ranking dos planos selecionados (todas as operadoras), do menor para o maior custo mensal.</div>
-      <div class="folder-bar">
-        <input id="clienteNome" placeholder="Nome do cliente (aparece no folder)">
-        <input id="consultorNome" placeholder="Consultor de Vendas (aparece no folder)">
-        <button class="btn solid" onclick="gerarFolder()"><i></i>Gerar folder (PDF)</button>
-      </div>
       <div id="resultArea"><div class="empty">Informe as vidas e selecione ao menos um plano na matriz para ver o ranking.</div></div>
       <div class="note" id="resNote" style="display:none"></div>
     </div>
   </div>
 
-  <!-- ============ TAB COMPARATIVO ============ -->
-  <div class="tabpane" id="pane-comp">
-    <div class="kpis" id="kpis"></div>
-    <div class="panel">
-      <h2>Detalhe do comparativo</h2>
-      <div class="desc">Selecione um comparativo para ver metadados, evolução de preço por faixa etária e tabela detalhada.</div>
-      <div class="fgroup"><label>Comparativo</label><select class="cmp" id="cmpSelect"></select></div>
-      <div class="fgroup"><label>Acomodação</label><div class="chips" id="acomCmp"></div></div>
-      <div class="cmp-head" id="cmpHead"></div>
-      <div class="chart-box"><canvas id="bandChart" role="img" aria-label="Preço por faixa etária"></canvas></div>
-      <div style="overflow-x:auto;margin-top:18px"><table class="band" id="bandTable"></table></div>
-      <div class="note" id="cmpNote"></div>
-    </div>
-  </div>
-
   <!-- ============ TAB REDE ============ -->
+  <!-- O Dash Rede Full (rede-six.vercel.app) embutido, como no app HapON. O src
+       só é ligado quando a aba abre: são 3,6 MB e 12 mil unidades que não
+       fazem sentido baixar para quem só veio cotar. -->
   <div class="tabpane" id="pane-rede">
-    <div class="panel">
-      <h2>Rede de atendimento — comparativo</h2>
-      <div class="desc">Compare a rede credenciada (hospitais, maternidades e prontos-socorros) entre o plano Hapvida e o concorrente selecionado.</div>
-      <div id="redeStatus" class="empty">Abra esta aba para carregar a rede credenciada…</div>
-      <div id="redeControls" style="display:none">
-        <div class="mei-row"><span class="mei-lbl">Operadoras</span><div class="chips" id="redeOpChips"></div></div>
-        <div class="matrix-wrap"><table class="matrix"><tbody id="redeMatrix"></tbody></table></div>
-        <div class="matrix-hint">Selecione um ou mais planos por operadora (use "+ adicionar plano"; clique no × para remover). A rede credenciada é comparada lado a lado, por hospital.</div>
-        <div class="rede-filters" style="margin-top:16px">
-          <div class="fgroup"><label>Região</label><select class="cmp" id="redeReg" style="min-width:200px"></select></div>
-          <div class="fgroup" style="flex:1"><label>Buscar hospital</label><input class="search" id="redeSearch" placeholder="nome do hospital…"></div>
-          <div class="fgroup"><label>&nbsp;</label><button class="btn clear" onclick="clearRede()">Limpar</button></div>
+    <div class="panel rede-panel">
+      <div class="subh-row">
+        <div>
+          <h2>Rede de atendimento</h2>
+          <div class="desc" style="margin-bottom:0">Painel Rede Full — hospitais, prontos-socorros, maternidades e laboratórios por plano e por CEP.</div>
         </div>
-        <div class="chips" id="redeShow" style="margin:8px 0 16px"></div>
-        <div class="kpis" id="redeKpis"></div>
-        <div class="legend-rede" id="redeLegend"></div>
-        <div class="rede-count" id="redeCount"></div>
-        <div style="overflow-x:auto"><table class="rede-tbl" id="redeTable"></table></div>
+        <a class="btn" href="https://rede-six.vercel.app/" target="_blank" rel="noopener">Abrir em tela cheia</a>
       </div>
+      <div class="rede-aviso" id="redeAviso">Carregando a rede completa — pode levar alguns segundos.</div>
+      <iframe id="redeFrame" title="Rede de Atendimento Full" data-src="https://rede-six.vercel.app/" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
 
@@ -484,7 +544,7 @@
     </div>
   </div>
 
-  <footer>Cotação e comparativo gerados a partir das tabelas PPO Hapvida · valores sujeitos a condições contratuais e vigência de tabela · uso interno comercial · <b>atualizado em 08/09/2026</b>.</footer>
+  <footer>Cotação e comparativo gerados a partir das tabelas PPO Hapvida · valores sujeitos a condições contratuais e vigência de tabela · uso interno comercial · <b>atualizado em 12/09/2026</b>.</footer>
 </div>
 
 <!-- Folder de cotação (visível só na impressão/PDF) -->
@@ -518,7 +578,6 @@
 
 <script>
 let CATALOG=[];
-const DATA = [{"arquivo": "AMIL - HAPVIDA 900.pdf", "n_planos": 2, "planos": [{"plano": "S750 R1", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 603.26, "19 a 23": 705.81, "24 a 28": 861.09, "29 a 33": 1033.31, "34 a 38": 1084.98, "39 a 43": 1193.48, "44 a 48": 1491.85, "49 a 53": 1641.04, "54 a 58": 2051.3, "59 ou mais": 3589.78}, "total": 14255.9}, {"plano": "900", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 637.41, "19 a 23": 745.77, "24 a 28": 909.84, "29 a 33": 1091.81, "34 a 38": 1146.4, "39 a 43": 1261.04, "44 a 48": 1576.3, "49 a 53": 1905.9, "54 a 58": 2383.9, "59 ou mais": 3792.78}, "total": 15451.15}], "concorrente": "Amil"}, {"arquivo": "AMIL - HAPVIDA infinity.pdf", "n_planos": 2, "planos": [{"plano": "S6500 Black R1", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 1348.44, "19 a 23": 1577.67, "24 a 28": 1924.76, "29 a 33": 2309.71, "34 a 38": 2425.2, "39 a 43": 2667.72, "44 a 48": 3334.65, "49 a 53": 3668.12, "54 a 58": 4585.15, "59 ou mais": 8024.01}, "total": 31865.43}, {"plano": "Infinity", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 990.28, "19 a 23": 1158.61, "24 a 28": 1413.5, "29 a 33": 1696.22, "34 a 38": 1781.05, "39 a 43": 1959.15, "44 a 48": 2448.94, "49 a 53": 2960.93, "54 a 58": 3703.65, "59 ou mais": 5892.55}, "total": 24004.88}], "concorrente": "Amil"}, {"arquivo": "BRADESCO - HAPVIDA 900 care.pdf", "n_planos": 3, "planos": [{"plano": "Efetivo Plus", "operadora": "Bradesco Seguros", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 433.34, "19 a 23": 511.34, "24 a 28": 618.72, "29 a 33": 742.47, "34 a 38": 846.41, "39 a 43": 871.8, "44 a 48": 1061.47, "49 a 53": 1248.5, "54 a 58": 1485.72, "59 ou mais": 2599.86}, "total": 10667.62}, {"plano": "Efetivo Plus", "operadora": "Bradesco Seguros", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 468.03, "19 a 23": 552.28, "24 a 28": 668.25, "29 a 33": 801.91, "34 a 38": 914.17, "39 a 43": 941.6, "44 a 48": 1146.45, "49 a 53": 1348.45, "54 a 58": 1604.66, "59 ou mais": 2807.99}, "total": 11521.63}, {"plano": "900 Care", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 605.04, "19 a 23": 707.89, "24 a 28": 863.62, "29 a 33": 1036.36, "34 a 38": 1088.19, "39 a 43": 1197.0, "44 a 48": 1496.25, "49 a 53": 1809.07, "54 a 58": 2262.86, "59 ou mais": 3600.24}, "total": 14666.52}], "concorrente": "Bradesco Seguros"}, {"arquivo": "BRADESCO - HAPVIDA 900.pdf", "n_planos": 2, "planos": [{"plano": "Nacional III", "operadora": "Bradesco Seguros", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 499.45, "19 a 23": 589.35, "24 a 28": 713.11, "29 a 33": 855.74, "34 a 38": 975.54, "39 a 43": 1004.81, "44 a 48": 1223.42, "49 a 53": 1438.99, "54 a 58": 1712.4, "59 ou mais": 2996.53}, "total": 12295.16}, {"plano": "900", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 637.41, "19 a 23": 745.77, "24 a 28": 909.84, "29 a 33": 1091.81, "34 a 38": 1146.4, "39 a 43": 1261.04, "44 a 48": 1576.3, "49 a 53": 1905.9, "54 a 58": 2383.9, "59 ou mais": 3792.78}, "total": 15451.15}], "concorrente": "Bradesco Seguros"}, {"arquivo": "BRADESCO - HAPVIDA infinity.pdf", "n_planos": 2, "planos": [{"plano": "Nacional Plus 4", "operadora": "Bradesco Seguros", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 1433.1, "19 a 23": 1691.06, "24 a 28": 2046.17, "29 a 33": 2455.42, "34 a 38": 2799.15, "39 a 43": 2883.12, "44 a 48": 3510.37, "49 a 53": 4128.9, "54 a 58": 4913.39, "59 ou mais": 8597.94}, "total": 35278.74}, {"plano": "Infinity", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 990.28, "19 a 23": 1158.61, "24 a 28": 1413.5, "29 a 33": 1696.22, "34 a 38": 1781.05, "39 a 43": 1959.15, "44 a 48": 2448.94, "49 a 53": 2960.93, "54 a 58": 3703.65, "59 ou mais": 5892.55}, "total": 24004.88}], "concorrente": "Bradesco Seguros"}, {"arquivo": "HAPVIDA - AMIL 600.pdf", "n_planos": 4, "planos": [{"plano": "Prata", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 338.08, "19 a 23": 395.55, "24 a 28": 482.57, "29 a 33": 579.08, "34 a 38": 608.03, "39 a 43": 668.83, "44 a 48": 836.04, "49 a 53": 919.64, "54 a 58": 1149.55, "59 ou mais": 2011.71}, "total": 7989.08}, {"plano": "Prata", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 375.27, "19 a 23": 439.07, "24 a 28": 535.67, "29 a 33": 642.8, "34 a 38": 674.94, "39 a 43": 742.43, "44 a 48": 928.04, "49 a 53": 1020.84, "54 a 58": 1276.05, "59 ou mais": 2233.09}, "total": 8868.2}, {"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 297.23, "19 a 23": 347.76, "24 a 28": 424.26, "29 a 33": 509.11, "34 a 38": 534.58, "39 a 43": 588.03, "44 a 48": 735.04, "49 a 53": 888.72, "54 a 58": 1111.65, "59 ou mais": 1768.65}, "total": 7205.03}, {"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 329.92, "19 a 23": 386.01, "24 a 28": 470.92, "29 a 33": 565.12, "34 a 38": 593.38, "39 a 43": 652.72, "44 a 48": 815.9, "49 a 53": 986.48, "54 a 58": 1233.92, "59 ou mais": 1963.18}, "total": 7997.55}], "concorrente": "Amil"}, {"arquivo": "HAPVIDA - PORTO 600.pdf", "n_planos": 4, "planos": [{"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 297.23, "19 a 23": 347.76, "24 a 28": 424.26, "29 a 33": 509.11, "34 a 38": 534.58, "39 a 43": 588.03, "44 a 48": 735.04, "49 a 53": 888.72, "54 a 58": 1111.65, "59 ou mais": 1768.65}, "total": 7205.03}, {"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 329.92, "19 a 23": 386.01, "24 a 28": 470.92, "29 a 33": 565.12, "34 a 38": 593.38, "39 a 43": 652.72, "44 a 48": 815.9, "49 a 53": 986.48, "54 a 58": 1233.92, "59 ou mais": 1963.18}, "total": 7997.55}, {"plano": "Prata Pró Q", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 321.9, "19 a 23": 390.37, "24 a 28": 470.92, "29 a 33": 539.12, "34 a 38": 584.14, "39 a 43": 603.27, "44 a 48": 720.62, "49 a 53": 775.78, "54 a 58": 958.53, "59 ou mais": 1611.21}, "total": 7141.89}, {"plano": "Prata Pró E", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 320.41, "19 a 23": 388.56, "24 a 28": 468.74, "29 a 33": 536.63, "34 a 38": 581.44, "39 a 43": 600.48, "44 a 48": 717.28, "49 a 53": 772.19, "54 a 58": 954.09, "59 ou mais": 1603.75}, "total": 7108.83}], "concorrente": "Porto Seguro"}, {"arquivo": "HAPVIDA - SULA 600.pdf", "n_planos": 4, "planos": [{"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 297.23, "19 a 23": 347.76, "24 a 28": 424.26, "29 a 33": 509.11, "34 a 38": 534.58, "39 a 43": 588.03, "44 a 48": 735.04, "49 a 53": 888.72, "54 a 58": 1111.65, "59 ou mais": 1768.65}, "total": 7205.03}, {"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 329.92, "19 a 23": 386.01, "24 a 28": 470.92, "29 a 33": 565.12, "34 a 38": 593.38, "39 a 43": 652.72, "44 a 48": 815.9, "49 a 53": 986.48, "54 a 58": 1233.92, "59 ou mais": 1963.18}, "total": 7997.55}, {"plano": "Direto Nacional", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 341.93, "19 a 23": 427.4, "24 a 28": 529.98, "29 a 33": 588.28, "34 a 38": 629.47, "39 a 43": 730.18, "44 a 48": 872.86, "49 a 53": 1023.0, "54 a 58": 1217.88, "59 ou mais": 2051.53}, "total": 8612.73}, {"plano": "Direto Nacional", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 379.26, "19 a 23": 474.07, "24 a 28": 587.85, "29 a 33": 652.5, "34 a 38": 698.19, "39 a 43": 809.9, "44 a 48": 968.17, "49 a 53": 1134.69, "54 a 58": 1350.84, "59 ou mais": 2275.5}, "total": 9553.05}], "concorrente": "Sulamérica"}, {"arquivo": "PORTO - HAPVIDA 700 (1).pdf", "n_planos": 4, "planos": [{"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 392.6, "19 a 23": 459.34, "24 a 28": 560.39, "29 a 33": 672.48, "34 a 38": 706.12, "39 a 43": 776.73, "44 a 48": 970.92, "49 a 53": 1173.91, "54 a 58": 1468.36, "59 ou mais": 2336.18}, "total": 9517.03}, {"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 435.79, "19 a 23": 509.87, "24 a 28": 622.03, "29 a 33": 746.44, "34 a 38": 783.77, "39 a 43": 862.14, "44 a 48": 1077.69, "49 a 53": 1303.01, "54 a 58": 1629.84, "59 ou mais": 2593.11}, "total": 10563.69}, {"plano": "Bronze Brasil I", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 352.46, "19 a 23": 427.44, "24 a 28": 515.63, "29 a 33": 590.31, "34 a 38": 639.61, "39 a 43": 660.55, "44 a 48": 789.04, "49 a 53": 849.44, "54 a 58": 1049.54, "59 ou mais": 1764.2}, "total": 7820.01}, {"plano": "Bronze Brasil I", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 360.61, "19 a 23": 437.32, "24 a 28": 527.55, "29 a 33": 603.95, "34 a 38": 654.39, "39 a 43": 675.82, "44 a 48": 807.28, "49 a 53": 869.07, "54 a 58": 1073.8, "59 ou mais": 1804.97}, "total": 8000.75}], "concorrente": "Porto Seguro"}, {"arquivo": "PORTO - HAPVIDA 700 (2).pdf", "n_planos": 4, "planos": [{"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 392.6, "19 a 23": 459.34, "24 a 28": 560.39, "29 a 33": 672.48, "34 a 38": 706.12, "39 a 43": 776.73, "44 a 48": 970.92, "49 a 53": 1173.91, "54 a 58": 1468.36, "59 ou mais": 2336.18}, "total": 9517.03}, {"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 435.79, "19 a 23": 509.87, "24 a 28": 622.03, "29 a 33": 746.44, "34 a 38": 783.77, "39 a 43": 862.14, "44 a 48": 1077.69, "49 a 53": 1303.01, "54 a 58": 1629.84, "59 ou mais": 2593.11}, "total": 10563.69}, {"plano": "Direto Nacional", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 341.93, "19 a 23": 427.4, "24 a 28": 529.98, "29 a 33": 588.28, "34 a 38": 629.47, "39 a 43": 730.18, "44 a 48": 872.86, "49 a 53": 1023.0, "54 a 58": 1217.88, "59 ou mais": 2051.53}, "total": 8612.73}, {"plano": "Direto Nacional", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 379.26, "19 a 23": 474.07, "24 a 28": 587.85, "29 a 33": 652.5, "34 a 38": 698.19, "39 a 43": 809.9, "44 a 48": 968.17, "49 a 53": 1134.69, "54 a 58": 1350.84, "59 ou mais": 2275.5}, "total": 9553.05}], "concorrente": "Sulamérica"}, {"arquivo": "PORTO - HAPVIDA 700 (3).pdf", "n_planos": 4, "planos": [{"plano": "Ouro", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 380.87, "19 a 23": 445.62, "24 a 28": 543.66, "29 a 33": 652.39, "34 a 38": 685.01, "39 a 43": 753.51, "44 a 48": 941.89, "49 a 53": 1036.08, "54 a 58": 1295.1, "59 ou mais": 2266.43}, "total": 9000.56}, {"plano": "Ouro", "operadora": "Amil", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 422.78, "19 a 23": 494.65, "24 a 28": 603.47, "29 a 33": 724.16, "34 a 38": 760.37, "39 a 43": 836.41, "44 a 48": 1045.51, "49 a 53": 1150.06, "54 a 58": 1437.58, "59 ou mais": 2515.77}, "total": 9990.76}, {"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 392.6, "19 a 23": 459.34, "24 a 28": 560.39, "29 a 33": 672.48, "34 a 38": 706.12, "39 a 43": 776.73, "44 a 48": 970.92, "49 a 53": 1173.91, "54 a 58": 1468.36, "59 ou mais": 2336.18}, "total": 9517.03}, {"plano": "700", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 435.79, "19 a 23": 509.87, "24 a 28": 622.03, "29 a 33": 746.44, "34 a 38": 783.77, "39 a 43": 862.14, "44 a 48": 1077.69, "49 a 53": 1303.01, "54 a 58": 1629.84, "59 ou mais": 2593.11}, "total": 10563.69}], "concorrente": "Amil"}, {"arquivo": "PORTO - HAPVIDA 900 care.pdf", "n_planos": 2, "planos": [{"plano": "900 Care", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 605.04, "19 a 23": 707.89, "24 a 28": 863.62, "29 a 33": 1036.36, "34 a 38": 1088.19, "39 a 43": 1197.0, "44 a 48": 1496.25, "49 a 53": 1809.07, "54 a 58": 2262.86, "59 ou mais": 3600.24}, "total": 14666.52}, {"plano": "Ouro Mais I", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 530.12, "19 a 23": 642.89, "24 a 28": 775.54, "29 a 33": 887.86, "34 a 38": 962.0, "39 a 43": 993.5, "44 a 48": 1186.76, "49 a 53": 1277.59, "54 a 58": 1578.56, "59 ou mais": 2653.43}, "total": 11761.67}], "concorrente": "Porto Seguro"}, {"arquivo": "PORTO - HAPVIDA 900.pdf", "n_planos": 2, "planos": [{"plano": "900", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 637.41, "19 a 23": 745.77, "24 a 28": 909.84, "29 a 33": 1091.81, "34 a 38": 1146.4, "39 a 43": 1261.04, "44 a 48": 1576.3, "49 a 53": 1905.9, "54 a 58": 2383.9, "59 ou mais": 3792.78}, "total": 15451.15}, {"plano": "Ouro Max I", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 641.45, "19 a 23": 777.89, "24 a 28": 938.4, "29 a 33": 1074.3, "34 a 38": 1164.02, "39 a 43": 1202.13, "44 a 48": 1435.97, "49 a 53": 1545.89, "54 a 58": 1910.05, "59 ou mais": 3210.65}, "total": 14231.59}], "concorrente": "Porto Seguro"}, {"arquivo": "PORTO - HAPVIDA infinity.pdf", "n_planos": 2, "planos": [{"plano": "Infinity", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 990.28, "19 a 23": 1158.61, "24 a 28": 1413.5, "29 a 33": 1696.22, "34 a 38": 1781.05, "39 a 43": 1959.15, "44 a 48": 2448.94, "49 a 53": 2960.93, "54 a 58": 3703.65, "59 ou mais": 5892.55}, "total": 24004.88}, {"plano": "Diamante Mais I", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 1625.24, "19 a 23": 1970.96, "24 a 28": 2377.64, "29 a 33": 2721.98, "34 a 38": 2949.29, "39 a 43": 3045.86, "44 a 48": 3638.35, "49 a 53": 3916.84, "54 a 58": 4839.54, "59 ou mais": 8134.88}, "total": 36058.83}], "concorrente": "Porto Seguro"}, {"arquivo": "PORTO PRÓ - HAPVIDA.pdf", "n_planos": 4, "planos": [{"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Parcial", "precos": {"00 a 18": 297.23, "19 a 23": 347.76, "24 a 28": 424.26, "29 a 33": 509.11, "34 a 38": 534.58, "39 a 43": 588.03, "44 a 48": 735.04, "49 a 53": 888.72, "54 a 58": 1111.65, "59 ou mais": 1768.65}, "total": 7205.03}, {"plano": "600", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 329.92, "19 a 23": 386.01, "24 a 28": 470.92, "29 a 33": 565.12, "34 a 38": 593.38, "39 a 43": 652.72, "44 a 48": 815.9, "49 a 53": 986.48, "54 a 58": 1233.92, "59 ou mais": 1963.18}, "total": 7997.55}, {"plano": "Prata Pró E", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Enfermaria", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 271.71, "19 a 23": 329.51, "24 a 28": 397.5, "29 a 33": 455.07, "34 a 38": 493.07, "39 a 43": 509.21, "44 a 48": 608.27, "49 a 53": 654.82, "54 a 58": 809.08, "59 ou mais": 1360.01}, "total": 6028.39}, {"plano": "Prata Pró Q", "operadora": "Porto Seguro", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 275.34, "19 a 23": 333.91, "24 a 28": 402.8, "29 a 33": 461.14, "34 a 38": 499.65, "39 a 43": 516.01, "44 a 48": 616.38, "49 a 53": 663.56, "54 a 58": 819.88, "59 ou mais": 1378.15}, "total": 6108.83}], "concorrente": "Porto Seguro"}, {"arquivo": "SULA - HAPVIDA 900 care.pdf", "n_planos": 2, "planos": [{"plano": "900 Care", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 605.04, "19 a 23": 707.89, "24 a 28": 863.62, "29 a 33": 1036.36, "34 a 38": 1088.19, "39 a 43": 1197.0, "44 a 48": 1496.25, "49 a 53": 1809.07, "54 a 58": 2262.86, "59 ou mais": 3600.24}, "total": 14666.52}, {"plano": "Especial Vital", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 384.14, "19 a 23": 480.17, "24 a 28": 595.41, "29 a 33": 660.91, "34 a 38": 707.16, "39 a 43": 820.32, "44 a 48": 980.6, "49 a 53": 1149.27, "54 a 58": 1368.2, "59 ou mais": 2304.72}, "total": 9675.83}], "concorrente": "Sulamérica"}, {"arquivo": "SULA - HAPVIDA 900.pdf", "n_planos": 2, "planos": [{"plano": "900", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 637.41, "19 a 23": 745.77, "24 a 28": 909.84, "29 a 33": 1091.81, "34 a 38": 1146.4, "39 a 43": 1261.04, "44 a 48": 1576.3, "49 a 53": 1905.9, "54 a 58": 2383.9, "59 ou mais": 3792.78}, "total": 15451.15}, {"plano": "Especial 100 R1", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 449.28, "19 a 23": 561.59, "24 a 28": 696.38, "29 a 33": 772.99, "34 a 38": 827.09, "39 a 43": 959.43, "44 a 48": 1146.91, "49 a 53": 1344.17, "54 a 58": 1600.23, "59 ou mais": 2695.58}, "total": 11316.73}], "concorrente": "Sulamérica"}, {"arquivo": "SULA - HAPVIDA infinity.pdf", "n_planos": 2, "planos": [{"plano": "Infinity", "operadora": "Hapvida NotreDame SP/RJ", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Parcial", "precos": {"00 a 18": 990.28, "19 a 23": 1158.61, "24 a 28": 1413.5, "29 a 33": 1696.22, "34 a 38": 1781.05, "39 a 43": 1959.15, "44 a 48": 2448.94, "49 a 53": 2960.93, "54 a 58": 3703.65, "59 ou mais": 5892.55}, "total": 24004.88}, {"plano": "Executivo R1", "operadora": "Sulamérica", "modalidade": "Saúde PME", "acomodacao": "Apartamento", "coparticipacao": "Sem Coparticipação", "precos": {"00 a 18": 967.26, "19 a 23": 1209.08, "24 a 28": 1499.24, "29 a 33": 1664.16, "34 a 38": 1780.65, "39 a 43": 2065.54, "44 a 48": 2469.15, "49 a 53": 2893.85, "54 a 58": 3445.13, "59 ou mais": 5803.31}, "total": 24363.75}], "concorrente": "Sulamérica"}];
 const BANDS = ["00 a 18","19 a 23","24 a 28","29 a 33","34 a 38","39 a 43","44 a 48","49 a 53","54 a 58","59 ou mais"];
 const fmt = n => (n==null||isNaN(n))?'—':n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmt0 = n => n==null?'—':Math.round(n).toLocaleString('pt-BR');
@@ -534,7 +593,6 @@ let CATEGORIES=[];
 const LOGO_SVG='<img src="data:image/jpeg;base64,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" alt="Hapvida" style="height:42px;border-radius:8px;display:block">';
 
 /* ===== tabs ===== */
-let compInit=false;
 function acFilter(){
   const q=(document.getElementById('acSearch').value||'').trim().toLowerCase();
   const norm=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -564,10 +622,8 @@ function acFilter(){
 function switchTab(t){
   document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
   document.getElementById('pane-calc').classList.toggle('active',t==='calc');
-  document.getElementById('pane-comp').classList.toggle('active',t==='comp');
   document.getElementById('pane-rede').classList.toggle('active',t==='rede');
   document.getElementById('pane-area').classList.toggle('active',t==='area');
-  if(t==='comp'){if(!compInit){initComp();compInit=true;}else if(bandChart)bandChart.resize();}
   if(t==='rede'){loadRede();}
 }
 
@@ -584,7 +640,21 @@ function vidasDe(c){
   // na cotação mista o concorrente é alternativa ao CONTRATO INTEIRO — cobre HMO+PPO
   if(cotMode==='mista'&&c&&!isPPO(c)&&!isHapHMO(c)&&totCol(vidasHMO)>0&&totCol(vidasPPO)>0) return vidas;
   const ppo=isPPO(c);const own=ppo?vidasPPO:vidasHMO;const other=ppo?vidasHMO:vidasPPO;
+  /* Na mista, plano Hapvida (HMO ou PPO) conta SÓ a própria coluna. Antes havia
+     um recuo para a outra coluna: com as vidas todas na HMO, o Adv 600 saía
+     precificado com essas vidas e o folder imprimia "2 opções cotadas" sem
+     somar nada — foi o que o usuário reportou em 14/09. Na comparativa o recuo
+     continua, porque lá as colunas não têm significado. */
+  if(cotMode==='mista'&&c&&(isPPO(c)||isHapHMO(c))) return own;
   return totCol(own)>0?own:(totCol(other)>0?other:own);}
+/* mista declarada, com plano HMO e PPO escolhidos, mas vidas em uma coluna só */
+function mistaIncompleta(sel){sel=sel||selectedPlans();
+  if(cotMode!=='mista'||!sel.some(isHapHMO)||!sel.some(isPPO)) return null;
+  const h=totCol(vidasHMO),p=totCol(vidasPPO);
+  if(h>0&&p>0) return null;
+  if(h===0&&p===0) return null;            // sem vidas nenhuma: o aviso geral já cobre
+  return h===0?'HMO':'PPO';                 // qual coluna está vazia
+}
 let opMode='hapvida'; // default: só Hapvida (colunas). 'todas' = Hapvida + concorrentes
 let matrixCols=[];
 function emptySlot(){return {plano:null,acom:null,seg:null};}
@@ -636,8 +706,113 @@ function buildPracaChips(){
   const el=document.getElementById('pracaChips'); if(!el) return;
   el.innerHTML=pracasDaFilial().map(p=>`<div class="chip ${pracaSel===p?'active':''}" data-praca="${p}">${p}</div>`).join('');
   el.querySelectorAll('[data-praca]').forEach(e=>e.onclick=()=>{limparCEP();setPraca(e.dataset.praca);});
+  buildPracaResumo();
 }
-function setPraca(p){ if(pracaSel===p) return; pracaSel=p; reconcileSel(); buildPracaChips(); recompute(); }
+function setPraca(p){ if(pracaSel===p) return; pracaSel=p; filialSel=pracaRegiao(p); reconcileSel(); pracaPickerAberto=false; buildFilialChips(); buildPracaChips(); recompute(); }
+/* ===== praça recolhida (layout 12/09) =====
+   Depois de escolhida, a praça vira uma linha de resumo; a grade de Filial e
+   Praça só aparece ao clicar em "trocar". O CEP continua preenchendo a praça
+   normalmente — o resumo se atualiza porque buildPracaChips o redesenha. */
+let pracaPickerAberto=false;
+function buildPracaResumo(){
+  const el=document.getElementById('pracaResumo'); if(!el) return;
+  /* a região vem da PRAÇA em uso, não de filialSel: o seletor de filial pode
+     ficar para trás (setPraca não o move) e o resumo mostrava "SP / RMSP …
+     Nordeste · 15 praças" depois de uma busca por cidade de outra região */
+  const reg=pracaRegiao(pracaSel);
+  const n=PRACAS.filter(p=>pracaRegiao(p)===reg).length;
+  const pin='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+  el.innerHTML=`<span class="pr-pill" onclick="togglePracaPicker()">${pin}<span>${pracaSel||'—'}</span></span>`
+    +`<button type="button" class="pr-trocar" onclick="togglePracaPicker()">${pracaPickerAberto?'fechar':'trocar'}</button>`
+    +`<span class="pr-meta">${reg||''} · ${n} praça${n!==1?'s':''}</span>`;
+  const pk=document.getElementById('pracaPicker'); if(pk) pk.style.display=pracaPickerAberto?'':'none';
+  /* trocar a praça pelos chips ou pelo CEP limpa o campo de cidade, para ele
+     nunca mostrar uma cidade que não corresponde à praça em uso */
+  const ci=document.getElementById('cidadeInput'), cm=document.getElementById('cidadeMsg');
+  if(ci&&ci.value){const d=_cidadeDaPraca(pracaSel); const alvo=_n(ci.value.replace(/\s*-\s*[A-Z]{2}$/,''));
+    const ok=cidadeIndice().some(x=>x.busca===alvo&&x.praca===pracaSel);
+    if(!ok){ci.value='';ci.classList.remove('pend');if(cm){cm.className='cep-msg';cm.innerHTML='';}}}
+}
+function togglePracaPicker(){ pracaPickerAberto=!pracaPickerAberto; buildPracaResumo(); }
+
+/* ===== busca da praça por CIDADE (14/09) =====
+   Terceira porta de entrada, ao lado do CEP e dos chips. O índice é montado do
+   próprio catálogo: cada praça vira sua cidade, e a "SP / RMSP" — que não é uma
+   cidade — entra com os 39 municípios da região metropolitana, os mesmos que o
+   CEP já usava. São Bernardo do Campo e Mogi das Cruzes têm praça própria e
+   ganham dela, não da RMSP (mesma precedência do pracaDoCEP). */
+let CIDADE_IX=null;
+function cidadeIndice(){
+  if(CIDADE_IX) return CIDADE_IX;
+  const ix=[];
+  PRACAS.forEach(p=>{const d=_cidadeDaPraca(p); if(d) ix.push({busca:d.cid,nome:p.replace(/\s*-\s*[A-Z]{2}$/,''),uf:d.uf,praca:p,propria:true});});
+  if(PRACAS.includes('SP / RMSP')){
+    const proprias=new Set(ix.filter(x=>x.uf==='SP').map(x=>x.busca));
+    RMSP_CIDADES.forEach(c=>{const n=_n(c); if(!proprias.has(n)) ix.push({busca:n,nome:c,uf:'SP',praca:'SP / RMSP',propria:false});});
+  }
+  CIDADE_IX=ix.sort((a,b)=>a.nome.localeCompare(b.nome));
+  return CIDADE_IX;
+}
+let cidadeSel=-1;
+function cidadeMatches(){
+  const q=_n(document.getElementById('cidadeInput').value||'');
+  const ix=cidadeIndice();
+  if(!q) return ix.slice(0,60);
+  /* começa-com antes de contém: digitando "san", Santos vem antes de Feira de Santana */
+  const a=[],b=[];
+  ix.forEach(x=>{const i=x.busca.indexOf(q); if(i===0)a.push(x); else if(i>0)b.push(x);});
+  return a.concat(b).slice(0,60);
+}
+function cidadeSugestoes(){
+  const box=document.getElementById('cidadeSug'); if(!box) return;
+  const ms=cidadeMatches(); cidadeSel=-1;
+  if(!ms.length){box.innerHTML='<div class="vazio">Nenhuma cidade do catálogo com esse nome. Use o CEP ou escolha a praça em "trocar".</div>';box.style.display='block';return;}
+  box.innerHTML=ms.map((x,i)=>`<div class="it" data-i="${i}" onclick="cidadeEscolhe(${i})"><b>${x.nome} - ${x.uf}</b><small>${x.propria?'tabela própria':'praça '+x.praca}</small></div>`).join('');
+  box.style.display='block';
+}
+function cidadeFecha(){const b=document.getElementById('cidadeSug'); if(b)b.style.display='none'; cidadeSel=-1;}
+/* Sair do campo sem escolher deixava o texto parado enquanto a praça seguia
+   outra — o vendedor via "São Bernardo do Campo" e cotava a tabela da RMSP
+   (reportado com print em 14/09). Agora: match único aplica sozinho; ambíguo
+   ou inexistente fica VISIVELMENTE não aplicado, nunca silencioso. */
+function cidadeConfere(){
+  const inp=document.getElementById('cidadeInput'); if(!inp) return;
+  const m=document.getElementById('cidadeMsg');
+  const txt=(inp.value||'').trim();
+  if(!txt){inp.classList.remove('pend'); if(m){m.className='cep-msg';m.innerHTML='';} return;}
+  const alvo=_n(txt.replace(/\s*-\s*[A-Z]{2}$/,''));
+  if(cidadeIndice().some(x=>x.busca===alvo&&x.praca===pracaSel)){inp.classList.remove('pend');return;}
+  const ms=cidadeMatches();
+  const exatos=ms.filter(x=>x.busca===alvo);
+  if(exatos.length===1||ms.length===1){inp.classList.remove('pend');cidadeEscolhe(ms.indexOf(exatos[0]||ms[0]));return;}
+  inp.classList.add('pend');
+  if(m){m.className='cep-msg warn';
+    m.innerHTML=ms.length?'<b>não aplicado</b> — escolha uma cidade na lista':'cidade não encontrada no catálogo';}
+}
+function cidadeEscolhe(i){
+  const x=cidadeMatches()[i]; if(!x) return;
+  const inp=document.getElementById('cidadeInput'); inp.value=x.nome+' - '+x.uf; inp.classList.remove('pend');
+  cidadeFecha(); limparCEP();
+  if(x.praca!==pracaSel){pracaSel=x.praca;filialSel=pracaRegiao(x.praca);reconcileSel();buildFilialChips();buildPracaChips();recompute();}
+  else buildPracaResumo();
+  const m=document.getElementById('cidadeMsg');
+  if(m){m.className='cep-msg ok';
+    m.innerHTML=x.propria?('praça <b>'+x.praca+'</b>'):(x.nome+' → praça <b>'+x.praca+'</b>');}
+}
+function cidadeTecla(e){
+  const box=document.getElementById('cidadeSug');
+  const its=box?[...box.querySelectorAll('.it')]:[];
+  if(e.key==='Escape'){cidadeFecha();return;}
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    if(!its.length){cidadeSugestoes();return;} e.preventDefault();
+    cidadeSel=(cidadeSel+(e.key==='ArrowDown'?1:-1)+its.length)%its.length;
+    its.forEach((el,i)=>el.classList.toggle('sel',i===cidadeSel));
+    its[cidadeSel].scrollIntoView({block:'nearest'});return;
+  }
+  if(e.key==='Enter'){e.preventDefault();cidadeEscolhe(cidadeSel>=0?cidadeSel:0);}
+}
+/* clicar fora fecha a lista */
+document.addEventListener('click',e=>{if(!e.target.closest('.cid-grp'))cidadeFecha();});
 /* ===================== BUSCA POR CEP =====================================
    Pedido do usuário (10/09): informar o CEP como alternativa de entrada, para
    (a) trazer a tabela de preços da praça daquele CEP e (b) recomendar o
@@ -870,13 +1045,23 @@ function buildOpChips(){
 function setOpMode(m){if(opMode===m)return;opMode=m;buildCols();buildOpChips();recompute();}
 
 function buildMatrix(){
-  let html=`<tr><th class="rowlabel">Operadora</th>`+
-    matrixCols.map((col,ci)=>{const ppo=colIsPPO(ci);return `<th><div class="ophead" style="background:${ppo?'#1e2a5c':opColor(col.op)}">${ppo?'NotreDame Saúde':opLabelC(col.op)}</div></th>`;}).join('')+`</tr>`;
+  /* A coluna se chama "Opção N": a faixa laranja repetia "Hapvida" três vezes e
+     não distinguia nada com o filtro "Somente Hapvida". A marca fica na tarja
+     do canto — e volta a importar quando há concorrente na cotação. */
+  let html=`<tr><th class="rowlabel">Opções</th>`+
+    matrixCols.map((col,ci)=>{const ppo=colIsPPO(ci);const cor=ppo?'#1e2a5c':opColor(col.op);const nome=ppo?'NotreDame Saúde':opLabelC(col.op);
+      return `<th><div class="ophead"><span class="opn">Opção ${ci+1}</span><span class="optag" style="background:${cor}">${nome}</span></div></th>`;}).join('')+`</tr>`;
+  const om=document.getElementById('opcMeta');
+  if(om){const n=planLabels('Hapvida').length;om.textContent=`${pracaSel} · ${n} plano${n!==1?'s':''} Hapvida na praça`;}
   html+=`<tr><th class="rowlabel">Planos</th>`+matrixCols.map((col,ci)=>{
     let tot=0;
     const slots=col.slots.map((x,si)=>{const c=resolved(ci,si);const v=c?planTotal(c):0;tot+=v;return slotBlock(ci,si,x,v);}).join('');
     const add=`<button class="cadd" onclick="addSlot(${ci})">+ adicionar plano</button>`;
-    const tt=`<div class="ctot ${tot>0?'has':''}">Total R$ ${fmt(tot)}</div>`;
+    /* um número só, grande: antes o preço saía pequeno no cartão e repetido
+       como "Total" logo abaixo */
+    const tv=totVidas();
+    const porVida=(tot>0&&tv>0&&cotMode!=='mista')?`${tv} vida${tv>1?'s':''} · R$ ${fmt(tot/tv)} por vida`:'&nbsp;';
+    const tt=`<div class="ctot ${tot>0?'has':''}"><span class="ctot-l">Mensalidade</span><span class="ctot-v">R$ ${fmt(tot)}</span><span class="ctot-s">${porVida}</span></div>`;
     return `<td><div class="ccol">${slots}${add}${tt}</div></td>`;
   }).join('')+`</tr>`;
   document.getElementById('matrix').innerHTML=html;
@@ -906,7 +1091,10 @@ function slotBlock(ci,si,x,v){
   const noV=totVidas()===0&&done;
   const badTier=done&&totVidas()>0&&!resolved(ci,si);
   let disp, tip='';
+  const rc0=done?resolved(ci,si):null;
+  const semColuna=cotMode==='mista'&&rc0&&(isPPO(rc0)||isHapHMO(rc0))&&vidasCob(rc0)===0&&totVidas()>0;
   if(noV) disp='informe vidas';
+  else if(semColuna){ disp='informe vidas '+(isPPO(rc0)?'PPO':'HMO'); tip='Cotação mista: este plano é precificado só com as vidas da coluna '+(isPPO(rc0)?'PPO':'HMO')+'. Lance as vidas dele lá para somar ao contrato.'; }
   else if(badTier){
     const todos=CATALOG.filter(c=>c.operadora===op&&c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg&&pracaOk(c)&&tipoOk(c)&&meiOk(c)&&contratOk(c));
     const mv=Math.max(0,...todos.map(minVidas));
@@ -939,7 +1127,11 @@ function onAcom(ci,si,v){const col=matrixCols[ci];const x=col.slots[si];x.acom=v
   if(x.acom){const g=segsFor(col.op,x.plano,x.acom);if(g.length===1)x.seg=g[0];}recompute();}
 function onSeg(ci,si,v){matrixCols[ci].slots[si].seg=v||null;recompute();}
 function selectedPlans(){const ids=[];matrixCols.forEach((col,ci)=>col.slots.forEach((x,si)=>{const c=resolved(ci,si);if(c&&!ids.includes(c.id))ids.push(c.id);}));return ids.map(planById).filter(Boolean);}
-function recompute(){buildMeiChips();buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';}
+function recompute(){buildMeiChips();buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';
+  const mw=document.getElementById('mistaWarn');
+  if(mw){const vz=mistaIncompleta();
+    mw.style.display=vz?'block':'none';
+    if(vz) mw.innerHTML=`⚠ <b>Cotação mista incompleta</b> — as vidas estão só na coluna <b>${vz==='HMO'?'PPO':'HMO'}</b>. Lance na coluna <b>${vz}</b> as vidas do plano ${vz==='PPO'?'NotreDame Saúde':'Hapvida'} para o contrato somar as duas partes.`;}}
 function reconcileSel(){
   matrixCols.forEach(col=>col.slots.forEach(x=>{
     if(x.plano&&!planLabels(col.op).includes(x.plano)){x.plano=null;x.acom=null;x.seg=null;}
@@ -1163,62 +1355,6 @@ function applyConv(){const today=new Date();const lines=document.getElementById(
   document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>{i.value=(i.dataset.col==='PPO'?vidasPPO:vidasHMO)[i.dataset.b];});refreshTot();updateValues();renderCards();calcResult();
   document.getElementById('convResult').innerHTML=`${ok} vida(s) distribuída(s)${bad?`, ${bad} ignorada(s)`:''}. Faixas atualizadas.`;setTimeout(closeConv,900);}
 
-/* ================= TAB 2: COMPARATIVO ================= */
-let cmpState={cmp:null,acom:'Apartamento'};let bandChart;
-DATA.forEach(c=>{c.id=c.arquivo.replace('.pdf','');c.label=c.id;});
-const isHapP=p=>p.operadora.includes('Hapvida');
-function headlinePair(c,a){const haps=c.planos.filter(isHapP),concs=c.planos.filter(p=>!isHapP(p));
-  const pk=arr=>arr.length?(arr.find(p=>p.acomodacao===a)||arr.find(p=>p.acomodacao==='Apartamento')||arr[0]):null;
-  return {hap:pk(haps),conc:pk(concs)};}
-function initComp(){
-  cmpState.cmp=DATA[0].id;
-  const ops=[...new Set(DATA.map(c=>c.concorrente))];let wins=0,tot=0;
-  DATA.forEach(c=>{const{hap,conc}=headlinePair(c,'Apartamento');if(hap&&conc&&hap.total!=null&&conc.total!=null){tot++;if(hap.total<conc.total)wins++;}});
-  const planos=DATA.reduce((s,c)=>s+c.planos.length,0);
-  const k=[{lbl:'Comparativos',val:DATA.length,foot:'PDFs analisados'},{lbl:'Operadoras concorrentes',val:ops.length,foot:ops.join(' · ')},
-    {lbl:'Planos analisados',val:planos,foot:'incl. enfermaria + apartamento'},{lbl:'Hapvida mais barata',val:wins+'/'+tot,foot:'apartamento · total mensal',hap:true}];
-  document.getElementById('kpis').innerHTML=k.map(x=>`<div class="kpi"><div class="lbl">${x.lbl}</div><div class="val ${x.hap?'hap':''}">${x.val}</div><div class="foot">${x.foot}</div></div>`).join('');
-  const sel=document.getElementById('cmpSelect');sel.innerHTML=DATA.map(c=>`<option value="${c.id}">${c.concorrente} — ${c.label}</option>`).join('');
-  sel.value=cmpState.cmp;sel.onchange=()=>{cmpState.cmp=sel.value;renderDetail();};
-  const ac=['Apartamento','Enfermaria'];
-  document.getElementById('acomCmp').innerHTML=ac.map(a=>`<div class="chip ${cmpState.acom===a?'active':''}" data-ac="${a}">${a}</div>`).join('');
-  document.querySelectorAll('#acomCmp [data-ac]').forEach(e=>e.onclick=()=>{cmpState.acom=e.dataset.ac;document.querySelectorAll('#acomCmp .chip').forEach(c=>c.classList.toggle('active',c.dataset.ac===cmpState.acom));renderDetail();});
-  renderDetail();
-}
-function renderDetail(){
-  const c=DATA.find(x=>x.id===cmpState.cmp);const{hap,conc}=headlinePair(c,cmpState.acom);
-  const card=(p,cls)=>{if(!p)return `<div class="side ${cls}"><div class="op">—</div></div>`;
-    const cb=p.coparticipacao.includes('Sem')?`<span class="badge sem">${p.coparticipacao}</span>`:`<span class="badge copart">${p.coparticipacao}</span>`;
-    return `<div class="side ${cls}"><div class="op">${p.operadora}</div><div class="plan">${p.plano}</div><div class="badges"><span class="badge">${p.modalidade}</span><span class="badge">${p.acomodacao}</span>${cb}</div><div class="tot">Total mensal (1 vida/faixa)<b>R$ ${fmt(p.total)}</b></div></div>`;};
-  let vs='';
-  if(hap&&conc&&hap.total!=null&&conc.total!=null){const d=hap.total-conc.total,pct=d/conc.total*100,good=d<0;
-    vs=`<div class="vs"><div class="vtag">VS</div><div class="diff ${good?'good':'bad'}">${good?'−':'+'}R$ ${fmt(Math.abs(d))}<small>${good?'Hapvida mais barata':'Hapvida mais cara'} (${(pct>0?'+':'')+pct.toFixed(1)}%)</small></div><div class="diff-year ${good?'good':'bad'}">R$ ${fmt(Math.abs(d)*12)}<small>${good?'economia em 12 meses':'a mais em 12 meses'}</small></div></div>`;
-  }else vs=`<div class="vs"><div class="vtag">VS</div></div>`;
-  document.getElementById('cmpHead').innerHTML=card(hap,'hapvida')+vs+card(conc,'conc');
-  const ctx=document.getElementById('bandChart');if(bandChart)bandChart.destroy();
-  bandChart=new Chart(ctx,{type:'line',data:{labels:BANDS,datasets:[
-    {label:hap?('Hapvida '+hap.plano):'Hapvida',data:BANDS.map(b=>hap?hap.precos[b]:null),borderColor:'#FF6B00',backgroundColor:'rgba(255,107,0,.08)',borderWidth:2.5,tension:.3,fill:true,pointRadius:3},
-    {label:conc?(conc.operadora+' '+conc.plano):'Concorrente',data:BANDS.map(b=>conc?conc.precos[b]:null),borderColor:'#378add',backgroundColor:'rgba(55,138,221,.06)',borderWidth:2.5,tension:.3,fill:true,pointRadius:3,borderDash:[6,4]}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:14,usePointStyle:true}},tooltip:{callbacks:{label:x=>x.dataset.label+': R$ '+fmt(x.raw)}}},scales:{y:{ticks:{callback:v=>'R$ '+fmt0(v)}}}}});
-  const t=document.getElementById('bandTable');
-  let head=`<thead><tr><th>Faixa etária</th>${hap?`<th>Hapvida ${hap.plano}</th>`:''}${conc?`<th>${conc.operadora} ${conc.plano}</th>`:''}<th>Diferença</th><th>%</th></tr></thead>`;
-  let body='<tbody>';
-  BANDS.forEach(b=>{const hv=hap?hap.precos[b]:null,cv=conc?conc.precos[b]:null,d=(hv!=null&&cv!=null)?hv-cv:null,pct=(d!=null&&cv)?d/cv*100:null,hw=d!=null&&d<0;
-    body+=`<tr><td>${b}</td>${hap?`<td class="cell-hap ${hw?'win':''}">R$ ${fmt(hv)}</td>`:''}${conc?`<td class="${d!=null&&d>0?'win':''}">R$ ${fmt(cv)}</td>`:''}
-      <td style="color:${d!=null?(d<0?'#0f6e56':'#a32d2d'):'inherit'}">${d!=null?((d<0?'−':'+')+'R$ '+fmt(Math.abs(d))):'—'}</td>
-      <td style="color:${pct!=null?(pct<0?'#0f6e56':'#a32d2d'):'inherit'}">${pct!=null?((pct>0?'+':'')+pct.toFixed(1)+'%'):'—'}</td></tr>`;});
-  const ht=hap?hap.total:null,ct=conc?conc.total:null,dt=(ht!=null&&ct!=null)?ht-ct:null,pt=(dt!=null&&ct)?dt/ct*100:null;
-  body+=`<tr class="total-row"><td>Total mensal</td>${hap?`<td class="cell-hap">R$ ${fmt(ht)}</td>`:''}${conc?`<td>R$ ${fmt(ct)}</td>`:''}
-    <td style="color:${dt!=null?(dt<0?'#0f6e56':'#a32d2d'):'inherit'}">${dt!=null?((dt<0?'−':'+')+'R$ '+fmt(Math.abs(dt))):'—'}</td>
-    <td style="color:${pt!=null?(pt<0?'#0f6e56':'#a32d2d'):'inherit'}">${pt!=null?((pt>0?'+':'')+pt.toFixed(1)+'%'):'—'}</td></tr></tbody>`;
-  t.innerHTML=head+body;
-  const note=document.getElementById('cmpNote');
-  if(hap&&conc){const same=hap.coparticipacao===conc.coparticipacao;
-    note.innerHTML=same?`Mesma regra de coparticipação (${hap.coparticipacao}) e acomodação (${hap.acomodacao}) — comparação direta de mensalidade.`
-      :`Atenção: o plano Hapvida (<b>${hap.coparticipacao}</b>) e o concorrente (<b>${conc.coparticipacao}</b>) têm regimes de coparticipação diferentes — o preço cheio não captura a diferença de custo no uso. Acomodação: ${hap.acomodacao}.`;}
-  else note.innerHTML='';
-}
-
 /* ===== folder / proposta em PDF ===== */
 function opLabel(k){const o=OPS.find(x=>x.key===k);return o?o.label:k;}
 const COP_COLS=[
@@ -1252,6 +1388,8 @@ function isPPOsel(sel){return sel.some(c=>/^(Adv|Advance|Premium|Infinity)/i.tes
 async function gerarFolder(){
   const sel=selectedPlans(); const tv=totVidas();
   if(!sel.length||tv===0){alert('Informe as vidas e selecione ao menos um plano na matriz antes de gerar o folder.');return;}
+  const vazia=mistaIncompleta(sel);
+  if(vazia){alert('Cotação mista incompleta: as vidas estão só na coluna '+(vazia==='HMO'?'PPO':'HMO')+'. Lance as vidas da coluna '+vazia+' para o folder somar as duas partes do contrato — ou mude para "Cotação comparativa" se os planos forem alternativas.');return;}
   const nome=(document.getElementById('clienteNome').value||'').trim();
   const consultor=(document.getElementById('consultorNome').value||'').trim();
   const hoje=new Date().toLocaleDateString('pt-BR');
@@ -1350,9 +1488,13 @@ async function gerarFolder(){
   const carHtml=`<div class="fd-sec">Tabela de carências</div>
     <div class="fd-note">Prazos contados a partir da vigência do contrato.${isencao?' <b>Contrato empresarial com '+tv+' vidas: isenção de carências</b> (a partir de 30 vidas), exceto CPT para doenças e lesões preexistentes declaradas.':(empresarial?' Empresas com até 29 vidas seguem os prazos abaixo; a partir de 30 vidas há isenção de carências.':'')} Referencial — sujeito às condições contratuais e à tabela vigente.</div>
     <table class="fd-tbl"><thead><tr><th>Cobertura</th><th style="text-align:right">Carência</th></tr></thead><tbody>${carBody}</tbody></table>`;
-  // Rede de atendimento dos planos selecionados
-  let redeHtml='';
-  const okRede=await ensureRede();
+  // Rede de atendimento dos planos selecionados.
+  // V4: o lado Hapvida vem do Dash Rede Full, recortado pela praça cotada e
+  // com laboratório. O comparativo com concorrente continua no rede.json — é a
+  // única base que tem Amil/Bradesco/Porto/SulAmérica — e só sai quando há de
+  // fato um concorrente na cotação, senão sairiam duas tabelas de hospital.
+  let redeHtml=await folderRedeFull(cols);
+  const okRede=(cols.some(c=>c.operadora!=='Hapvida'))&&await ensureRede();
   if(okRede){
     const rcols=cols.map(c=>({c,key:c.operadora+'|'+c.plano})).filter(x=>PLAN_COV[x.key]);
     if(rcols.length){
@@ -1365,8 +1507,8 @@ async function gerarFolder(){
         body+=`<tr><td>${h.nome||''}</td><td>${h.bairro||''}</td>`+rcols.map(x=>{const v=(PLAN_COV[x.key]||{})[k];return cov(v)?`<td class="fd-cov">${v}</td>`:`<td class="fd-cov no">—</td>`;}).join('')+`</tr>`;
       });
       const rhead=`<tr><th>Hospital</th><th>Bairro</th>`+rcols.map(x=>`<th>${x.c.label}</th>`).join('')+`</tr>`;
-      redeHtml=`<div class="fd-sec">Rede de atendimento — ${keys.length} unidades</div>
-        <div class="fd-note">Principais hospitais e laboratórios credenciados para o(s) plano(s) selecionado(s). Legenda: H Hospital · M Maternidade · PS Pronto-socorro · PSA/PSP PS adulto/infantil · PA Pronto atend. · AMB Ambulatório · — não credenciado/não listado.</div>
+      redeHtml+=`<div class="fd-sec">Comparativo de rede — ${keys.length} unidades</div>
+        <div class="fd-note">Base comparativa de hospitais usada para o lado a lado com o concorrente (recorte SP/RMSP). Legenda: H Hospital · M Maternidade · PS Pronto-socorro · PSA/PSP PS adulto/infantil · PA Pronto atend. · AMB Ambulatório · — não credenciado/não listado.</div>
         <table class="fd-tbl fd-rede"><thead>${rhead}</thead><tbody>${body}</tbody></table>`;
     }
   }
@@ -1392,7 +1534,7 @@ async function gerarFolder(){
     ${copHtml}
     ${carHtml}
     ${redeHtml}
-    <div class="fd-foot">Mensalidade = soma de (vidas × preço por faixa etária) por plano. Planos Hapvida com coparticipação parcial; concorrentes em geral sem coparticipação — o valor é apenas a mensalidade, sem o custo de uso. Rede: principais hospitais/laboratórios, podendo haver mais unidades não listadas. Valores referenciais, sujeitos a condições contratuais e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato. Emitido em ${hoje}.</div>`;
+    <div class="fd-foot">Mensalidade = soma de (vidas × preço por faixa etária) por plano. Planos Hapvida com coparticipação parcial; concorrentes em geral sem coparticipação — o valor é apenas a mensalidade, sem o custo de uso. Rede: unidades de internação, pronto-socorro e maternidade credenciadas na praça cotada, conforme a rede vigente (mesma base do painel Rede Full); pode haver unidades não listadas e a rede é sujeita a alteração. Valores referenciais, sujeitos a condições contratuais e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato. Emitido em ${hoje}.</div>`;
   const t0=document.title;
   document.title='Cotacao'+(nome?(' - '+nome):'');
   // garante que os logos (data-URI) estejam decodificados antes do print — senão saem em branco no PDF
@@ -1401,14 +1543,115 @@ async function gerarFolder(){
   setTimeout(()=>{document.title=t0;},600);
 }
 
+/* ============ REDE FIEL AO DASH REDE FULL (V4) ============================
+   Até a V3 o resumo de rede do folder saía do rede.json — base curada à mão,
+   centrada na RMSP e feita para o comparativo com concorrente. Quem cotava
+   Jundiaí ou Recife levava no PDF a rede da Grande São Paulo, e laboratório
+   não aparecia em lugar nenhum.
+
+   Agora os produtos Hapvida/NDI/Clinipam/CCG vêm do mesmo arquivo que alimenta
+   o Dash Rede Full, recortado pela praça cotada. O concorrente continua no
+   rede.json: a Rede Full não tem Amil/Bradesco/Porto/SulAmérica, e trocar só o
+   lado Hapvida deixaria o comparativo com duas bases diferentes.
+
+   O build também gera um rede_full_labs.json com os laboratórios, mas ele NÃO
+   é carregado aqui: por ora o folder traz só internação/PS/maternidade.      */
+let REDE_FULL=null;
+/* Em falha NÃO guarda `false`: se guardasse, uma oscilação de rede derrubava a
+   seção de rede do folder até o vendedor recarregar a página, porque o estado
+   "deu erro" era indistinguível de "já carregou". Volta para null e a próxima
+   tentativa refaz o fetch. */
+function _fetchJson(arq,cb){return new Promise(res=>{
+  fetch(arq,{cache:'no-cache'}).then(r=>r.json()).then(d=>{cb(d);res(true);})
+    .catch(()=>{cb(null);res(false);});});}
+function ensureRedeFull(){return (REDE_FULL&&REDE_FULL.unidades)?Promise.resolve(true)
+  :_fetchJson('rede_full.json',d=>{REDE_FULL=d;});}
+
+/* plano do cotador -> chave de plano da Rede Full (o de-para foi montado no
+   build_rede_full.py, conferido contra as 3.966 linhas Hapvida do catálogo). */
+function rfKey(c){
+  if(!REDE_FULL||c.operadora!=='Hapvida')return null;
+  const praca=c.praca||'SP / RMSP';
+  const obst=/s\/ Obstetrícia/.test(c.label||'')?'SO':'CO';
+  return REDE_FULL.planos[praca+'|'+c.plano+'|'+c.acomodacao+'|'+obst]||null;
+}
+/* bitmask do Dash -> código. Por ora a tabela traz SÓ os três atendimentos que
+   o cliente pergunta: internação, pronto-socorro e maternidade. Os bits 8
+   (consultórios/clínicas) e 16 (SADT/laboratório) ficam fora — o 16 aparecia em
+   96,8% dos hospitais, então como código não distinguia nada. */
+const RF_BITS=[[1,'H'],[2,'PS'],[4,'MT']];
+function rfCode(m){return m?RF_BITS.filter(b=>m&b[0]).map(b=>b[1]).join(','):'';}
+function rfPraca(c){return (REDE_FULL&&REDE_FULL.pracas[c.praca||'SP / RMSP'])||null;}
+function _esc(t){return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+/* a base do Dash vem toda em caixa alta e sem acento; conectivo fica minúsculo
+   para não sair "Hospital E Maternidade Sao Luiz" no folder do cliente */
+const _TC_MIN=new Set(['e','de','da','do','das','dos','em','no','na']);
+function _tc(t){return (t||'').toLowerCase().replace(/(^|[\s\/\-\(])([a-zà-ú]+)/g,
+  (m,a,w)=>a+((a&&_TC_MIN.has(w))?w:w.charAt(0).toUpperCase()+w.slice(1)));}
+
+async function folderRedeFull(cols){
+  if(!await ensureRedeFull())return '';
+  const hc=cols.map(c=>({c,k:rfKey(c)})).filter(x=>x.k);
+  if(!hc.length)return '';
+  const pr=rfPraca(hc[0].c); if(!pr)return '';
+  const cid=new Set(pr.cidades), uf=pr.uf, MIN=REDE_FULL.meta.min_praca;
+  const temp=u=>u.u===uf&&hc.some(x=>(u.p[x.k]||0)&7);
+  let naPraca=REDE_FULL.unidades.filter(u=>temp(u)&&cid.has(u.c));
+  let noEstado=(naPraca.length<MIN)?REDE_FULL.unidades.filter(u=>temp(u)&&!cid.has(u.c)):[];
+  if(!naPraca.length&&!noEstado.length)return '';
+  /* Em SP o folder abre por ZONA — Centro, Zona Sul, Zona Oeste, Zona Norte,
+     Zona Leste, ABCD, Grande SP, Grande SP - Sul, Interior e depois as demais
+     em ordem alfabética. É como era o folder antigo, e `cmpRegiao` já carrega
+     essa ordem (REDE_REG_ORDEM). O campo `g` vem do build; fora de SP não
+     existe, e aí o agrupamento continua por cidade, com a sede da praça na
+     frente (senão uma cotação de SP/RMSP abriria por Arujá). */
+  const porRegiao=naPraca.concat(noEstado).some(u=>u.g);
+  const grupo=u=>u.g||_tc(u.c);
+  /* A região da praça cotada vem na frente; o resto segue a ordem fixa. Sem
+     isso, uma cotação de São Bernardo abria por "São Paulo - Centro" e o ABCD,
+     onde o cliente mora, caía para 6º. `gsede` não existe para SP / RMSP — na
+     capital a ordem fixa já começa pelas zonas dela. */
+  const gs=pr.gsede||null;
+  const ordem=porRegiao
+    ? (a,b)=>(a.g===gs?0:1)-(b.g===gs?0:1)||cmpRegiao(a.g,b.g)||a.n.localeCompare(b.n)
+    : (a,b)=>(a.c===pr.sede?0:1)-(b.c===pr.sede?0:1)||a.c.localeCompare(b.c)
+             ||(a.b||'').localeCompare(b.b||'')||a.n.localeCompare(b.n);
+  naPraca=naPraca.sort(ordem); noEstado=noEstado.sort(ordem);
+
+  const ncol=2+hc.length;
+  const secao=(titulo,lista)=>{
+    if(!lista.length)return '';
+    let html=`<tr class="grp"><td colspan="${ncol}">${titulo}</td></tr>`,cur=null;
+    lista.forEach(u=>{
+      const g=grupo(u);
+      if(g!==cur){cur=g;html+=`<tr class="used"><td colspan="${ncol}">${_esc(g)}</td></tr>`;}
+      html+=`<tr><td>${_esc(_tc(u.n))}</td><td>${u.b?_esc(_tc(u.b)):'—'}</td>`
+           +hc.map(x=>{const cd=rfCode(u.p[x.k]||0);
+              return cd?`<td class="fd-cov">${cd}</td>`:'<td class="fd-cov no">—</td>';}).join('')+'</tr>';
+    });
+    return html;
+  };
+  const nomePraca=hc[0].c.praca||'SP / RMSP';
+  let body=secao(nomePraca,naPraca);
+  body+=secao(naPraca.length?'Demais cidades do estado':`Rede hospitalar do estado — ${nomePraca} não tem unidade própria`,noEstado);
+  const head=`<tr><th>Unidade</th><th>Bairro</th>`+hc.map(x=>`<th>${x.c.label}</th>`).join('')+`</tr>`;
+  const n=naPraca.length+noEstado.length;
+  let html=`<div class="fd-sec">Rede de atendimento — ${n} unidade${n>1?'s':''}</div>
+    <div class="fd-note">Unidades de internação, pronto-socorro e maternidade credenciadas para o(s) plano(s) cotado(s)
+      em <b>${_esc(nomePraca)}</b>${noEstado.length?(naPraca.length?' e demais cidades do estado':' — que não tem unidade hospitalar própria, por isso a lista traz as demais cidades do estado'):''}.
+      Legenda: <b>H</b> Internação · <b>PS</b> Pronto Socorro · <b>MT</b> Maternidade ·
+      — não credenciado para aquele plano.
+      Fonte: rede credenciada vigente (Rede Full).</div>
+    <table class="fd-tbl fd-rede"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+  return html;
+}
+
 /* ================= TAB 3: REDE DE ATENDIMENTO ================= */
-let REDE=null, redeInit=false, redeLoading=false, redeIndexBuilt=false;
-let redeSel={}; OPS.forEach(o=>redeSel[o.key]=[]);
-let redeState={reg:'Todas',q:'',show:'todos'};
-let redeOpMode='todas'; // 'todas' = todas operadoras; 'hapvida' = só Hapvida
-function redeVisibleOps(){return redeOpMode==='hapvida'?OPS.filter(o=>o.key==='Hapvida'):OPS;}
-const HAP_PLANS=new Set(CATALOG.filter(c=>c.operadora==='Hapvida').map(c=>c.label));
-const CONC_TO_OP={'Amil':'Amil','Sulamérica':'SulAmérica','Bradesco Seguros':'Bradesco','Porto Seguro':'Porto Seguro'};
+/* A aba passou a embutir o Dash Rede Full (12/09). O que segue aqui é só o
+   que o FOLDER ainda usa do rede.json: o comparativo de rede com concorrente
+   (ensureRede/PLAN_COV/REDE_HOSP) e a ordem das regiões (cmpRegiao). A UI
+   antiga da aba — matriz de operadoras, filtros, tabela lado a lado — saiu. */
+let REDE=null, redeIndexBuilt=false;
 const cov=v=>!!v&&v!=='-';
 let REDE_HOSP={}, PLAN_COV={}, PLAN_BY_OP={};
 function hkey(n,b){return ((n||'')+'||'+(b||'')).toLowerCase().replace(/\s+/g,' ').trim();}
@@ -1444,48 +1687,6 @@ function ensureRede(){
     fetch('rede.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{REDE=d;buildRedeIndex();redeIndexBuilt=true;res(true);}).catch(()=>res(false));
   });
 }
-function loadRede(){
-  if(redeInit||redeLoading)return;
-  redeLoading=true;
-  const st=document.getElementById('redeStatus');st.style.display='block';st.textContent='Carregando rede credenciada…';
-  ensureRede().then(ok=>{redeLoading=false;if(!ok){st.textContent='Não foi possível carregar a rede credenciada (rede.json).';return;}redeInit=true;initRede();});
-}
-function initRede(){
-  // default: Hapvida + Amil para já mostrar uma comparação
-  const h0=(PLAN_BY_OP['Hapvida']||[])[0], a0=(PLAN_BY_OP['Amil']||[])[0];
-  redeSel['Hapvida']=h0?[h0]:[]; redeSel['Amil']=a0?[a0]:[];
-  buildRedeOpChips();
-  buildRedeMatrix();
-  document.getElementById('redeSearch').addEventListener('input',e=>{redeState.q=e.target.value.toLowerCase().trim();renderRede();});
-  const shows=[['todos','Todos'],['dif','Só onde diferem'],['exh','Só Hapvida cobre']];
-  const sc=document.getElementById('redeShow');
-  sc.innerHTML=shows.map(([k,l])=>`<div class="chip ${redeState.show===k?'active':''}" data-sh="${k}">${l}</div>`).join('');
-  sc.querySelectorAll('[data-sh]').forEach(e=>e.onclick=()=>{redeState.show=e.dataset.sh;sc.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.sh===redeState.show));renderRede();});
-  document.getElementById('redeLegend').innerHTML='<b>Legenda:</b> <span>H Hospital</span><span>M Maternidade</span><span>PS Pronto-socorro</span><span>PSA PS adulto</span><span>PSP PS infantil</span><span>PA Pronto atend.</span><span>AMB Ambulatório</span><span>¹²³ observações</span><span>— não credenciado/não listado</span>';
-  document.getElementById('redeReg').onchange=e=>{redeState.reg=e.target.value;renderRede();};
-  document.getElementById('redeStatus').style.display='none';
-  document.getElementById('redeControls').style.display='block';
-  buildRegOptions(); renderRede();
-}
-const HAP_DISP={'600':'Adv 600','700':'Adv 700','900':'Premium 900','900 Care':'Premium 900 Care','Nosso Médico RMSP':'Nosso Médico'};
-const HAP_ORD=['Nosso Médico RMSP','Smart UP','Smart Flex','Smart Prime','600','700','900','900 Care','Infinity'];
-function pdisp(op,p){return op==='Hapvida'?(HAP_DISP[p]||p):p;}
-function pordList(op,list){if(op!=='Hapvida')return list;const r=p=>{const i=HAP_ORD.indexOf(p);return i<0?99:i;};return list.slice().sort((a,b)=>r(a)-r(b));}
-function buildRedeMatrix(){
-  const vops=redeVisibleOps();
-  let html=`<tr><th class="rowlabel">Operadora</th>`+vops.map(o=>`<th><div class="ophead" style="background:${o.color}">${o.label}</div></th>`).join('')+`</tr>`;
-  html+=`<tr><th class="rowlabel">Planos</th>`+vops.map(o=>{
-    const sel=redeSel[o.key]||[]; const avail=pordList(o.key,(PLAN_BY_OP[o.key]||[]).filter(p=>!sel.includes(p)));
-    const chips=sel.map(p=>`<span class="rchip" style="border-color:${o.color}">${pdisp(o.key,p)}<b onclick="removeRedePlan('${o.key}','${p.replace(/'/g,"\\'")}')">×</b></span>`).join('');
-    const add=`<select onchange="addRedePlan('${o.key}',this.value);this.value=''"><option value="">${sel.length?'+ adicionar plano':'— Plano —'}</option>`+avail.map(p=>`<option value="${p}">${pdisp(o.key,p)}</option>`).join('')+`</select>`;
-    return `<td>${chips?`<div class="rchips">${chips}</div>`:''}${add}</td>`;
-  }).join('')+`</tr>`;
-  document.getElementById('redeMatrix').innerHTML=html;
-}
-function afterRedeSelChange(){redeState.reg='Todas';const rr=document.getElementById('redeReg');if(rr)rr.value='Todas';buildRedeMatrix();buildRegOptions();renderRede();}
-function addRedePlan(op,p){if(!p)return;if(!redeSel[op].includes(p))redeSel[op].push(p);afterRedeSelChange();}
-function removeRedePlan(op,p){redeSel[op]=redeSel[op].filter(x=>x!==p);afterRedeSelChange();}
-function clearRede(){OPS.forEach(o=>redeSel[o.key]=[]);redeState.reg='Todas';redeState.q='';const s=document.getElementById('redeSearch');if(s)s.value='';redeState.show='todos';document.querySelectorAll('#redeShow .chip').forEach(c=>c.classList.toggle('active',c.dataset.sh==='todos'));afterRedeSelChange();}
 /* Ordem das regiões no folder e na aba Rede (pedido do usuário em 10/09):
    primeiro as zonas da capital, depois ABC, Grande SP, Interior e o restante.
    Antes era alfabético, o que jogava ABCD e Alto Tietê na frente da capital.
@@ -1495,61 +1696,19 @@ const REDE_REG_ORDEM=['São Paulo - Centro','São Paulo - Zona Sul','São Paulo 
   'São Paulo - Zona Norte','São Paulo - Zona Leste','ABCD','Grande SP','Grande SP - Sul','Interior'];
 function _regRank(r){const i=REDE_REG_ORDEM.indexOf(r||'');return i<0?REDE_REG_ORDEM.length:i;}
 function cmpRegiao(a,b){return _regRank(a)-_regRank(b)||(a||'').localeCompare(b||'');}
-function redeCols(){return redeVisibleOps().flatMap(o=>(redeSel[o.key]||[]).map(p=>({op:o.key,label:o.label,color:o.color,plano:p,key:o.key+'|'+p,isHap:o.key==='Hapvida'})));}
-function buildRedeOpChips(){
-  const el=document.getElementById('redeOpChips');if(!el)return;
-  const opts=[['hapvida','Somente Hapvida'],['todas','Todas']];
-  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${redeOpMode===v?'active':''}" data-rom="${v}">${l}</div>`).join('');
-  el.querySelectorAll('[data-rom]').forEach(e=>e.onclick=()=>setRedeOpMode(e.dataset.rom));
-}
-function setRedeOpMode(m){if(redeOpMode===m)return;redeOpMode=m;buildRedeOpChips();afterRedeSelChange();}
-function redeKeys(cols){const s=new Set();cols.forEach(c=>{const m=PLAN_COV[c.key]||{};for(const k in m)s.add(k);});return [...s];}
-function buildRegOptions(){
-  const cols=redeCols();const regs=[...new Set(redeKeys(cols).map(k=>REDE_HOSP[k]&&REDE_HOSP[k].regiao).filter(Boolean))].sort(cmpRegiao);
-  document.getElementById('redeReg').innerHTML=`<option value="Todas">Todas as regiões</option>`+regs.map(r=>`<option value="${r}">${r}</option>`).join('');
-}
-function renderRede(){
-  const cols=redeCols();
-  const kpiBox=document.getElementById('redeKpis'),tbl=document.getElementById('redeTable'),cnt=document.getElementById('redeCount');
-  if(!cols.length){kpiBox.innerHTML='';cnt.textContent='';tbl.innerHTML='';
-    document.getElementById('redeLegend').style.display='none';
-    cnt.innerHTML='<div class="empty">Selecione o plano de ao menos uma operadora para comparar a rede.</div>';return;}
-  document.getElementById('redeLegend').style.display='flex';
-  const covOf=(c,k)=>{const m=PLAN_COV[c.key]||{};return m[k];};
-  const isCov=(c,k)=>cov(covOf(c,k));
-  // só hospitais cobertos por ao menos um plano selecionado (remove notas/ruído sem cobertura)
-  const keys=redeKeys(cols).filter(k=>cols.some(c=>isCov(c,k)));
-  // KPIs: hospitais comparados + cobertura por plano (até 4)
-  let kp=`<div class="kpi"><div class="lbl">Hospitais comparados</div><div class="val">${keys.length}</div><div class="foot">${cols.length} plano(s) selecionado(s)</div></div>`;
-  cols.slice(0,3).forEach(c=>{const n=keys.filter(k=>isCov(c,k)).length;
-    kp+=`<div class="kpi"><div class="lbl">${c.label}</div><div class="val" style="color:${c.color}">${n}</div><div class="foot">${c.plano} · cobre ${n}/${keys.length}</div></div>`;});
-  const hapCol=cols.find(c=>c.isHap);
-  if(hapCol){const exh=keys.filter(k=>isCov(hapCol,k)&&cols.filter(c=>!c.isHap).every(c=>!isCov(c,k))).length;
-    kp+=`<div class="kpi"><div class="lbl">Só Hapvida cobre</div><div class="val hap">${exh}</div><div class="foot">vs. os demais selecionados</div></div>`;}
-  kpiBox.innerHTML=kp;
-  // rows
-  let rows=keys.map(k=>({k,h:REDE_HOSP[k]||{}})).filter(r=>{
-    if(redeState.reg!=='Todas'&&r.h.regiao!==redeState.reg)return false;
-    if(redeState.q&&!((r.h.nome||'').toLowerCase().includes(redeState.q)))return false;
-    const flags=cols.map(c=>isCov(c,r.k));
-    if(redeState.show==='dif'&&flags.every(f=>f===flags[0]))return false;
-    if(redeState.show==='exh'){if(!hapCol)return false;const hc=isCov(hapCol,r.k);const others=cols.filter(c=>!c.isHap).some(c=>isCov(c,r.k));if(!(hc&&!others))return false;}
-    return true;
-  }).sort((a,b)=>cmpRegiao(a.h.regiao,b.h.regiao)||(a.h.nome||'').localeCompare(b.h.nome||''));
-  cnt.textContent=`${rows.length} de ${keys.length} hospitais exibidos.`;
-  let head=`<thead><tr><th>Hospital</th><th>Bairro</th><th>Região</th>`+
-    cols.map(c=>`<th class="cov-head" style="background:${c.color}">${c.label}<br><span style="font-weight:400;font-size:10px">${pdisp(c.op,c.plano)}</span></th>`).join('')+`</tr></thead>`;
-  let body='<tbody>';
-  rows.forEach(r=>{
-    body+=`<tr><td class="hname">${r.h.nome||''}</td><td>${r.h.bairro||''}</td><td>${r.h.regiao||''}</td>`+
-      cols.map(c=>{const v=covOf(c,r.k);return cov(v)?`<td class="cov ${c.isHap?'yhap':'ycc'}">${v}</td>`:`<td class="cov no">—</td>`;}).join('')+`</tr>`;
-  });
-  body+='</tbody>';
-  tbl.innerHTML=head+body;
+
+/* liga o iframe só na primeira vez que a aba abre; o aviso some ~4 s depois do
+   load, que é quanto o Dash leva montando as 12 mil unidades (medido no app) */
+function loadRede(){
+  const f=document.getElementById('redeFrame'); if(!f||f.getAttribute('src')) return;
+  f.addEventListener('load',()=>{setTimeout(()=>{const a=document.getElementById('redeAviso');if(a)a.style.display='none';},4000);},{once:true});
+  f.src=f.dataset.src;
 }
 
 /* init */
-document.getElementById('brandLogo').innerHTML=LOGO_SVG;
+/* as duas marcas no cabeçalho (pedido de 12/09): Hapvida e NotreDame Saúde.
+   Reusa a classe .dual do folder; o tamanho de cabeçalho fica em #brandLogo. */
+document.getElementById('brandLogo').innerHTML='<span class="dual">'+LOGO_SVG+NOTRE_LOGO_SVG+'</span>';
 // pré-carrega o logo NotreDame (data-URI) para o print/PDF não pegá-lo sem decodificar
 {const pre=document.createElement('div');pre.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;opacity:0';pre.innerHTML=NOTRE_LOGO_SVG;document.body.appendChild(pre);}
 function boot(){
@@ -1570,7 +1729,7 @@ fetch('odonto.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{ODONTO=d||{};
      pelo card do app HapON Vendas, que aponta para uma aba específica.
      (o cotador não usa o hash para mais nada, então não há conflito) */
   function _abaDoHash(){
-    var m = (location.hash||'').match(/^#\/?(calc|comp|rede|area)$/);
+    var m = (location.hash||'').match(/^#\/?(calc|rede|area)$/);
     if (m) switchTab(m[1]);
   }
   _abaDoHash();

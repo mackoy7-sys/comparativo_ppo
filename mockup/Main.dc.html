@@ -1,0 +1,233 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+           background: #f4f6fa; color: #1a2433; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    a { color: #cc5500; } a:hover { color: #FF6B00; }
+    .lbl { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #69758a; }
+    .chip { border: 1px solid #e6eaf0; background: #fff; color: #1a2433; padding: 6px 13px;
+            border-radius: 18px; font-size: 12.5px; font-weight: 500; white-space: nowrap; }
+    .chip.on { background: #0f2740; color: #fff; border-color: #0f2740; }
+    .card { background: #fff; border: 1px solid #e6eaf0; border-radius: 14px; }
+    .sel { border: 1px solid #e6eaf0; border-radius: 7px; padding: 7px 9px; font-size: 12px;
+           color: #69758a; background: #fff; display: flex; justify-content: space-between; align-items: center; }
+    .sel.set { color: #1a2433; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; padding: 20px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">
+
+  <!-- cabeçalho: igual ao de hoje -->
+  <div style="background: linear-gradient(100deg, #0f2740, #1c3a5e); color: #fff; border-radius: 16px; padding: 16px 26px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-size: 20px; font-weight: 600; letter-spacing: .2px;">Cotador HapOn</div>
+      <div style="color: #aebfd4; font-size: 12.5px; margin-top: 2px;">Hapvida NotreDame vs Amil · Bradesco · Porto Seguro · SulAmérica — planos PME</div>
+    </div>
+    <div style="background: #FF6B00; color: #fff; font-weight: 700; font-size: 12px; padding: 6px 13px; border-radius: 8px; letter-spacing: .5px;">Hapvida</div>
+  </div>
+
+  <!-- abas: iguais -->
+  <div style="display: flex; gap: 4px; border-bottom: 1px solid #e6eaf0;">
+    <div style="padding: 9px 18px; font-size: 13.5px; font-weight: 600; color: #FF6B00; border-bottom: 3px solid #FF6B00;">Calculadora de cotação</div>
+    <div style="padding: 9px 18px; font-size: 13.5px; font-weight: 600; color: #69758a;">Comparativo de planos</div>
+    <div style="padding: 9px 18px; font-size: 13.5px; font-weight: 600; color: #69758a;">Rede de atendimento</div>
+    <div style="padding: 9px 18px; font-size: 13.5px; font-weight: 600; color: #69758a;">Área de comercialização</div>
+  </div>
+
+  <!-- 1. FAIXA DE CONTEXTO — uma linha só. A praça escolhida vira um resumo;
+       a grade de 30 chips só reaparece ao clicar em "trocar". -->
+  <div class="card" style="padding: 12px 18px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 9px;">
+      <span class="lbl">CEP do cliente</span>
+      <div style="border: 1px solid #e6eaf0; border-radius: 9px; padding: 7px 12px; font-size: 13px; color: #a8b2c1; width: 104px;">00000-000</div>
+      <div style="border: 1px solid #e6eaf0; background: #fff; color: #0f2740; padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 600;">Buscar praça</div>
+    </div>
+
+    <div style="width: 1px; height: 30px; background: #e6eaf0;"></div>
+
+    <div style="display: flex; align-items: center; gap: 9px;">
+      <span class="lbl">Praça</span>
+      <div style="display: flex; align-items: center; gap: 8px; background: #0f2740; color: #fff; border-radius: 9px; padding: 7px 13px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span style="font-size: 13px; font-weight: 600;">Belo Horizonte - MG</span>
+      </div>
+      <div style="font-size: 12.5px; color: #69758a; text-decoration: underline; text-underline-offset: 2px;">trocar</div>
+      <span style="font-size: 12px; color: #a8b2c1;">Sudeste · 30 praças</span>
+    </div>
+
+    <div style="flex-grow: 1;"></div>
+
+    <div style="border: 1px solid #ffd9b8; background: #fff3df; color: #854f0b; padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 600;">Nova cotação</div>
+  </div>
+
+  <!-- 2. FILTROS — cada grupo é um bloco fechado (rótulo + opções juntos),
+       então o rótulo nunca fica órfão numa linha e as opções na seguinte. -->
+  <div class="card" style="padding: 11px 18px; display: flex; align-items: center; gap: 26px; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span class="lbl">Produto</span>
+      <div style="display: flex; gap: 5px;"><span class="chip on">Empresarial</span><span class="chip">Individual</span></div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span class="lbl">Contrato</span>
+      <div style="display: flex; gap: 5px;"><span class="chip">Não-MEI</span><span class="chip on">MEI</span></div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span class="lbl">Operadoras</span>
+      <div style="display: flex; gap: 5px;"><span class="chip on">Somente Hapvida</span><span class="chip">Todas</span></div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span class="lbl">PME 30-99</span>
+      <div style="display: flex; gap: 5px;"><span class="chip on">Compulsório</span><span class="chip">Adesão</span></div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 7px; background: #e6f1fb; border: 1px solid #cbe1f7; color: #1f5f9b; padding: 5px 12px; border-radius: 9px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <span style="font-size: 12px;">Tabela única — serve para MEI e Não-MEI</span>
+    </div>
+  </div>
+
+  <!-- 3. ÁREA DE TRABALHO — vidas e opções lado a lado, ambas na primeira dobra -->
+  <div style="display: grid; grid-template-columns: 286px minmax(0, 1fr); gap: 16px; flex-grow: 1;">
+
+    <!-- vidas: grade de 2 colunas no lugar de 10 linhas empilhadas -->
+    <div class="card" style="padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+      <div>
+        <div style="font-size: 14px; font-weight: 600; color: #0f2740;">Distribuição de vidas</div>
+        <div style="font-size: 12px; color: #69758a; margin-top: 2px;">Idade de cada vida do contrato</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 10px;">
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="font-size: 12px; color: #69758a; width: 52px;">00 a 18</span><div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px; font-size: 14px; text-align: center; color: #1a2433;">2</div></div>
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="font-size: 12px; color: #69758a; width: 52px;">39 a 43</span><div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px; font-size: 14px; text-align: center; color: #a8b2c1;">0</div></div>
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="font-size: 12px; color: #69758a; width: 52px;">19 a 23</span><div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px; font-size: 14px; text-align: center; color: #a8b2c1;">0</div></div>
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="font-size: 12px; color: #69758a; width: 52px;">44 a 48</span><div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px; font-size: 14px; text-align: center; color: #a8b2c1;">0</div></div>
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="font-size: 12px; color: #69758a; width: 52px;">24 a 28</span><div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px; font-size: 14px; text-align: center; color: #a8b2c1;">0</div></div>
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="font-size: 12px; color: #69758a; width: 52px;">49 a 53</span><div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px; font-size: 14px; text-align: center; color: #a8b2c1;">0</div></div>
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="font-size: 12px; color: #69758a; width: 52px;">29 a 33</span><div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px; font-size: 14px; text-align: center; color: #1a2433;">1</div></div>
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="font-size: 12px; color: #69758a; width: 52px;">54 a 58</span><div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px; font-size: 14px; text-align: center; color: #a8b2c1;">0</div></div>
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="font-size: 12px; color: #69758a; width: 52px;">34 a 38</span><div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px; font-size: 14px; text-align: center; color: #a8b2c1;">0</div></div>
+        <div style="display: flex; align-items: center; gap: 7px;"><span style="font-size: 12px; color: #69758a; width: 52px;">59 +</span><div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 8px; padding: 6px; font-size: 14px; text-align: center; color: #a8b2c1;">0</div></div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #e6eaf0; padding-top: 10px;">
+        <span style="font-size: 12.5px; color: #69758a;">Total do contrato</span>
+        <span style="font-size: 15px; font-weight: 700; color: #0f2740;">3 vidas</span>
+      </div>
+
+      <div style="display: flex; gap: 7px;">
+        <div style="flex-grow: 1; border: 1px solid #e6eaf0; border-radius: 9px; padding: 7px; font-size: 12.5px; font-weight: 600; color: #0f2740; text-align: center;">Distribuir nas faixas</div>
+        <div style="border: 1px solid #e6eaf0; border-radius: 9px; padding: 7px 12px; font-size: 12.5px; font-weight: 600; color: #69758a; text-align: center;">Zerar</div>
+      </div>
+
+      <div style="border-top: 1px solid #e6eaf0; padding-top: 11px; display: flex; flex-direction: column; gap: 7px;">
+        <span class="lbl">Tipo de cotação</span>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <span class="chip on" style="text-align: center;">Cotação comparativa</span>
+          <span class="chip" style="text-align: center;">Cotação mista (HMO + PPO)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- as três opções -->
+    <div class="card" style="padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <div>
+          <div style="font-size: 14px; font-weight: 600; color: #0f2740;">Opções para apresentar ao cliente</div>
+          <div style="font-size: 12px; color: #69758a; margin-top: 2px;">Até três produtos, lado a lado</div>
+        </div>
+        <span style="font-size: 12px; color: #a8b2c1;">Belo Horizonte - MG · 4 planos disponíveis</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; flex-grow: 1;">
+
+        <!-- Opção 1 -->
+        <div style="border: 1px solid #e6eaf0; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="background: #0f2740; color: #fff; padding: 7px 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; font-weight: 700; letter-spacing: .4px;">OPÇÃO 1</span>
+            <span style="font-size: 11px; font-weight: 600; background: #FF6B00; border-radius: 5px; padding: 2px 8px;">Hapvida</span>
+          </div>
+          <div style="padding: 12px; display: flex; flex-direction: column; gap: 7px; flex-grow: 1;">
+            <div class="sel set" style="font-weight: 600;">Nosso Plano
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#69758a" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+            <div class="sel set">Enfermaria
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#69758a" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+            <div class="sel set">Coparticipação parcial
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#69758a" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+            <div style="flex-grow: 1;"></div>
+            <div style="border-top: 1px solid #e6eaf0; padding-top: 10px;">
+              <div style="font-size: 11px; color: #69758a; text-transform: uppercase; letter-spacing: .4px; font-weight: 700;">Mensalidade</div>
+              <div style="font-size: 26px; font-weight: 700; color: #0f2740; letter-spacing: -.4px;">R$ 417,78</div>
+              <div style="font-size: 11.5px; color: #69758a;">3 vidas · R$ 139,26 por vida</div>
+            </div>
+            <div style="font-size: 12px; color: #cc5500; font-weight: 600;">+ adicionar plano</div>
+          </div>
+        </div>
+
+        <!-- Opção 2 -->
+        <div style="border: 1px solid #e6eaf0; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="background: #0f2740; color: #fff; padding: 7px 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; font-weight: 700; letter-spacing: .4px;">OPÇÃO 2</span>
+            <span style="font-size: 11px; font-weight: 600; background: #FF6B00; border-radius: 5px; padding: 2px 8px;">Hapvida</span>
+          </div>
+          <div style="padding: 12px; display: flex; flex-direction: column; gap: 7px; flex-grow: 1;">
+            <div class="sel set" style="font-weight: 600;">Adapt 300 Estadual
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#69758a" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+            <div class="sel set">Enfermaria
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#69758a" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+            <div class="sel set">Coparticipação completa
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#69758a" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+            <div style="flex-grow: 1;"></div>
+            <div style="border-top: 1px solid #e6eaf0; padding-top: 10px;">
+              <div style="font-size: 11px; color: #69758a; text-transform: uppercase; letter-spacing: .4px; font-weight: 700;">Mensalidade</div>
+              <div style="font-size: 26px; font-weight: 700; color: #0f2740; letter-spacing: -.4px;">R$ 399,08</div>
+              <div style="font-size: 11.5px; color: #69758a;">3 vidas · R$ 133,03 por vida</div>
+            </div>
+            <div style="font-size: 12px; color: #cc5500; font-weight: 600;">+ adicionar plano</div>
+          </div>
+        </div>
+
+        <!-- Opção 3 -->
+        <div style="border: 1px solid #e6eaf0; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="background: #0f2740; color: #fff; padding: 7px 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; font-weight: 700; letter-spacing: .4px;">OPÇÃO 3</span>
+            <span style="font-size: 11px; font-weight: 600; background: #FF6B00; border-radius: 5px; padding: 2px 8px;">Hapvida</span>
+          </div>
+          <div style="padding: 12px; display: flex; flex-direction: column; gap: 7px; flex-grow: 1;">
+            <div class="sel set" style="font-weight: 600;">Adapt 500 Estadual
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#69758a" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+            <div class="sel set">Enfermaria
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#69758a" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+            <div class="sel set">Coparticipação completa
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#69758a" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+            <div style="flex-grow: 1;"></div>
+            <div style="border-top: 1px solid #e6eaf0; padding-top: 10px;">
+              <div style="font-size: 11px; color: #69758a; text-transform: uppercase; letter-spacing: .4px; font-weight: 700;">Mensalidade</div>
+              <div style="font-size: 26px; font-weight: 700; color: #0f2740; letter-spacing: -.4px;">R$ 442,82</div>
+              <div style="font-size: 11.5px; color: #69758a;">3 vidas · R$ 147,61 por vida</div>
+            </div>
+            <div style="font-size: 12px; color: #cc5500; font-weight: 600;">+ adicionar plano</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; border-top: 1px solid #e6eaf0; padding-top: 12px;">
+        <span style="font-size: 12.5px; color: #69758a;">Valores referenciais, sujeitos à tabela vigente</span>
+        <div style="background: #FF6B00; color: #fff; padding: 10px 22px; border-radius: 9px; font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Gerar folder (PDF)
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
