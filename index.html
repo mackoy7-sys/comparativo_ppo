@@ -659,7 +659,7 @@ function mistaIncompleta(sel){sel=sel||selectedPlans();
 }
 let opMode='hapvida'; // default: só Hapvida (colunas). 'todas' = Hapvida + concorrentes
 let matrixCols=[];
-function emptySlot(){return {plano:null,acom:null,seg:null};}
+function emptySlot(){return {plano:null,acom:null,seg:null,reemb:'Total'};}
 function buildCols(){
   if(opMode==='hapvida') matrixCols=[0,1,2].map(()=>({op:'Hapvida',slots:[emptySlot()]}));
   else matrixCols=OPS.map(o=>({op:o.key,slots:[emptySlot()]}));
@@ -748,17 +748,22 @@ function cidadeIndice(){
   if(CIDADE_IX) return CIDADE_IX;
   const ix=[];
   PRACAS.forEach(p=>{const d=_cidadeDaPraca(p); if(d) ix.push({busca:d.cid,nome:p.replace(/\s*-\s*[A-Z]{2}$/,''),uf:d.uf,praca:p,propria:true});});
-  if(PRACAS.includes('SP / RMSP')){
-    const proprias=new Set(ix.filter(x=>x.uf==='SP').map(x=>x.busca));
-    RMSP_CIDADES.forEach(c=>{const n=_n(c); if(!proprias.has(n)) ix.push({busca:n,nome:c,uf:'SP',praca:'SP / RMSP',propria:false});});
-  }
-  /* as demais cidades atendidas, da área de comercialização */
   const ja=new Set(ix.map(x=>x.busca+'|'+x.uf));
+  /* as cidades atendidas, da área de comercialização — ANTES da RMSP, que é
+     lista genérica de região metropolitana e não diz quem comercializa.
+     As chaves sem cidade ("|PR") são fallback de estado para o CEP e não
+     entram na busca por nome. */
   for(const k in CIDADES_PRACA){
     const [bu,uf]=k.split('|'); const praca=CIDADES_PRACA[k];
-    if(ja.has(bu+'|'+uf)||!PRACAS.includes(praca)) continue;
+    if(!bu||ja.has(bu+'|'+uf)||!PRACAS.includes(praca)) continue;
     const nome=bu.replace(/\b\w/g,m=>m.toUpperCase());
     ix.push({busca:bu,nome,uf,praca,propria:false,obs:CIDADES_OBS[k]||''});
+    ja.add(bu+'|'+uf);
+  }
+  /* o restante da região metropolitana, que o mapa não lista */
+  if(PRACAS.includes('SP / RMSP')){
+    RMSP_CIDADES.forEach(c=>{const nn=_n(c);
+      if(!ja.has(nn+'|SP')){ix.push({busca:nn,nome:c,uf:'SP',praca:'SP / RMSP',propria:false});ja.add(nn+'|SP');}});
   }
   CIDADE_IX=ix.sort((a,b)=>a.nome.localeCompare(b.nome));
   return CIDADE_IX;
@@ -843,16 +848,17 @@ const RANKING_BAIRROS=[{"b":"Leblon","uf":"RJ","r":1,"m2":26446,"fx":[[22440,224
    não num .json, porque o CEP é resolvido antes de qualquer fetch terminar. */
 /*CIDADES_INI*/const CIDADES_PRACA={"belo horizonte|MG":"Belo Horizonte - MG","sao joaquim de bicas|MG":"Belo Horizonte - MG","contagem|MG":"Belo Horizonte - MG","pedro leopoldo|MG":"Belo Horizonte - MG","santa luzia|MG":"Belo Horizonte - MG","mario campos|MG":"Belo Horizonte - MG","juatuba|MG":"Belo Horizonte - MG","igarape|MG":"Belo Horizonte - MG","sabara|MG":"Belo Horizonte - MG","caete|MG":"Belo Horizonte - MG","nova lima|MG":"Belo Horizonte - MG","jatuba|MG":"Belo Horizonte - MG","sao jose da lapa|MG":"Belo Horizonte - MG","matozinhos|MG":"Belo Horizonte - MG","vespasiano|MG":"Belo Horizonte - MG","brumadinho|MG":"Belo Horizonte - MG","betim|MG":"Belo Horizonte - MG","taquarucu de minas|MG":"Belo Horizonte - MG","sarzedo|MG":"Belo Horizonte - MG","esmeraldas|MG":"Belo Horizonte - MG","raposos|MG":"Belo Horizonte - MG","itabirito|MG":"Belo Horizonte - MG","ribeirao das neves|MG":"Belo Horizonte - MG","moeda|MG":"Belo Horizonte - MG","lagoa santa|MG":"Belo Horizonte - MG","nova uniao|MG":"Belo Horizonte - MG","rio acima|MG":"Belo Horizonte - MG","capim branco|MG":"Belo Horizonte - MG","confins|MG":"Belo Horizonte - MG","divinopolis|MG":"Divinópolis - MG","sao sebastiao do oeste|MG":"Divinópolis - MG","nova serrana|MG":"Divinópolis - MG","sao goncalo do para|MG":"Divinópolis - MG","perdigao|MG":"Divinópolis - MG","pitangui|MG":"Divinópolis - MG","leandro ferreira|MG":"Divinópolis - MG","carmo do cajuru|MG":"Divinópolis - MG","onca de pitangui|MG":"Divinópolis - MG","carmo da mata|MG":"Divinópolis - MG","bom despacho|MG":"Divinópolis - MG","claudio|MG":"Divinópolis - MG","para de minas|MG":"Divinópolis - MG","itauna|MG":"Divinópolis - MG","conceicao do para|MG":"Divinópolis - MG","mateus leme|MG":"Divinópolis - MG","araujos|MG":"Divinópolis - MG","pedra do indaia|MG":"Divinópolis - MG","igaratinga|MG":"Divinópolis - MG","santo antonio dos campos|MG":"Divinópolis - MG","santo antonio do monte|MG":"Divinópolis - MG","ibirite|MG":"Divinópolis - MG","alfenas|MG":"Alfenas - MG","campos gerais|MG":"Alfenas - MG","fama|MG":"Alfenas - MG","alterosa|MG":"Alfenas - MG","areado|MG":"Alfenas - MG","eloi mendes|MG":"Alfenas - MG","monte belo|MG":"Alfenas - MG","poco fundo|MG":"Alfenas - MG","serrania|MG":"Alfenas - MG","poco de caldas|MG":"Poços de Caldas - MG","bandeira do sul|MG":"Poços de Caldas - MG","divinolandia|MG":"Poços de Caldas - MG","caconde|MG":"Poços de Caldas - MG","sao joao da boa vista|MG":"Poços de Caldas - MG","campestre|MG":"Poços de Caldas - MG","sao jose do rio pardo|MG":"Poços de Caldas - MG","aguas da prata|MG":"Poços de Caldas - MG","botelhos|MG":"Poços de Caldas - MG","areias|MG":"Poços de Caldas - MG","ibitiura de minas|MG":"Poços de Caldas - MG","santa rita de caldas|MG":"Poços de Caldas - MG","caldas|MG":"Poços de Caldas - MG","sao sebastiao da grama|MG":"Poços de Caldas - MG","andradas|MG":"Poços de Caldas - MG","vargem grande do sul|MG":"Poços de Caldas - MG","cabo verde|MG":"Poços de Caldas - MG","varginha|MG":"Varginha - MG","tres coracoes|MG":"Varginha - MG","paraguacu|MG":"Varginha - MG","cambuquira|MG":"Varginha - MG","carmo da cachoeira|MG":"Varginha - MG","monsenhor paulo|MG":"Varginha - MG","santana da vargem|MG":"Varginha - MG","cordislandia|MG":"Varginha - MG","tres pontas|MG":"Varginha - MG","campanha|MG":"Varginha - MG","sao bento abade|MG":"Varginha - MG","uberaba|MG":"Uberaba - MG","uberlandia|MG":"Uberlândia - MG","brasilia|DF":"Brasília - DF","aguas lindas de goias|DF":"Brasília - DF","cidade ocidental|DF":"Brasília - DF","formosa|DF":"Brasília - DF","novo gama|DF":"Brasília - DF","planaltina|DF":"Brasília - DF","santo antonio do descoberto|DF":"Brasília - DF","val paraiso de goias|DF":"Brasília - DF","aquiraz|CE":"Fortaleza - CE","caucaia|CE":"Fortaleza - CE","eusebio|CE":"Fortaleza - CE","fortaleza|CE":"Fortaleza - CE","itaitinga|CE":"Fortaleza - CE","maracanau|CE":"Fortaleza - CE","maranguape|CE":"Fortaleza - CE","pacajus|CE":"Fortaleza - CE","pacatuba|CE":"Fortaleza - CE","sao goncalo do amarante|CE":"Fortaleza - CE","barbalha|CE":"Juazeiro Do Norte - CE","caririacu|CE":"Juazeiro Do Norte - CE","crato|CE":"Juazeiro Do Norte - CE","juazeiro do norte|CE":"Juazeiro Do Norte - CE","missao velha|CE":"Juazeiro Do Norte - CE","abadiania|GO":"Anápolis - GO","anapolis|GO":"Anápolis - GO","campo limpo de goias|GO":"Anápolis - GO","goianapolis|GO":"Anápolis - GO","ouro verde de goias|GO":"Anápolis - GO","terezopolis de goias|GO":"Anápolis - GO","abadia de goias|GO":"Goiânia - GO","aparecida de goiania|GO":"Goiânia - GO","aracu|GO":"Goiânia - GO","aragoiania|GO":"Goiânia - GO","goiania|GO":"Goiânia - GO","goianira|GO":"Goiânia - GO","guapo|GO":"Goiânia - GO","neropolis|GO":"Goiânia - GO","santo antonio de goias|GO":"Goiânia - GO","senador canedo|GO":"Goiânia - GO","trindade|GO":"Goiânia - GO","paranaiguara|GO":"Quirinópolis - GO","quirinopolis|GO":"Quirinópolis - GO","jatai|GO":"Rio Verde - GO","montividiu|GO":"Rio Verde - GO","rio verde|GO":"Rio Verde - GO","santa helena de goias|GO":"Rio Verde - GO","antonio cardoso|BA":"Feira De Santana - BA","conceicao do jacuipe|BA":"Feira De Santana - BA","feira de santana|BA":"Feira De Santana - BA","sao goncalo dos campos|BA":"Feira De Santana - BA","candeias|BA":"Salvador - BA","lauro de freitas|BA":"Salvador - BA","salvador|BA":"Salvador - BA","simoes filho|BA":"Salvador - BA","vera cruz|BA":"Salvador - BA","camacari|BA":"Camaçari - BA","ananindeua|PA":"Belém - PA","quirinopolis|PA":"Belém - PA","curionopolis|PA":"Parauapebas - PA","parauapebas|PA":"Parauapebas - PA","demerval lobao|PI":"Teresina - PI","teresina|PI":"Teresina - PI","nazaria|PI":"Teresina - PI","timon|PI":"Teresina - PI","paco do lumiar|MA":"São Luís - MA","raposa|MA":"São Luís - MA","sao luis|MA":"São Luís - MA","sao jose de ribamar|MA":"São Luís - MA","abreu e lima|PE":"Recife - PE","cabo de santo agostinho|PE":"Recife - PE","camaragibe|PE":"Recife - PE","goiana|PE":"Recife - PE","agarassu|PE":"Recife - PE","itapissuma|PE":"Recife - PE","jaboatao dos guararapes|PE":"Recife - PE","moreno|PE":"Recife - PE","olinda|PE":"Recife - PE","paulista|PE":"Recife - PE","recife|PE":"Recife - PE","sao lourenco da mata|PE":"Recife - PE","extremoz|RN":"Natal - RN","macaiba|RN":"Natal - RN","natal|RN":"Natal - RN","parnamirim|RN":"Natal - RN","sao goncalo do amarante|RN":"Natal - RN","barauna|RN":"Mossoró - RN","mossoro|RN":"Mossoró - RN","serra do mel|RN":"Mossoró - RN","tibau|RN":"Mossoró - RN","careiro da varzea|AM":"Manaus - AM","iranduba|AM":"Manaus - AM","manaus|AM":"Manaus - AM","aracaju|SE":"Aracaju - SE","barra dos coqueiros|SE":"Aracaju - SE","laranjeiras|SE":"Aracaju - SE","nossa senhora do socorro|SE":"Aracaju - SE","sao cristovao|SE":"Aracaju - SE","campina grande|PB":"Campina Grande - PB","fagundes|PB":"Campina Grande - PB","lagoa seca|PB":"Campina Grande - PB","massaranduba|PB":"Campina Grande - PB","puxinana|PB":"Campina Grande - PB","queimadas|PB":"Campina Grande - PB","bayeux|PB":"João Pessoa - PB","cabedelo|PB":"João Pessoa - PB","conde|PB":"João Pessoa - PB","joao pessoa|PB":"João Pessoa - PB","santa rita|PB":"João Pessoa - PB","coqueiro seco|AL":"Maceió - AL","maceio|AL":"Maceió - AL","marechal deodoro|AL":"Maceió - AL","piripueira|AL":"Maceió - AL","rio largo|AL":"Maceió - AL","santa luzia do norte|AL":"Maceió - AL","satuba|AL":"Maceió - AL","cuiaba|MT":"Cuiabá - MT","varzea grande|MT":"Cuiabá - MT","juscimeira|MT":"Rondonópolis - MT","pedra preta|MT":"Rondonópolis - MT","rondonopolis|MT":"Rondonópolis - MT","sao jose do povo|MT":"Rondonópolis - MT","campo grande|MS":"Campo Grande - MS","jaraguari|MS":"Campo Grande - MS","nova alvorada do sul|MS":"Campo Grande - MS","ribas do rio pardo|MS":"Campo Grande - MS","sidrolandia|MS":"Campo Grande - MS","terenos|MS":"Campo Grande - MS","deodapolis|MS":"Dourados - MS","douradina|MS":"Dourados - MS","dourados|MS":"Dourados - MS","fatima do sul|MS":"Dourados - MS","itapora|MS":"Dourados - MS","rio brilhante|MS":"Dourados - MS","tres lagoas|MS":"Três Lagoas - MS","brodowski|SP":"Ribeirão Preto - SP","cravinhos|SP":"Ribeirão Preto - SP","dumont|SP":"Ribeirão Preto - SP","guatapara|SP":"Ribeirão Preto - SP","jardinopolis|SP":"Ribeirão Preto - SP","luis antonio|SP":"Ribeirão Preto - SP","ribeirao preto|SP":"Ribeirão Preto - SP","serrana|SP":"Ribeirão Preto - SP","americo brasiliense|SP":"Araraquara - SP","araraquara|SP":"Araraquara - SP","boa esperanca do sul|SP":"Araraquara - SP","gaviao peixoto|SP":"Araraquara - SP","matao|SP":"Araraquara - SP","motuca|SP":"Araraquara - SP","rincao|SP":"Araraquara - SP","santa lucia|SP":"Araraquara - SP","barretos|SP":"Barretos - SP","colina|SP":"Barretos - SP","colombia|SP":"Barretos - SP","guaira|SP":"Barretos - SP","guaraci|SP":"Barretos - SP","jaborandi|SP":"Barretos - SP","olimpia|SP":"Barretos - SP","severinia|SP":"Barretos - SP","guariba|SP":"Jaboticabal - SP","jaboticabal|SP":"Jaboticabal - SP","monte alto|SP":"Jaboticabal - SP","taiuva|SP":"Jaboticabal - SP","taquaral|SP":"Jaboticabal - SP","taquaritinga|SP":"Jaboticabal - SP","artur nogueira|SP":"Limeira - SP","cordeiropolis|SP":"Limeira - SP","cosmopolis|SP":"Limeira - SP","engenheiro coelho|SP":"Limeira - SP","iracemapolis|SP":"Limeira - SP","limeira|SP":"Limeira - SP","santa barbara doeste|SP":"Limeira - SP","cafelandia|SP":"Lins - SP","getulina|SP":"Lins - SP","guaicara|SP":"Lins - SP","lins|SP":"Lins - SP","sabino|SP":"Lins - SP","alvaro de carvalho|SP":"Marília - SP","campos novos paulista|SP":"Marília - SP","echapora|SP":"Marília - SP","guaimbe|SP":"Marília - SP","julio mesquita|SP":"Marília - SP","marilia|SP":"Marília - SP","ocaucu|SP":"Marília - SP","oriente|SP":"Marília - SP","pompeia|SP":"Marília - SP","vera cruz|SP":"Marília - SP","cacapava|SP":"São José Dos Campos - SP","igarata|SP":"São José Dos Campos - SP","jacarei|SP":"São José Dos Campos - SP","monteiro lobato|SP":"São José Dos Campos - SP","sao jose dos campos|SP":"São José Dos Campos - SP","santa branca|SP":"São José Dos Campos - SP","paraibuna|SP":"São José Dos Campos - SP","taubate|SP":"São José Dos Campos - SP","cristais paulista|SP":"Franca - SP","franca|SP":"Franca - SP","patrocinio paulista|SP":"Franca - SP","restinga|SP":"Franca - SP","ribeirao corrente|SP":"Franca - SP","sao jose da bela vista|SP":"Franca - SP","capivari|SP":"Piracicaba - SP","charqueada|SP":"Piracicaba - SP","ipeuna|SP":"Piracicaba - SP","laranjal paulista|SP":"Piracicaba - SP","piracicaba|SP":"Piracicaba - SP","rio claro|SP":"Piracicaba - SP","rio das pedras|SP":"Piracicaba - SP","saltinho|SP":"Piracicaba - SP","santa maria da serra|SP":"Piracicaba - SP","sao pedro|SP":"Piracicaba - SP","tiete|SP":"Piracicaba - SP","aguai|SP":"Pirassununga - SP","analandia|SP":"Pirassununga - SP","pirassununga|SP":"Pirassununga - SP","porto ferreira|SP":"Pirassununga - SP","santa cruz da conceicao|SP":"Pirassununga - SP","santa cruz das palmeiras|SP":"Pirassununga - SP","santa rita do passa quarto|SP":"Pirassununga - SP","barrinha|SP":"Sertãozinho - SP","pitangueiras|SP":"Sertãozinho - SP","pontal|SP":"Sertãozinho - SP","sertaozinho|SP":"Sertãozinho - SP","descalvado|SP":"São Carlos - SP","ibate|SP":"São Carlos - SP","itirapina|SP":"São Carlos - SP","ribeirao bonito|SP":"São Carlos - SP","sao carlos|SP":"São Carlos - SP","agudos|SP":"Bauru - SP","arealva|SP":"Bauru - SP","avai|SP":"Bauru - SP","bauru|SP":"Bauru - SP","duartina|SP":"Bauru - SP","pederneiras|SP":"Bauru - SP","piratininga|SP":"Bauru - SP","americana|SP":"Americana - SP","nova odessa|SP":"Americana - SP","campinas|SP":"Campinas - SP","valinhos|SP":"Campinas - SP","paulinia|SP":"Campinas - SP","hortolandia|SP":"Campinas - SP","jaguariuna|SP":"Campinas - SP","pedreira|SP":"Campinas - SP","indaiatuba|SP":"Campinas - SP","monte mor|SP":"Campinas - SP","holambra|SP":"Campinas - SP","sumare|SP":"Campinas - SP","elias fausto|SP":"Campinas - SP","santo antonio de posse|SP":"Campinas - SP","amparo|SP":"Campinas - SP","jundiai|SP":"Jundiaí - SP","varzea paulista|SP":"Jundiaí - SP","louveira|SP":"Jundiaí - SP","itupeva|SP":"Jundiaí - SP","cajamar|SP":"Jundiaí - SP","vinhedo|SP":"Jundiaí - SP","itatiba|SP":"Jundiaí - SP","mogi das cruzes|SP":"Mogi das Cruzes - SP","suzano|SP":"Mogi das Cruzes - SP","poa|SP":"Mogi das Cruzes - SP","itaquaquecetuba|SP":"Mogi das Cruzes - SP","ferraz de vasconcelos|SP":"Mogi das Cruzes - SP","aruja|SP":"Mogi das Cruzes - SP","guararema|SP":"Mogi das Cruzes - SP","santa isabel|SP":"Mogi das Cruzes - SP","santos|SP":"Santos - SP","sao vicente|SP":"Santos - SP","praia grande|SP":"Santos - SP","guaruja|SP":"Santos - SP","cubatao|SP":"Santos - SP","bertioga|SP":"Santos - SP","mongagua|SP":"Santos - SP","sao bernardo do campo|SP":"São Bernardo do Campo - SP","santo andre|SP":"São Bernardo do Campo - SP","diadema|SP":"São Bernardo do Campo - SP","sao caetano do sul|SP":"São Bernardo do Campo - SP","maua|SP":"São Bernardo do Campo - SP","ribeirao pires|SP":"São Bernardo do Campo - SP","rio grande da serra|SP":"São Bernardo do Campo - SP","embu guacu|SP":"São Bernardo do Campo - SP","sao paulo|SP":"SP / RMSP","taboao da serra|SP":"SP / RMSP","carapicuiba|SP":"SP / RMSP","guarulhos|SP":"SP / RMSP","caieiras|SP":"SP / RMSP","embu das artes|SP":"SP / RMSP","barueri|SP":"SP / RMSP","osasco|SP":"SP / RMSP","mairipora|SP":"SP / RMSP","jandira|SP":"SP / RMSP","franco da rocha|SP":"SP / RMSP","itapecerica da serra|SP":"SP / RMSP","cotia|SP":"SP / RMSP","itapevi|SP":"SP / RMSP","sorocaba|SP":"Sorocaba - SP","votorantim|SP":"Sorocaba - SP","aracoiaba da serra|SP":"Sorocaba - SP","salto de pirapora|SP":"Sorocaba - SP","aluminio|SP":"Sorocaba - SP","piedade|SP":"Sorocaba - SP","capela do alto|SP":"Sorocaba - SP","ibiuna|SP":"Sorocaba - SP","ipero|SP":"Sorocaba - SP","sao roque|SP":"Sorocaba - SP","porto feliz|SP":"Sorocaba - SP","salto|SP":"Sorocaba - SP","itu|SP":"Sorocaba - SP","cabreuva|SP":"Sorocaba - SP","sarapui|SP":"Sorocaba - SP","aracariguama|SP":"Sorocaba - SP","araquari|SC":"Joinville - SC","garuva|SC":"Joinville - SC","joinville|SC":"Joinville - SC","sao francisco do sul|SC":"Joinville - SC","|PR":"Curitiba - PR","almirante tamandare|PR":"Curitiba - PR","colombo|PR":"Curitiba - PR","pinhais|PR":"Curitiba - PR","araucaria|PR":"Curitiba - PR","campo magro|PR":"Curitiba - PR","itaperucu|PR":"Curitiba - PR","campina grande do sul|PR":"Curitiba - PR","campo largo|PR":"Curitiba - PR","rio branco do sul|PR":"Curitiba - PR","quatro barras|PR":"Curitiba - PR","sao jose dos pinhais|PR":"Curitiba - PR","piraquara|PR":"Curitiba - PR","fazenda rio grande|PR":"Curitiba - PR","curitiba|PR":"Curitiba - PR","|SC":"Balneário Camboriú - SC","camboriu|SC":"Balneário Camboriú - SC","itajai|SC":"Balneário Camboriú - SC","navegantes|SC":"Balneário Camboriú - SC","itapema|SC":"Balneário Camboriú - SC","bombinhas|SC":"Balneário Camboriú - SC","porto belo|SC":"Balneário Camboriú - SC","ilhota|SC":"Balneário Camboriú - SC","penha|SC":"Balneário Camboriú - SC","balneario picarras|SC":"Balneário Camboriú - SC","tijucas|SC":"Balneário Camboriú - SC","balneario camboriu|SC":"Balneário Camboriú - SC","arapongas|PR":"Londrina - PR","rolandia|PR":"Londrina - PR","cambe|PR":"Londrina - PR","jataizinho|PR":"Londrina - PR","ibipora|PR":"Londrina - PR","primeiro de maio|PR":"Londrina - PR","londrina|PR":"Londrina - PR","angulo|PR":"Maringá - PR","iguaracu|PR":"Maringá - PR","floresta|PR":"Maringá - PR","marialva|PR":"Maringá - PR","sarandi|PR":"Maringá - PR","paicandu|PR":"Maringá - PR","mandaguacu|PR":"Maringá - PR","maringa|PR":"Maringá - PR","|RS":"Porto Alegre - RS","eldorado do sul|RS":"Porto Alegre - RS","alvorada|RS":"Porto Alegre - RS","cachoeirinha|RS":"Porto Alegre - RS","porto alegre|RS":"Porto Alegre - RS","viamao|RS":"Porto Alegre - RS","guaiba|RS":"Porto Alegre - RS","gravatai|RS":"Porto Alegre - RS","ararica|RS":"Novo Hamburgo - RS","dois irmaos|RS":"Novo Hamburgo - RS","estancia velha|RS":"Novo Hamburgo - RS","ivoti|RS":"Novo Hamburgo - RS","nova hartz|RS":"Novo Hamburgo - RS","novo hamburgo|RS":"Novo Hamburgo - RS","parobe|RS":"Novo Hamburgo - RS","sao sebastiao do cai|RS":"Novo Hamburgo - RS","sapiranga|RS":"Novo Hamburgo - RS","capela de santana|RS":"São Leopoldo - RS","campo bom|RS":"São Leopoldo - RS","montenegro|RS":"São Leopoldo - RS","sao leopoldo|RS":"São Leopoldo - RS","portao|RS":"São Leopoldo - RS","canoas|RS":"Canoas - RS","esteio|RS":"Canoas - RS","nova santa rita|RS":"Canoas - RS","sapucaia do sul|RS":"Canoas - RS","rio de janeiro|RJ":"Rio de Janeiro - RJ","niteroi|RJ":"Rio de Janeiro - RJ","duque de caxias|RJ":"Rio de Janeiro - RJ","sao goncalo|RJ":"Rio de Janeiro - RJ","sao joao do meriti|RJ":"Rio de Janeiro - RJ","nilopolis|RJ":"Rio de Janeiro - RJ","belfort roxo|RJ":"Rio de Janeiro - RJ","mesquita|RJ":"Rio de Janeiro - RJ","nova iguacu|RJ":"Rio de Janeiro - RJ","mage|RJ":"Rio de Janeiro - RJ","itaborai|RJ":"Rio de Janeiro - RJ","marica|RJ":"Rio de Janeiro - RJ","queimados|RJ":"Rio de Janeiro - RJ"},CIDADES_OBS={"pacajus|CE":"somente ambulatorial","sao goncalo do amarante|CE":"somente ambulatorial","|PR":"Paraná","|SC":"Santa Catarina","|RS":"Rio Grande do Sul"};/*CIDADES_FIM*/
 const RMSP_CIDADES=["Arujá","Barueri","Biritiba-Mirim","Caieiras","Cajamar","Carapicuíba","Cotia","Diadema","Embu das Artes","Embu-Guaçu","Ferraz de Vasconcelos","Francisco Morato","Franco da Rocha","Guararema","Guarulhos","Itapecerica da Serra","Itapevi","Itaquaquecetuba","Jandira","Juquitiba","Mairiporã","Mauá","Mogi das Cruzes","Osasco","Pirapora do Bom Jesus","Poá","Ribeirão Pires","Rio Grande da Serra","Salesópolis","Santa Isabel","Santana de Parnaíba","Santo André","São Bernardo do Campo","São Caetano do Sul","São Lourenço da Serra","São Paulo","Suzano","Taboão da Serra","Vargem Grande Paulista"];
-function _n(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
+function _n(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
 /* praça -> "cidade" comparável. 'SP / RMSP' não é cidade e fica de fora. */
 function _cidadeDaPraca(p){const m=(p||'').match(/^(.*?)\s*-\s*([A-Z]{2})$/);return m?{cid:_n(m[1]),uf:m[2]}:null;}
 function pracaDoCEP(cidade,uf){
   const c=_n(cidade);
   for(const p of PRACAS){const d=_cidadeDaPraca(p); if(d&&d.uf===uf&&d.cid===c) return p;}
-  if(uf==='SP'&&RMSP_CIDADES.some(x=>_n(x)===c)&&PRACAS.includes('SP / RMSP')) return 'SP / RMSP';
-  /* cidade atendida por uma praça vizinha, conforme a área de comercialização */
+  /* a área de comercialização manda: ela é a lista oficial de quem vende onde.
+     A RMSP abaixo é só o resto da região metropolitana, que o mapa não cita. */
   const p2=CIDADES_PRACA[c+'|'+uf];
   if(p2&&PRACAS.includes(p2)) return p2;
+  if(uf==='SP'&&RMSP_CIDADES.some(x=>_n(x)===c)&&PRACAS.includes('SP / RMSP')) return 'SP / RMSP';
   return null;
 }
 /* observação da área de comercialização para a cidade (ex.: "somente ambulatorial") */
@@ -968,6 +974,13 @@ function tipoOk(c){return !!prodSel[c.tipo||'Empresarial'];}
 function pracaOk(c){return (c.praca||'SP / RMSP')===pracaSel;}
 function plansOf(opKey){return CATALOG.filter(c=>c.operadora===opKey && c.categoria===categoria && pracaOk(c) && tipoOk(c) && meiOk(c) && contratOk(c));}
 function planById(id){return CATALOG.find(c=>c.id===id);}
+function temParcial(opKey,label,acom,seg){return plansOf(opKey).some(c=>c.label===label&&c.acomodacao===acom&&c.coparticipacao===seg&&c.pr2);}
+function reembTipoDe(c){return c?(c.reembTipo||(c.pr2?'Total':null)):null;}
+function comReembolso(c,x){
+  if(!c||!c.pr2||!x||x.reemb!=='Parcial')return c;
+  if(!c.__parc)c.__parc=Object.assign({},c,{precos:c.pr2,reembTipo:'Parcial'});
+  return c.__parc;}
+function planByRe(id,tipo){const c=planById(id);return (tipo==='Parcial')?comReembolso(c,{reemb:'Parcial'}):c;}
 function planLabels(opKey){const seen=[];plansOf(opKey).forEach(c=>{if(!seen.includes(c.label))seen.push(c.label);});return seen;}
 function acomsFor(opKey,label){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&!s.includes(c.acomodacao))s.push(c.acomodacao);});return s;}
 function segsFor(opKey,label,acom){const s=[];plansOf(opKey).forEach(c=>{if(c.label===label&&c.acomodacao===acom&&!s.includes(c.coparticipacao))s.push(c.coparticipacao);});return s;}
@@ -996,7 +1009,7 @@ function resolved(ci,si){const col=matrixCols[ci];if(!col)return null;const x=co
   if(!cands.length)return null;
   // preferir a tabela de porte MAIS ESPECÍFICA (1 vida > 2-29 > 30-99 > sem porte)
   const amp=c=>(c.vmin==null&&c.vmax==null)?1e9:((c.vmax==null?1e9:c.vmax)-(c.vmin||0));
-  return cands.slice().sort((a,b)=>amp(a)-amp(b))[0];}
+  return comReembolso(cands.slice().sort((a,b)=>amp(a)-amp(b))[0],x);}
 /* ===== Plano odontológico =====
    A tabela Hapvida traz DUAS colunas médicas: "Assistência Médica ¹" (com desconto,
    quando o cliente contrata o odonto junto) e "Médica ²" (sem desconto). O catálogo
@@ -1112,6 +1125,11 @@ function slotBlock(ci,si,x,v){
   const segs=(x.plano&&x.acom)?segsFor(op,x.plano,x.acom):[];
   h+=`<select class="sub" ${x.acom?'':'disabled'} onchange="onSeg(${ci},${si},this.value)"><option value="">Segmentação</option>`+
     segs.map(g=>`<option value="${g}" ${x.seg===g?'selected':''}>${segLabel(g)}</option>`).join('')+`</select>`;
+  if(x.plano&&x.acom&&x.seg&&temParcial(op,x.plano,x.acom,x.seg)){
+    h+=`<select class="sub cslot-re" onchange="onReemb(${ci},${si},this.value)" title="Reembolso previsto em contrato. O parcial reduz a mensalidade.">`+
+      `<option value="Total" ${x.reemb!=='Parcial'?'selected':''}>Reembolso total</option>`+
+      `<option value="Parcial" ${x.reemb==='Parcial'?'selected':''}>Reembolso parcial</option></select>`;
+  }
   const done=!!x.plano&&!!x.acom&&!!x.seg;
   const noV=totVidas()===0&&done;
   const badTier=done&&totVidas()>0&&!resolved(ci,si);
@@ -1152,12 +1170,15 @@ function slotBlock(ci,si,x,v){
 }
 function addSlot(ci){matrixCols[ci].slots.push(emptySlot());recompute();}
 function removeSlot(ci,si){matrixCols[ci].slots.splice(si,1);if(!matrixCols[ci].slots.length)matrixCols[ci].slots.push(emptySlot());recompute();}
-function onPlano(ci,si,v){const col=matrixCols[ci];const x=col.slots[si];x.plano=v||null;x.acom=null;x.seg=null;
+function onPlano(ci,si,v){const col=matrixCols[ci];const x=col.slots[si];x.plano=v||null;x.acom=null;x.seg=null;x.reemb='Total';
   if(x.plano){const a=acomsFor(col.op,x.plano);if(a.length===1){x.acom=a[0];const g=segsFor(col.op,x.plano,x.acom);if(g.length===1)x.seg=g[0];}}recompute();}
-function onAcom(ci,si,v){const col=matrixCols[ci];const x=col.slots[si];x.acom=v||null;x.seg=null;
+function onAcom(ci,si,v){const col=matrixCols[ci];const x=col.slots[si];x.acom=v||null;x.seg=null;x.reemb='Total';
   if(x.acom){const g=segsFor(col.op,x.plano,x.acom);if(g.length===1)x.seg=g[0];}recompute();}
-function onSeg(ci,si,v){matrixCols[ci].slots[si].seg=v||null;recompute();}
-function selectedPlans(){const ids=[];matrixCols.forEach((col,ci)=>col.slots.forEach((x,si)=>{const c=resolved(ci,si);if(c&&!ids.includes(c.id))ids.push(c.id);}));return ids.map(planById).filter(Boolean);}
+function onSeg(ci,si,v){const x=matrixCols[ci].slots[si];x.seg=v||null;x.reemb='Total';recompute();}
+function onReemb(ci,si,v){matrixCols[ci].slots[si].reemb=(v==='Parcial')?'Parcial':'Total';recompute();}
+function selectedPlans(){const out=[],vis=[];matrixCols.forEach((col,ci)=>col.slots.forEach((x,si)=>{
+  const c=resolved(ci,si);if(!c)return;const k=c.id+'|'+(reembTipoDe(c)||'-');
+  if(vis.includes(k))return;vis.push(k);out.push(c);}));return out;}
 function recompute(){buildMeiChips();buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';
   const ow=document.getElementById('odoWarn');
   if(ow){const faltando=selectedPlans().filter(odontoFalta);
@@ -1173,6 +1194,7 @@ function reconcileSel(){
     else if(x.plano){
       if(x.acom&&!acomsFor(col.op,x.plano).includes(x.acom)){x.acom=null;x.seg=null;}
       if(x.acom&&x.seg&&!segsFor(col.op,x.plano,x.acom).includes(x.seg))x.seg=null;
+      if(x.reemb==='Parcial'&&!(x.acom&&x.seg&&temParcial(col.op,x.plano,x.acom,x.seg)))x.reemb='Total';
     }
   }));
 }
@@ -1226,9 +1248,9 @@ function renderCards(){
     return `<div class="pcard" style="border-top-color:${col}">
       <div class="pcop" style="color:${col}">${opDisp(c)}</div>
       <div class="pcname">${c.label}</div>
-      <div class="pcmeta">${c.tipo==='Individual'?'Saúde PF (individual)':'Saúde PME (empresarial)'}<br>${c.acomodacao}<br>${cop}${c.operadora==='Hapvida'&&REEMBOLSO[c.plano]?`<br>Reembolso: <b style="color:var(--navy)">${REEMBOLSO[c.plano]}</b>`:''}</div>
+      <div class="pcmeta">${c.tipo==='Individual'?'Saúde PF (individual)':'Saúde PME (empresarial)'}<br>${c.acomodacao}<br>${cop}${reembTipoDe(c)?`<br>Reembolso <b style="color:var(--navy)">${reembTipoDe(c).toLowerCase()}</b>`:''}${c.operadora==='Hapvida'&&REEMBOLSO[c.plano]?`<br>Reembolso consulta: <b style="color:var(--navy)">${REEMBOLSO[c.plano]}</b>`:''}</div>
       <div class="pcval">R$ ${fmt(v)} <small>/mês · ${tv} vida(s)</small></div>
-      <button class="btn vd" onclick="openDetail(${c.id})">Ver detalhes</button></div>`;}).join('');
+      <button class="btn vd" onclick="openDetail(${c.id},'${reembTipoDe(c)||''}')">Ver detalhes</button></div>`;}).join('');
 }
 
 function setResHead(mista){
@@ -1340,13 +1362,14 @@ function calcResult(){
   if(bestHap)kpis+=`<div class="kpi"><div class="lbl">Melhor Hapvida</div><div class="val hap">R$ ${fmt(bestHap.total)}</div><div class="foot">${bestHap.c.label} · ${bestHap.c.acomodacao}${bestHap.total>min?` (+R$ ${fmt(bestHap.total-min)} vs menor)`:' (menor preço)'}</div></div>`;
   kpis+=`<div class="kpi"><div class="lbl">Diferença máx. (mês)</div><div class="val">R$ ${fmt(econ)}</div><div class="foot">entre o mais barato e o mais caro</div></div>`;
   kpis+=`<div class="kpi"><div class="lbl">Ganho em 12 meses</div><div class="val green">R$ ${fmt(econ*12)}</div><div class="foot">diferença anual (mensal × 12)</div></div></div>`;
-  let t=`<div style="overflow-x:auto"><table class="res"><thead><tr><th>Plano</th><th>Produto</th><th>Acomodação</th><th>Copart.</th><th>Custo mensal</th><th>R$/vida</th><th>vs menor</th></tr></thead><tbody>`;
+  const temRe=rows.some(r=>reembTipoDe(r.c));
+  let t=`<div style="overflow-x:auto"><table class="res"><thead><tr><th>Plano</th><th>Produto</th><th>Acomodação</th><th>Copart.</th>${temRe?'<th>Reembolso</th>':''}<th>Custo mensal</th><th>R$/vida</th><th>vs menor</th></tr></thead><tbody>`;
   rows.forEach((r,i)=>{const isHap=r.c.operadora==='Hapvida';const diff=r.total-min,pct=min?diff/min*100:0;const prod=(r.c.tipo==='Individual')?'Individual (PF)':'Empresarial (PME)';
     const odoTxt=temOdonto(r.c)?(odontoFalta(r.c)
       ? ` <span style="color:#a32d2d">· odonto não carregado</span>`
       : ` <span style="color:#6b6a66">· saúde R$ ${fmt(planMed(r.c))} + odonto R$ ${fmt(planOdo(r.c))}</span>`):'';
     t+=`<tr class="${i===0?'best':''} ${isHap?'haprow':''}"><td class="pn-cell"><span class="rank ${i===0?'g':''}">${i+1}</span><b>${r.c.label}</b><br><span class="op" style="margin-left:30px">${opDisp(r.c)}${odoTxt}</span></td>
-      <td>${prod}</td><td>${r.c.acomodacao}</td><td>${r.c.coparticipacao.includes('Sem')?'Sem':(r.c.coparticipacao.includes('Completa')?'Completa':'Parcial')}</td><td><b>R$ ${fmt(r.total)}</b></td><td>R$ ${fmt(r.total/tv)}</td>
+      <td>${prod}</td><td>${r.c.acomodacao}</td><td>${r.c.coparticipacao.includes('Sem')?'Sem':(r.c.coparticipacao.includes('Completa')?'Completa':'Parcial')}</td>${temRe?`<td>${reembTipoDe(r.c)||'—'}</td>`:''}<td><b>R$ ${fmt(r.total)}</b></td><td>R$ ${fmt(r.total/tv)}</td>
       <td style="color:${diff===0?'#0f6e56':'#a32d2d'}">${diff===0?'—':'+R$ '+fmt(diff)+' ('+pct.toFixed(1)+'%)'}</td></tr>`;});
   t+='</tbody></table></div>';
   const hapCheapest=rows[0].c.operadora==='Hapvida';
@@ -1356,9 +1379,9 @@ function calcResult(){
 }
 
 /* detalhe do plano */
-function openDetail(id){
-  const c=planById(id);const o=OPS.find(x=>x.key===c.operadora);const col=opColorFor(c);
-  document.getElementById('detailHead').innerHTML=`<div style="color:${col};font-weight:700;font-size:13px">${opDisp(c)}</div><h3 style="margin:2px 0 0">${c.label} · ${c.acomodacao}</h3><p style="margin:4px 0 0">${c.tipo==='Individual'?'Saúde PF':'Saúde PME'} · ${c.coparticipacao}${c.operadora==='Hapvida'&&REEMBOLSO[c.plano]?` · Reembolso ${REEMBOLSO[c.plano]}`:''}</p>`;
+function openDetail(id,tipo){
+  const c=planByRe(id,tipo);const o=OPS.find(x=>x.key===c.operadora);const col=opColorFor(c);
+  document.getElementById('detailHead').innerHTML=`<div style="color:${col};font-weight:700;font-size:13px">${opDisp(c)}</div><h3 style="margin:2px 0 0">${c.label} · ${c.acomodacao}</h3><p style="margin:4px 0 0">${c.tipo==='Individual'?'Saúde PF':'Saúde PME'} · ${c.coparticipacao}${reembTipoDe(c)?` · Reembolso ${reembTipoDe(c).toLowerCase()}`:''}${c.operadora==='Hapvida'&&REEMBOLSO[c.plano]?` · Reembolso consulta ${REEMBOLSO[c.plano]}`:''}</p>`;
   let body=`<table><thead><tr><th>Faixa etária</th><th>Vidas</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>`;
   const mostraTudo=totVidas()===0; // sem vidas informadas, mostra a tabela completa de preços
   const vd=vidasDe(c);
@@ -1439,7 +1462,7 @@ async function gerarFolder(){
   const chips=BANDS.filter(b=>vidas[b]>0).map(b=>`<div class="fd-chip">${b}: <b>${vidas[b]}</b>${split?` <span style="font-size:10.5px;color:#666">(HMO ${vidasHMO[b]||0} · PPO ${vidasPPO[b]||0})</span>`:''}</div>`).join('');
   const temReemb=rows.some(r=>r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]);
   let trs=rows.map((r,i)=>{const cop=segLabel(r.c.coparticipacao);const prod=(r.c.tipo==='Individual')?'Individual (PF)':'Empresarial (PME)';
-    const reembCell=temReemb?`<td>${r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]?REEMBOLSO[r.c.plano]:'—'}</td>`:'';
+    const reembCell=temReemb?`<td>${r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]?`${reembTipoDe(r.c)?`${reembTipoDe(r.c)}<br><span style="font-size:9.5px;color:#666">${REEMBOLSO[r.c.plano]}/consulta</span>`:REEMBOLSO[r.c.plano]}`:'—'}</td>`:'';
     return `<tr><td>${i+1}</td><td>${r.c.label}</td><td>${opDisp(r.c)}</td><td>${prod}</td><td>${r.c.acomodacao}</td><td>${cop}</td>${reembCell}<td>R$ ${fmt(r.total)}</td></tr>`;}).join('');
   // linha de composição quando o plano leva odonto (espelha a cotação oficial:
   // "Plano de saúde" + "Plano odontológico" = mensalidade)
@@ -1452,7 +1475,7 @@ async function gerarFolder(){
   if(hib){
     const best=cbs[0];
     const vd=q=>`${q} vida${q>1?'s':''}`;
-    const li=r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</span><b>R$ ${fmt(r.total)}</b></div>`+odoSub(r);
+    const li=r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}${reembTipoDe(r.c)?` · reemb. ${reembTipoDe(r.c).toLowerCase()}`:''}</span><b>R$ ${fmt(r.total)}</b></div>`+odoSub(r);
     if(cbs.length===1){
       hi=`<div class="fd-hi"><div class="fd-hi-t">Cotação mista — 1 contrato, ${tv} vidas</div>`+
          `<div class="fd-hi-grp">Hapvida (HMO) · ${vd(hL)}</div>${li(best.h)}`+
@@ -1465,13 +1488,13 @@ async function gerarFolder(){
     }
   } else if(rows.length===1){
     const r=rows[0];
-    hi=`<div class="fd-hi">Mensalidade: <span class="v">R$ ${fmt(r.total)}</span> — ${r.c.label} (${opDisp(r.c)}) · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}${odoSub(r)}</div>`;
+    hi=`<div class="fd-hi">Mensalidade: <span class="v">R$ ${fmt(r.total)}</span> — ${r.c.label} (${opDisp(r.c)}) · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}${reembTipoDe(r.c)?` · reemb. ${reembTipoDe(r.c).toLowerCase()}`:''}${odoSub(r)}</div>`;
   } else {
-    const items=rows.map(r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}</span><b>R$ ${fmt(r.total)}</b></div>`+odoSub(r)).join('');
+    const items=rows.map(r=>`<div class="fd-hi-item"><span>${r.c.label} · ${opDisp(r.c)} · ${r.c.acomodacao} · ${segLabel(r.c.coparticipacao)}${reembTipoDe(r.c)?` · reemb. ${reembTipoDe(r.c).toLowerCase()}`:''}</span><b>R$ ${fmt(r.total)}</b></div>`+odoSub(r)).join('');
     hi=`<div class="fd-hi"><div class="fd-hi-t">${rows.length} opções cotadas</div>${items}</div>`;
   }
   // Tabela de valores completa (preço por faixa etária)
-  const colHead=cols.map(c=>`<th>${c.label}<br><span style="font-weight:400;font-size:10px">${opDisp(c)} · ${c.acomodacao} · ${segLabel(c.coparticipacao)}</span></th>`).join('');
+  const colHead=cols.map(c=>`<th>${c.label}<br><span style="font-weight:400;font-size:10px">${opDisp(c)} · ${c.acomodacao} · ${segLabel(c.coparticipacao)}${reembTipoDe(c)?` · reemb. ${reembTipoDe(c).toLowerCase()}`:''}</span></th>`).join('');
   const priceBody=BANDS.map(b=>`<tr class="${vidas[b]>0?'used':''}"><td>${b}${vidas[b]>0?` <span style="color:#5f5e5a;font-weight:400">(${vidas[b]} vida${vidas[b]>1?'s':''})</span>`:''}</td>`+cols.map(c=>{const q=(vidasDe(c)[b]||0);return `<td>R$ ${fmt(c.precos[b]||0)}${split&&q>0?` <span style="font-size:9.5px;color:#666">(${q})</span>`:''}</td>`;}).join('')+`</tr>`).join('');
   const temOdo=cols.some(temOdonto);
   const linhaOdo=temOdo?`<tr><td>Plano de saúde</td>`+cols.map(c=>`<td>R$ ${fmt(planMed(c))}</td>`).join('')+`</tr>`
@@ -1511,9 +1534,11 @@ async function gerarFolder(){
       <div class="fd-note">Coparticipação por procedimento, conforme o plano cotado. Consultas/exames: percentual limitado ao teto indicado ou valor fixo; terapias e internações: valor fixo. "—" = sem cobrança nesse grupo. Referencial — sujeito às condições contratuais e vigência.</div>
       <table class="fd-tbl"><thead>${chead}</thead><tbody>${cbody}</tbody></table>`;
   }
-  const reembSel=[...new Map(cols.filter(c=>c.operadora==='Hapvida'&&REEMBOLSO[c.plano]).map(c=>[c.plano,c.label])).entries()];
+  const reembSel=[...new Map(cols.filter(c=>c.operadora==='Hapvida'&&REEMBOLSO[c.plano]).map(c=>[c.plano+'|'+(reembTipoDe(c)||''),c])).entries()];
   if(reembSel.length){
-    copHtml+=`<div class="fd-note" style="font-size:12px;margin-top:6px"><b>Reembolso:</b> ${reembSel.map(([p,l])=>`${l}: <b>${REEMBOLSO[p]}</b>`).join(' · ')}</div>`;
+    copHtml+=`<div class="fd-note" style="font-size:12px;margin-top:6px"><b>Reembolso:</b> `+
+      reembSel.map(([k,c])=>`${c.label}: ${reembTipoDe(c)?`<b>${reembTipoDe(c).toLowerCase()}</b> · `:''}<b>${REEMBOLSO[c.plano]}</b> por consulta`).join(' · ')+
+      `</div>`;
   }
   // Tabela de carências (padrão contratual — vale para qualquer praça)
   const empresarial=cols.some(c=>c.tipo!=='Individual');
