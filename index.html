@@ -190,6 +190,10 @@
   .chips{display:flex;gap:7px;flex-wrap:wrap}
   .chip{border:1px solid var(--line);background:#fff;color:var(--txt);padding:6px 13px;border-radius:18px;font-size:12.5px;cursor:pointer;font-weight:500}
   .chip:hover{border-color:var(--hap)} .chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  /* filtro que não muda nada na seleção atual: sai do estado ligado e para de
+     responder ao clique, em vez de ficar destacado sugerindo que faz efeito */
+  .chip.inerte{background:#fff;color:var(--muted);border-color:var(--line);border-style:dashed;cursor:default;font-weight:400}
+  .chip.inerte:hover{border-color:var(--line)}
   .cmp-head{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch;margin:6px 0 20px}
   .side{border-radius:14px;padding:18px 20px;border:1px solid var(--line)}
   .side.hapvida{background:#fff7f0;border-color:#ffd9b8} .side.conc{background:#f3f7fc;border-color:#d3e3f5}
@@ -976,13 +980,40 @@ async function buscarCEP(){
 let meiMode = true; // true = MEI (padrão), false = Não-MEI. Aplica-se só à Hapvida.
 let contratMode = 'Compulsório'; // modalidade das tabelas PME 30-99 (Compulsório | Adesão)
 function contratOk(c){return !c.contratacao || c.contratacao===contratMode;}
-let prodSel = {Empresarial:true, Individual:true}; // filtro de produto (multi) — default ambos
+/* Coletivo por Adesão entra DESLIGADO por padrão: só pode ser vendido a quem
+   pertence a uma entidade de classe. Ligado por padrão, ele apareceria no
+   comparativo de todo lead — e o mais barato do ranking poderia ser um plano
+   que o cliente não tem como contratar. Um clique no chip liga. */
+let prodSel = {Empresarial:true, Individual:true, 'Adesão':false};
+const SEG_LONGO={Individual:'Individual (PF)',Empresarial:'Empresarial (PME)','Adesão':'Coletivo por Adesão'};
+const SEG_CARD ={Individual:'Saúde PF (individual)',Empresarial:'Saúde PME (empresarial)','Adesão':'Coletivo por Adesão'};
+const SEG_CURTO={Individual:'Saúde PF',Empresarial:'Saúde PME','Adesão':'Col. por Adesão'};
+const SEG_ODO  ={Individual:'Individual',Empresarial:'PME/Super Simples','Adesão':'Coletivo por Adesão'};
+function segDe(c){return (c&&c.tipo)||'Empresarial';}
+/* Um filtro só deve parecer ligado quando muda alguma coisa. Com apenas
+   Coletivo por Adesão marcado, MEI e PME 30-99 não alteram um único plano (24
+   antes e depois), e nenhuma concorrente tem plano de Adesão — mas os três
+   chips continuavam em azul, sugerindo que filtravam. Vale para qualquer
+   combinação: com só Individual marcado acontecia o mesmo, desde sempre. */
+function _visiveis(){return CATALOG.filter(c=>c.categoria===categoria&&pracaOk(c)&&tipoOk(c));}
+function meiRelevante(){return _visiveis().some(c=>c.mei);}
+function contratRelevante(){return _visiveis().some(c=>c.contratacao);}
+function opRelevante(){return _visiveis().some(c=>c.operadora!=='Hapvida');}
+function segsLigados(){return Object.keys(prodSel).filter(t=>prodSel[t])
+  .map(t=>t==='Adesão'?'Coletivo por Adesão':t).join(' e ');}
+function notaInerte(){/* a frase inteira nas três linhas polui; o detalhe fica no tooltip */
+  return `<span class="mei-nota" title="Nenhum plano de ${segsLigados()} é afetado por este filtro — por isso ele está desligado.">não se aplica</span>`;}
+function vigenciaDe(c){return (c&&c.vigencia)?`Tabela ${c.administradora||''} · vigência ${c.vigencia}`.replace('  ',' '):'';}
 /* "existe versão MEI DESTA MESMA tabela?" — tem de ser a mesma praça E o mesmo
    porte. Sem isso, a variante MEI do porte 2-29 fazia a tabela de 1 vida (que
    não tem versão MEI) ser filtrada fora quando o vendedor marcava MEI, e a
    cotação caía numa tabela sem porte — preço que não é o de 1 vida. */
 const _pt=v=>(v==null?null:v);
-function hasMeiVariant(c){return CATALOG.some(x=>x.operadora===c.operadora&&x.label===c.label&&x.acomodacao===c.acomodacao&&x.coparticipacao===c.coparticipacao&&(x.categoria||'Geral')===(c.categoria||'Geral')&&(x.praca||'')===(c.praca||'')&&_pt(x.vmin)===_pt(c.vmin)&&_pt(x.vmax)===_pt(c.vmax)&&(!!x.mei)!==(!!c.mei));}
+/* O SEGMENTO entra na comparação: variante MEI só existe dentro do mesmo tipo.
+   Sem isso, o Advance 600 de Coletivo por Adesão em SP/RMSP (sem porte) casava
+   com as entradas PPO legadas do Empresarial (também sem porte, essas com par
+   MEI) e sumia da lista sempre que o vendedor deixava MEI marcado. */
+function hasMeiVariant(c){return CATALOG.some(x=>x.operadora===c.operadora&&(x.tipo||'Empresarial')===(c.tipo||'Empresarial')&&x.label===c.label&&x.acomodacao===c.acomodacao&&x.coparticipacao===c.coparticipacao&&(x.categoria||'Geral')===(c.categoria||'Geral')&&(x.praca||'')===(c.praca||'')&&_pt(x.vmin)===_pt(c.vmin)&&_pt(x.vmax)===_pt(c.vmax)&&(!!x.mei)!==(!!c.mei));}
 /* A tabela de porte 1 vida é única (não tem versão MEI x Não-MEI) e vale para
    os DOIS contratos — como não existe variante MEI dela, hasMeiVariant() é
    false e ela passa no filtro qualquer que seja o seletor. */
@@ -992,7 +1023,17 @@ function pracaOk(c){return (c.praca||'SP / RMSP')===pracaSel;}
 function plansOf(opKey){return CATALOG.filter(c=>c.operadora===opKey && c.categoria===categoria && pracaOk(c) && tipoOk(c) && meiOk(c) && contratOk(c));}
 function planById(id){return CATALOG.find(c=>c.id===id);}
 function temParcial(opKey,label,acom,seg){return plansOf(opKey).some(c=>c.label===label&&c.acomodacao===acom&&c.coparticipacao===seg&&c.pr2);}
-function reembTipoDe(c){return c?(c.reembTipo||(c.pr2?'Total':null)):null;}
+function reembTipoDe(c){if(!c)return null;
+  if(c.reembTipo)return c.reembTipo;
+  if(c.pr2)return 'Total';
+  /* Coletivo por Adesão: os produtos NotreDame saem sempre com reembolso TOTAL.
+     A tabela de Adesão não traz quadro de reembolso parcial — não há escolha a
+     fazer, mas o vendedor precisa ver qual é. */
+  if(segDe(c)==='Adesão'&&isPPO(c))return 'Total';
+  return null;}
+function reembFixoTotal(opKey,label,acom,seg){
+  return plansOf(opKey).some(c=>c.label===label&&c.acomodacao===acom&&c.coparticipacao===seg
+    &&segDe(c)==='Adesão'&&isPPO(c)&&!c.pr2);}
 function comReembolso(c,x){
   if(!c||!c.pr2||!x||x.reemb!=='Parcial')return c;
   if(!c.__parc)c.__parc=Object.assign({},c,{precos:c.pr2,reembTipo:'Parcial'});
@@ -1094,8 +1135,10 @@ function novaCotacao(){BANDS.forEach(b=>{vidasHMO[b]=0;vidasPPO[b]=0;});document
 function buildOpChips(){
   const el=document.getElementById('opChipsCalc');if(!el)return;
   const opts=[['hapvida','Somente Hapvida'],['todas','Todas']];
-  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${opMode===v?'active':''}" data-opm="${v}">${l}</div>`).join('');
-  el.querySelectorAll('[data-opm]').forEach(e=>e.onclick=()=>setOpMode(e.dataset.opm));
+  const inerte=CATALOG.length&&!opRelevante();
+  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${inerte?'inerte':(opMode===v?'active':'')}" data-opm="${v}">${l}</div>`).join('')
+    +(inerte?notaInerte():'');
+  if(!inerte) el.querySelectorAll('[data-opm]').forEach(e=>e.onclick=()=>setOpMode(e.dataset.opm));
 }
 function setOpMode(m){if(opMode===m)return;opMode=m;buildCols();buildOpChips();recompute();}
 
@@ -1123,7 +1166,7 @@ function buildMatrix(){
 }
 function planOptGroups(opKey){
   const seen=[],groups={},order=[];
-  plansOf(opKey).forEach(c=>{if(!seen.includes(c.label)){seen.push(c.label);const t=c.tipo||'Empresarial';if(!groups[t]){groups[t]=[];order.push(t);}groups[t].push(c.label);}});
+  plansOf(opKey).forEach(c=>{const t=segDe(c);const k=t+'|'+c.label;if(seen.includes(k))return;seen.push(k);if(!groups[t]){groups[t]=[];order.push(t);}groups[t].push(c.label);});
   return order.map(t=>({tipo:t,labels:groups[t]}));
 }
 function slotBlock(ci,si,x,v){
@@ -1146,6 +1189,9 @@ function slotBlock(ci,si,x,v){
     h+=`<select class="sub cslot-re" onchange="onReemb(${ci},${si},this.value)" title="Reembolso previsto em contrato. O parcial reduz a mensalidade.">`+
       `<option value="Total" ${x.reemb!=='Parcial'?'selected':''}>Reembolso total</option>`+
       `<option value="Parcial" ${x.reemb==='Parcial'?'selected':''}>Reembolso parcial</option></select>`;
+  } else if(x.plano&&x.acom&&x.seg&&reembFixoTotal(op,x.plano,x.acom,x.seg)){
+    // travado: sem coluna de parcial na tabela de Adesão, mas a informação aparece
+    h+=`<select class="sub cslot-re" disabled title="No Coletivo por Adesão os produtos NotreDame Saúde têm reembolso total — a tabela não oferece a versão parcial."><option>Reembolso total</option></select>`;
   }
   const done=!!x.plano&&!!x.acom&&!!x.seg;
   const noV=totVidas()===0&&done;
@@ -1180,7 +1226,7 @@ function slotBlock(ci,si,x,v){
      um valor menor que o real e fechava com ele. Vale para 87 combinações em 56
      praças (14/09). Aqui o número fica marcado e o tooltip diz o que falta. */
   const odoFalta=rc0&&!badTier&&!noV&&!semColuna&&odontoFalta(rc0);
-  if(odoFalta) tip=`Falta o valor do plano odontológico de ${rc0.praca} (${rc0.tipo==='Individual'?'Individual':'PME/Super Simples'}) no cadastro. O valor acima cobre só a assistência médica — o odontológico ainda vai somar. Confira na tabela antes de passar ao cliente.`;
+  if(odoFalta) tip=`Falta o valor do plano odontológico de ${rc0.praca} (${SEG_ODO[segDe(rc0)]}) no cadastro. O valor acima cobre só a assistência médica — o odontológico ainda vai somar. Confira na tabela antes de passar ao cliente.`;
   const tipAttr=tip?` title="${tip.replace(/"/g,'&quot;')}"`:'';
   h+=`<div class="cslot-val ${v>0&&!badTier&&!odoFalta?'has':''} ${badTier||odoFalta?'warn':''}"${tipAttr}><span>${disp}${badTier||odoFalta?' &#9432;':''}</span>${canRemove?`<b title="remover" onclick="removeSlot(${ci},${si})">×</b>`:''}</div>${odoFalta?'<div class="cslot-odo">sem o valor do odonto</div>':''}</div>`;
   return h;
@@ -1196,7 +1242,7 @@ function onReemb(ci,si,v){matrixCols[ci].slots[si].reemb=(v==='Parcial')?'Parcia
 function selectedPlans(){const out=[],vis=[];matrixCols.forEach((col,ci)=>col.slots.forEach((x,si)=>{
   const c=resolved(ci,si);if(!c)return;const k=c.id+'|'+(reembTipoDe(c)||'-');
   if(vis.includes(k))return;vis.push(k);out.push(c);}));return out;}
-function recompute(){buildMeiChips();buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';
+function recompute(){buildMeiChips();buildContratChips();buildOpChips();buildMatrix();renderCards();calcResult();const w=document.getElementById('vidasWarn');if(w)w.style.display=(totVidas()===0&&selectedPlans().length)?'block':'none';
   const ow=document.getElementById('odoWarn');
   if(ow){const faltando=selectedPlans().filter(odontoFalta);
     ow.style.display=faltando.length?'block':'none';
@@ -1216,16 +1262,26 @@ function reconcileSel(){
   }));
 }
 function buildProdChips(){
-  const opts=['Empresarial','Individual'];
+  const opts=['Empresarial','Individual','Adesão'];
   const el=document.getElementById('prodChips');
-  el.innerHTML=opts.map(t=>`<div class="chip ${prodSel[t]?'active':''}" data-prod="${t}">${t}</div>`).join('');
+  /* O rótulo do chip NÃO é o mesmo do segmento: já existe um chip "Adesão" na
+     linha PME 20-99 (modalidade do contrato, Compulsório × Adesão). Dois chips
+     com o mesmo nome na mesma tela fariam o vendedor clicar no errado. */
+  const rotulo={'Adesão':'Coletivo por Adesão'};
+  const dica={'Adesão':'Coletivo por Adesão — exige vínculo com entidade de classe. Administradora OVER (Projeto Flamengo).'};
+  el.innerHTML=opts.map(t=>`<div class="chip ${prodSel[t]?'active':''}" data-prod="${t}"${dica[t]?` title="${dica[t]}"`:''}>${rotulo[t]||t}</div>`).join('');
   el.querySelectorAll('[data-prod]').forEach(e=>e.onclick=()=>setProd(e.dataset.prod));
 }
 function setProd(t){
   const on=Object.values(prodSel).filter(Boolean).length;
   if(prodSel[t]&&on===1)return; // não deixa desmarcar o último
+  /* Os três segmentos são combináveis: o vendedor precisa colocar PME, PF e
+     Coletivo por Adesão lado a lado para comparar valor. (Adesão chegou a ser
+     excludente em 24/09; o uso real pediu o contrário.)
+     Quando Adesão fica SOZINHO, CONTRATO/PME 30-99/OPERADORAS deixam de afetar
+     qualquer plano e se desligam — ver buildMeiChips/buildContratChips/buildOpChips. */
   prodSel[t]=!prodSel[t];
-  reconcileSel(); buildProdChips(); recompute();
+  reconcileSel(); buildProdChips(); recompute();  // recompute redesenha os chips que podem ter virado inertes
 }
 /* A tabela promocional MEI existe só nas praças da Regional 2 (RMSP, Mogi das
    Cruzes, São Bernardo, Santos, Jundiaí, Sorocaba, Campinas, Americana e Rio).
@@ -1236,10 +1292,11 @@ function buildMeiChips(){
   const opts=[[false,'Não-MEI'],[true,'MEI']];
   const el=document.getElementById('meiChips'); if(!el)return;
   const semMei=CATALOG.length&&!pracaTemMEI();
+  const inerte=CATALOG.length&&!meiRelevante();
   const tip='Em '+pracaSel+' não existe tabela promocional MEI separada — a mesma tabela atende os dois contratos. Pode cotar normalmente, o valor é o mesmo. A tabela MEI própria existe só nas praças de SP e do Rio.';
-  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${meiMode===v?'active':''}" data-mei="${v}">${l}</div>`).join('')
-    +(semMei?`<span class="mei-nota" title="${tip}">Tabela única — serve para MEI e Não-MEI</span>`:'');
-  el.querySelectorAll('[data-mei]').forEach(e=>e.onclick=()=>setMei(e.dataset.mei==='true'));
+  el.innerHTML=opts.map(([v,l])=>`<div class="chip ${inerte?'inerte':(meiMode===v?'active':'')}" data-mei="${v}">${l}</div>`).join('')
+    +(inerte?notaInerte():(semMei?`<span class="mei-nota" title="${tip}">Tabela única — serve para MEI e Não-MEI</span>`:''));
+  if(!inerte) el.querySelectorAll('[data-mei]').forEach(e=>e.onclick=()=>setMei(e.dataset.mei==='true'));
 }
 function setMei(v){
   if(meiMode===v)return; meiMode=v;
@@ -1248,8 +1305,10 @@ function setMei(v){
 }
 function buildContratChips(){
   const el=document.getElementById('contratChips'); if(!el) return;
-  el.innerHTML=['Compulsório','Adesão'].map(m=>`<div class="chip ${contratMode===m?'active':''}" data-contrat="${m}">${m}</div>`).join('');
-  el.querySelectorAll('[data-contrat]').forEach(e=>e.onclick=()=>setContrat(e.dataset.contrat));
+  const inerte=CATALOG.length&&!contratRelevante();
+  el.innerHTML=['Compulsório','Adesão'].map(m=>`<div class="chip ${inerte?'inerte':(contratMode===m?'active':'')}" data-contrat="${m}">${m}</div>`).join('')
+    +(inerte?notaInerte():'');
+  if(!inerte) el.querySelectorAll('[data-contrat]').forEach(e=>e.onclick=()=>setContrat(e.dataset.contrat));
 }
 function setContrat(m){
   if(contratMode===m)return; contratMode=m;
@@ -1265,7 +1324,7 @@ function renderCards(){
     return `<div class="pcard" style="border-top-color:${col}">
       <div class="pcop" style="color:${col}">${opDisp(c)}</div>
       <div class="pcname">${c.label}</div>
-      <div class="pcmeta">${c.tipo==='Individual'?'Saúde PF (individual)':'Saúde PME (empresarial)'}<br>${c.acomodacao}<br>${cop}${reembTipoDe(c)?`<br>Reembolso <b style="color:var(--navy)">${reembTipoDe(c).toLowerCase()}</b>`:''}${c.operadora==='Hapvida'&&REEMBOLSO[c.plano]?`<br>Reembolso consulta: <b style="color:var(--navy)">${REEMBOLSO[c.plano]}</b>`:''}</div>
+      <div class="pcmeta">${SEG_CARD[segDe(c)]}<br>${c.acomodacao}<br>${cop}${vigenciaDe(c)?`<br><span style="opacity:.75">${vigenciaDe(c)}</span>`:''}${reembTipoDe(c)?`<br>Reembolso <b style="color:var(--navy)">${reembTipoDe(c).toLowerCase()}</b>`:''}${c.operadora==='Hapvida'&&REEMBOLSO[c.plano]?`<br>Reembolso consulta: <b style="color:var(--navy)">${REEMBOLSO[c.plano]}</b>`:''}</div>
       <div class="pcval">R$ ${fmt(v)} <small>/mês · ${tv} vida(s)</small></div>
       <button class="btn vd" onclick="openDetail(${c.id},'${reembTipoDe(c)||''}')">Ver detalhes</button></div>`;}).join('');
 }
@@ -1288,7 +1347,7 @@ function notaCopart(rows,note){
   if(hasP&&hasS)avisos.push('A comparação mistura planos <b>com coparticipação</b> (Hapvida = Parcial) e <b>sem coparticipação</b>. O custo mensal é só a mensalidade — nos planos com coparticipação há custo adicional conforme o uso.');
   const semOdo=[...new Set(rows.filter(r=>odontoFalta(r.c)).map(r=>r.c.label))];
   if(semOdo.length){
-    const emp=rows.some(r=>odontoFalta(r.c)&&r.c.tipo!=='Individual');
+    const emp=rows.some(r=>odontoFalta(r.c)&&segDe(r.c)==='Empresarial');
     avisos.push('⚠ O valor do <b>plano odontológico</b> ainda não está carregado para '+(emp?'as tabelas <b>PME / Super Simples</b> desta praça (elas têm plano odontológico próprio, diferente do Individual)':'esta praça')+' — '+semOdo.join(', ')+' está sendo cotado <b>só com a assistência médica</b>. Confira no sistema antes de enviar a proposta.');
   }
   if(avisos.length){note.style.display='block';note.innerHTML=avisos.join('<br><br>');}else note.style.display='none';
@@ -1381,7 +1440,7 @@ function calcResult(){
   kpis+=`<div class="kpi"><div class="lbl">Ganho em 12 meses</div><div class="val green">R$ ${fmt(econ*12)}</div><div class="foot">diferença anual (mensal × 12)</div></div></div>`;
   const temRe=rows.some(r=>reembTipoDe(r.c));
   let t=`<div style="overflow-x:auto"><table class="res"><thead><tr><th>Plano</th><th>Produto</th><th>Acomodação</th><th>Copart.</th>${temRe?'<th>Reembolso</th>':''}<th>Custo mensal</th><th>R$/vida</th><th>vs menor</th></tr></thead><tbody>`;
-  rows.forEach((r,i)=>{const isHap=r.c.operadora==='Hapvida';const diff=r.total-min,pct=min?diff/min*100:0;const prod=(r.c.tipo==='Individual')?'Individual (PF)':'Empresarial (PME)';
+  rows.forEach((r,i)=>{const isHap=r.c.operadora==='Hapvida';const diff=r.total-min,pct=min?diff/min*100:0;const prod=SEG_LONGO[segDe(r.c)];
     const odoTxt=temOdonto(r.c)?(odontoFalta(r.c)
       ? ` <span style="color:#a32d2d">· odonto não carregado</span>`
       : ` <span style="color:#6b6a66">· saúde R$ ${fmt(planMed(r.c))} + odonto R$ ${fmt(planOdo(r.c))}</span>`):'';
@@ -1398,7 +1457,7 @@ function calcResult(){
 /* detalhe do plano */
 function openDetail(id,tipo){
   const c=planByRe(id,tipo);const o=OPS.find(x=>x.key===c.operadora);const col=opColorFor(c);
-  document.getElementById('detailHead').innerHTML=`<div style="color:${col};font-weight:700;font-size:13px">${opDisp(c)}</div><h3 style="margin:2px 0 0">${c.label} · ${c.acomodacao}</h3><p style="margin:4px 0 0">${c.tipo==='Individual'?'Saúde PF':'Saúde PME'} · ${c.coparticipacao}${reembTipoDe(c)?` · Reembolso ${reembTipoDe(c).toLowerCase()}`:''}${c.operadora==='Hapvida'&&REEMBOLSO[c.plano]?` · Reembolso consulta ${REEMBOLSO[c.plano]}`:''}</p>`;
+  document.getElementById('detailHead').innerHTML=`<div style="color:${col};font-weight:700;font-size:13px">${opDisp(c)}</div><h3 style="margin:2px 0 0">${c.label} · ${c.acomodacao}</h3><p style="margin:4px 0 0">${SEG_CURTO[segDe(c)]} · ${c.coparticipacao}${reembTipoDe(c)?` · Reembolso ${reembTipoDe(c).toLowerCase()}`:''}${c.operadora==='Hapvida'&&REEMBOLSO[c.plano]?` · Reembolso consulta ${REEMBOLSO[c.plano]}`:''}</p>`;
   let body=`<table><thead><tr><th>Faixa etária</th><th>Vidas</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>`;
   const mostraTudo=totVidas()===0; // sem vidas informadas, mostra a tabela completa de preços
   const vd=vidasDe(c);
@@ -1478,14 +1537,14 @@ async function gerarFolder(){
   const cbs=hib?combosDe(rows):[];
   const chips=BANDS.filter(b=>vidas[b]>0).map(b=>`<div class="fd-chip">${b}: <b>${vidas[b]}</b>${split?` <span style="font-size:10.5px;color:#666">(HMO ${vidasHMO[b]||0} · PPO ${vidasPPO[b]||0})</span>`:''}</div>`).join('');
   const temReemb=rows.some(r=>r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]);
-  let trs=rows.map((r,i)=>{const cop=segLabel(r.c.coparticipacao);const prod=(r.c.tipo==='Individual')?'Individual (PF)':'Empresarial (PME)';
+  let trs=rows.map((r,i)=>{const cop=segLabel(r.c.coparticipacao);const prod=SEG_LONGO[segDe(r.c)];
     const reembCell=temReemb?`<td>${r.c.operadora==='Hapvida'&&REEMBOLSO[r.c.plano]?`${reembTipoDe(r.c)?`${reembTipoDe(r.c)}<br><span style="font-size:9.5px;color:#666">${REEMBOLSO[r.c.plano]}/consulta</span>`:REEMBOLSO[r.c.plano]}`:'—'}</td>`:'';
     return `<tr><td>${i+1}</td><td>${r.c.label}</td><td>${opDisp(r.c)}</td><td>${prod}</td><td>${r.c.acomodacao}</td><td>${cop}</td>${reembCell}<td>R$ ${fmt(r.total)}</td></tr>`;}).join('');
   // linha de composição quando o plano leva odonto (espelha a cotação oficial:
   // "Plano de saúde" + "Plano odontológico" = mensalidade)
   const odoSub=r=>{
     if(!temOdonto(r.c))return '';
-    if(odontoFalta(r.c))return `<div class="fd-hi-sub warn">⚠ Valor do plano odontológico não carregado para ${r.c.praca} (${r.c.tipo==='Individual'?'Individual':'PME/Super Simples'}) — o total acima cobre apenas a assistência médica.</div>`;
+    if(odontoFalta(r.c))return `<div class="fd-hi-sub warn">⚠ Valor do plano odontológico não carregado para ${r.c.praca} (${SEG_ODO[segDe(r.c)]}) — o total acima cobre apenas a assistência médica.</div>`;
     return `<div class="fd-hi-sub">Plano de saúde <b>R$ ${fmt(planMed(r.c))}</b> · Plano odontológico <b>R$ ${fmt(planOdo(r.c))}</b> (R$ ${fmt(odontoVal(r.c))}/vida × ${vidasCob(r.c)})</div>`;
   };
   let hi;
@@ -1526,12 +1585,16 @@ async function gerarFolder(){
   const PROC_ALT={'Consultas eletivas':'Consultas Eletivas','Consultas de urgência':'Consultas de Urgência','Exames simples':'Exames Simples','Exames complexos':'Exames Complexos','Terapias especiais':'Terapias Especiais','Demais terapias':'Demais Terapias','Internações':'Internações'};
   const copCols=[];const vistos=new Set();
   cols.filter(c=>c.operadora==='Hapvida').forEach(c=>{
-    const src=(COPART_PRACA&&COPART_PRACA[c.praca]&&COPART_PRACA[c.praca][c.plano])||null;
+    /* Coletivo por Adesão tem coparticipação própria — em João Pessoa a consulta
+       eletiva é R$ 23,53 no Adesão e R$ 25,42 no PME. A chave leva o segmento. */
+    const kCop=segDe(c)==='Adesão'?c.plano+' · Adesão':c.plano;
+    const src=(COPART_PRACA&&COPART_PRACA[c.praca]&&COPART_PRACA[c.praca][kCop])||null;
     if(src){
-      const key='D|'+c.praca+'|'+c.plano; if(vistos.has(key))return; vistos.add(key);
+      const key='D|'+c.praca+'|'+kCop; if(vistos.has(key))return; vistos.add(key);
       const get=(g,p)=>{const o=src[g]||{};return o[p]!==undefined?o[p]:o[PROC_ALT[p]];};
       copCols.push({t:c.label,sub:c.praca,parcial:p=>get('parcial',p),total:p=>get('total',p)});
-    } else if(COP_IDX[c.plano]!==undefined){
+    } else if(segDe(c)!=='Adesão'&&COP_IDX[c.plano]!==undefined){
+      // sem tabela do Adesão carregada, melhor não mostrar nada do que mostrar a do PME
       const i=COP_IDX[c.plano];const key='T|'+i; if(vistos.has(key))return; vistos.add(key);
       copCols.push({t:COP_COLS[i].tier,sub:COP_COLS[i].planos,
         parcial:p=>{const r=COP_ROWS.find(x=>x[0]===p);return r&&/^(Terapias|Demais)/i.test(p)?r[i+1]:null;},
@@ -1558,7 +1621,9 @@ async function gerarFolder(){
       `</div>`;
   }
   // Tabela de carências (padrão contratual — vale para qualquer praça)
-  const empresarial=cols.some(c=>c.tipo!=='Individual');
+  // isenção de carência a partir de 30 vidas é regra de contrato EMPRESARIAL;
+  // não vale para Coletivo por Adesão.
+  const empresarial=cols.some(c=>segDe(c)==='Empresarial');
   const isencao=empresarial&&tv>=30;
   const carBody=CARENCIAS.map(r=>{const cpt=/CPT/.test(r[0]);
     return `<tr${isencao&&cpt?' class="used"':''}><td>${r[0]}</td><td style="text-align:right">${isencao&&!cpt?'<b>Isento</b>':r[1]}</td></tr>`;}).join('');
