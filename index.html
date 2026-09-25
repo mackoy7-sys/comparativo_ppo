@@ -1935,6 +1935,32 @@ const HIST=(function(){
     }
   }
 
+  /* EDITAR uma cotação salva. Os vendedores pediram isso de volta em 25/09.
+     O risco que existia — "cotação mexida vira outra com cara de antiga" — se
+     resolve sozinho porque salvar() sempre INSERE: a original continua no
+     histórico, com o folder original dela, e a edição entra como registro novo
+     quando o vendedor gerar o folder. */
+  async function editar(id){
+    const c=await cli();
+    const r=await c.from('cotacoes').select('payload,cliente_nome').eq('id',id).maybeSingle();
+    if(r.error||!r.data){alert('Não consegui abrir esta cotação.');return;}
+    aplicar(r.data.payload);
+    /* O CPF/CNPJ não é gravado por extenso, então não há como devolvê-lo ao
+       campo. Deixá-lo como estava faria a cotação nova sair com o documento do
+       cliente ANTERIOR, sem ninguém perceber. */
+    const doc=document.getElementById('clienteDoc'); if(doc)doc.value='';
+    switchTab('calc');
+    const orfaos=[];
+    matrixCols.forEach(function(col,ci){col.slots.forEach(function(x,si){
+      if(x.plano&&x.acom&&x.seg&&!resolved(ci,si))orfaos.push(x.plano+' · '+x.acom);});});
+    alert('Cotação de '+(r.data.cliente_nome||'cliente sem nome')+' carregada para edição.\n\n'+
+      (orfaos.length
+        ? '⚠ Sem preço atual para: '+orfaos.join(', ')+'. A tabela desta praça mudou — reveja a seleção.\n\n'
+        : '')+
+      'A original continua no histórico, intacta. Ao gerar o folder, isto entra como uma cotação NOVA.\n\n'+
+      'Redigite o CPF ou CNPJ: por segurança ele não fica guardado por extenso, só o suficiente para a busca.');
+  }
+
   async function apagar(id){
     if(!confirm('Apagar esta cotação do histórico? Não dá para desfazer.'))return;
     const c=await cli(); const r=await c.from('cotacoes').delete().eq('id',id);
@@ -1981,6 +2007,7 @@ const HIST=(function(){
         (doc?' · '+doc:'')+(fone?' · '+fone:'')+'<br>'+esc(x.resumo||'')+'</div></div>'+
         '<div><div class="hist-val">R$ '+fmt(x.total||0)+'</div>'+
         '<div class="hist-acao"><button onclick="HIST.folder(\''+x.id+'\')" title="Abre o folder desta cotação para ver e salvar em PDF. Não altera a cotação — para mudar algo, faça uma nova.">Ver folder</button>'+
+        '<button onclick="HIST.editar(\''+x.id+'\')" title="Carrega esta cotação na calculadora para alterar. A original continua no histórico; ao gerar o folder, a alterada entra como cotação nova.">Editar</button>'+
         (x.vendedor_id===eu?'<button onclick="HIST.apagar(\''+x.id+'\')">Apagar</button>':'')+
         '</div></div></div>';}).join('');
   }
@@ -2012,7 +2039,7 @@ const HIST=(function(){
   function telFmt(d){return d.length===11?'('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7):
                      d.length===10?'('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6):d;}
 
-  return {salvar:salvar,render:render,folder:folder,apagar:apagar,quem:quem,estado:estado,entrar:entrar,sair:sair};
+  return {salvar:salvar,render:render,folder:folder,editar:editar,apagar:apagar,quem:quem,estado:estado,entrar:entrar,sair:sair};
 })();
 /* Aberto pelo app, a sessão chega no hash. Lê já na abertura: se esperasse o
    primeiro folder, o vendedor que só consulta nunca ficaria reconhecido. */
