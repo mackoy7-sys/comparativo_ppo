@@ -394,6 +394,8 @@
   .cid-in{width:190px}
   .cid-in.pend{border-color:#ecd9a4;background:#fdf3d8}
   .cslot-odo{font-size:10.5px;color:#8a6a17;text-align:right;margin-top:2px;line-height:1.3}
+  /* a orientação não pode viver só no tooltip: no celular não há hover */
+  .cslot-dica{font-size:10.5px;color:var(--hap);text-align:right;margin-top:2px;line-height:1.3;font-weight:600}
   .cid-sug{position:absolute;top:calc(100% + 4px);left:0;z-index:40;min-width:260px;max-height:290px;overflow-y:auto;
     background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(15,39,64,.13);padding:4px}
   .cid-sug .it{padding:7px 10px;border-radius:7px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
@@ -1237,7 +1239,7 @@ function slotBlock(ci,si,x,v){
   const done=!!x.plano&&!!x.acom&&!!x.seg;
   const noV=totVidas()===0&&done;
   const badTier=done&&totVidas()>0&&!resolved(ci,si);
-  let disp, tip='';
+  let disp, tip='', dica='';
   const rc0=done?resolved(ci,si):null;
   const semColuna=cotMode==='mista'&&rc0&&(isPPO(rc0)||isHapHMO(rc0))&&vidasCob(rc0)===0&&totVidas()>0;
   if(noV) disp='informe vidas';
@@ -1259,6 +1261,7 @@ function slotBlock(ci,si,x,v){
         tip=`O produto ${x.plano} exige contrato com no mínimo ${mv} vida${mv>1?'s':''}. O mínimo considera o TOTAL de vidas do contrato: se os demais produtos cotados somarem ${mv} ou mais vidas, ele pode ser incluído.`;
       }
     } else if(isOdo){const base=x.plano.replace(/\s*\+\s*Odonto.*$/i,'');
+      dica=`abaixo disso, use "${base}"`;
       tip=`O desconto na mensalidade médica por contratar o odonto junto só existe no porte PME (${ranges} vidas). Para menos vidas, use "${base}" — o preço do médico é o mesmo (o desconto, nesse porte, incide no plano odontológico, contratado à parte).`;}
     else tip=`Este plano tem tabela apenas para ${ranges} vidas.`;
   } else disp='R$ '+fmt(v);
@@ -1269,7 +1272,7 @@ function slotBlock(ci,si,x,v){
   const odoFalta=rc0&&!badTier&&!noV&&!semColuna&&odontoFalta(rc0);
   if(odoFalta) tip=`Falta o valor do plano odontológico de ${rc0.praca} (${SEG_ODO[segDe(rc0)]}) no cadastro. O valor acima cobre só a assistência médica — o odontológico ainda vai somar. Confira na tabela antes de passar ao cliente.`;
   const tipAttr=tip?` title="${tip.replace(/"/g,'&quot;')}"`:'';
-  h+=`<div class="cslot-val ${v>0&&!badTier&&!odoFalta?'has':''} ${badTier||odoFalta?'warn':''}"${tipAttr}><span>${disp}${badTier||odoFalta?' &#9432;':''}</span>${canRemove?`<b title="remover" onclick="removeSlot(${ci},${si})">×</b>`:''}</div>${odoFalta?'<div class="cslot-odo">sem o valor do odonto</div>':''}</div>`;
+  h+=`<div class="cslot-val ${v>0&&!badTier&&!odoFalta?'has':''} ${badTier||odoFalta?'warn':''}"${tipAttr}><span>${disp}${badTier||odoFalta?' &#9432;':''}</span>${canRemove?`<b title="remover" onclick="removeSlot(${ci},${si})">×</b>`:''}</div>${odoFalta?'<div class="cslot-odo">sem o valor do odonto</div>':''}${dica?`<div class="cslot-dica">${dica}</div>`:''}</div>`;
   return h;
 }
 function addSlot(ci){matrixCols[ci].slots.push(emptySlot());recompute();}

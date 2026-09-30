@@ -154,10 +154,35 @@
   .cep-msg.ok{color:var(--ndblue);font-weight:600}
   .cep-msg.warn{color:#854f0b}
   .cep-msg.err{color:#a12a2a}
-  .ppo-reco{display:flex;gap:10px;align-items:flex-start;background:#eef1fa;border:1px solid #c9d3ee;border-left:4px solid var(--ndblue);border-radius:9px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#22305e}
-  .ppo-reco b{color:var(--ndblue)}
-  .ppo-reco .star{font-size:16px;line-height:1.2}
+  .ppo-reco{display:flex;gap:11px;align-items:flex-start;background:var(--ndblue);border:1px solid var(--ndblue);border-left:4px solid #ffc83d;border-radius:9px;padding:12px 15px;margin-bottom:14px;font-size:13px;line-height:1.5;color:#fff;box-shadow:0 2px 8px rgba(30,42,92,.18)}
+  .ppo-reco b{color:#fff}
+  .ppo-reco .reco-hi{color:#ffc83d}
+  .ppo-reco .star{flex:0 0 auto;line-height:0;margin-top:1px}
+  .ppo-reco .star svg{display:block}
   .mei-lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  /* ===== histórico de cotações ===== */
+  .hist-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+  .hist-bar input{flex:1;min-width:230px;padding:9px 13px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;color:var(--txt)}
+  .hist-bar input:focus{outline:none;border-color:var(--hap)}
+  .hist-aviso{background:#eef1fa;border:1px solid #c9d3ee;border-radius:10px;padding:16px 18px;font-size:13.5px;line-height:1.6;color:var(--navy)}
+  .hist-vazio{color:var(--muted);font-size:13.5px;padding:24px 4px}
+  .hist-item{border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:9px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+  .hist-item:hover{border-color:var(--hap)}
+  .hist-cli{font-weight:700;color:var(--navy);font-size:14.5px}
+  .hist-meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:3px}
+  .hist-val{font-size:16px;font-weight:700;color:var(--navy);text-align:right;white-space:nowrap}
+  .hist-acao{display:flex;gap:7px;justify-content:flex-end;margin-top:6px}
+  .hist-acao button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;color:var(--txt)}
+  .hist-acao button:hover{border-color:var(--hap)}
+  .hist-dono{display:inline-block;background:#f1f3f9;border-radius:5px;padding:1px 6px;font-size:11px;margin-left:6px}
+  .hist-selo{display:inline-block;border:1px solid var(--line);color:var(--muted);border-radius:5px;padding:1px 6px;font-size:10.5px;font-weight:600;margin-left:6px;vertical-align:middle}
+  .hist-selo.ok{border-color:#bcd9c4;background:#eef7f0;color:#2b6b3f}
+  .hist-login{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 6px}
+  .hist-login input{flex:1;min-width:180px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:13.5px}
+  .hist-msg{font-size:12.5px;color:#b3261e;min-height:18px;margin-bottom:4px}
+  .hist-quem{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .hist-quem a{color:var(--hap)}
+  @media(max-width:620px){.hist-item{grid-template-columns:1fr}.hist-val{text-align:left}}
   /* plan cards */
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px;margin-top:22px}
   .pcard{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff;border-top:3px solid var(--navy)}
@@ -191,6 +216,10 @@
   .chips{display:flex;gap:7px;flex-wrap:wrap}
   .chip{border:1px solid var(--line);background:#fff;color:var(--txt);padding:6px 13px;border-radius:18px;font-size:12.5px;cursor:pointer;font-weight:500}
   .chip:hover{border-color:var(--hap)} .chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  /* filtro que não muda nada na seleção atual: sai do estado ligado e para de
+     responder ao clique, em vez de ficar destacado sugerindo que faz efeito */
+  .chip.inerte{background:#fff;color:var(--muted);border-color:var(--line);border-style:dashed;cursor:default;font-weight:400}
+  .chip.inerte:hover{border-color:var(--line)}
   .cmp-head{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch;margin:6px 0 20px}
   .side{border-radius:14px;padding:18px 20px;border:1px solid var(--line)}
   .side.hapvida{background:#fff7f0;border-color:#ffd9b8} .side.conc{background:#f3f7fc;border-color:#d3e3f5}
@@ -287,6 +316,16 @@
   .fd-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:18px 0;font-size:14px}
   .fd-meta b{color:var(--navy)}
   .fd-sec{font-size:15px;font-weight:700;color:var(--navy);margin:20px 0 10px;border-bottom:2px solid var(--hap);padding-bottom:5px}
+  /* quadros do material NotreDame (diferenciais e exemplos de reembolso) */
+  .fd-nd{width:100%;border-collapse:collapse;font-size:9.3px;line-height:1.3;margin-top:4px}
+  .fd-nd th,.fd-nd td{border:1px solid #dfe4ee;padding:4px 5px;text-align:center;vertical-align:middle}
+  .fd-nd th{background:var(--ndblue);color:#fff;font-size:8.8px;font-weight:700;letter-spacing:.2px}
+  .fd-nd th small{display:block;font-weight:500;opacity:.85;font-size:8px;letter-spacing:0}
+  .fd-nd td:first-child,.fd-nd th:first-child{text-align:left;width:30%}
+  .fd-nd tbody tr:nth-child(even){background:#f7f9fc}
+  .fd-nd tr.grp td{background:#eef1fa;color:var(--ndblue);font-weight:700;text-align:left;
+    text-transform:uppercase;letter-spacing:.4px;font-size:8.6px}
+  .fd-nd .na{color:#b9c0cc}
   .fd-tbl{width:100%;border-collapse:collapse;font-size:13px}
   .fd-tbl th,.fd-tbl td{border:1px solid #d9dee7;padding:8px 10px;text-align:right}
   .fd-tbl th:first-child,.fd-tbl td:first-child{text-align:left}
@@ -319,6 +358,9 @@
     body{background:#fff}
     .fd-head,.fd-tbl thead th,.fd-tbl tr.best td,.fd-tbl tr.grp td,.fd-tbl tr.used td,.fd-hi{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .fd-sec{page-break-after:avoid}
+    .fd-nd{page-break-inside:auto}
+    .fd-nd tr{page-break-inside:avoid}
+    .fd-nd thead{display:table-header-group}
     .fd-tbl tr{page-break-inside:avoid}
     @page{size:A4;margin:12mm}
   }
@@ -355,6 +397,8 @@
   .cid-in{width:190px}
   .cid-in.pend{border-color:#ecd9a4;background:#fdf3d8}
   .cslot-odo{font-size:10.5px;color:#8a6a17;text-align:right;margin-top:2px;line-height:1.3}
+  /* a orientação não pode viver só no tooltip: no celular não há hover */
+  .cslot-dica{font-size:10.5px;color:var(--hap);text-align:right;margin-top:2px;line-height:1.3;font-weight:600}
   .cid-sug{position:absolute;top:calc(100% + 4px);left:0;z-index:40;min-width:260px;max-height:290px;overflow-y:auto;
     background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(15,39,64,.13);padding:4px}
   .cid-sug .it{padding:7px 10px;border-radius:7px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
