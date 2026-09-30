@@ -1631,12 +1631,26 @@ async function gerarFolder(){
   cols.filter(c=>c.operadora==='Hapvida').forEach(c=>{
     /* Coletivo por Adesão tem coparticipação própria — em João Pessoa a consulta
        eletiva é R$ 23,53 no Adesão e R$ 25,42 no PME. A chave leva o segmento. */
-    const kCop=segDe(c)==='Adesão'?c.plano+' · Adesão':c.plano;
+    let kCop=segDe(c)==='Adesão'?c.plano+' · Adesão':c.plano;
+    /* No RS (CCG) o quadro de coparticipação tem uma coluna só para a
+       segmentação ambulatorial: consulta R$ 40,39 fixos contra os 30%
+       limitados a R$ 20,00 do hospitalar. É a única região com essa
+       coluna — nas demais praças a chave com sufixo não existe e a
+       leitura cai na chave simples. */
+    /* O Individual tem quadro de coparticipação PRÓPRIO, com valores diferentes
+       dos do PME — em São Leopoldo a consulta é R$ 43,63 fixos no PF e 30%
+       limitados a R$ 20,00 no PME. Como o '(PF)' vive no rótulo e não no
+       `plano`, sem este sufixo o PF pegava a tabela do Empresarial. */
+    const _pf=COPART_PRACA&&COPART_PRACA[c.praca]&&COPART_PRACA[c.praca][kCop+' · PF'];
+    if(segDe(c)==='Individual'&&_pf)kCop=kCop+' · PF';
+    let kAmb=false;
+    if(c.acomodacao==='Ambulatorial'){const kA=kCop+' · Ambulatorial';
+      if(COPART_PRACA&&COPART_PRACA[c.praca]&&COPART_PRACA[c.praca][kA]){kCop=kA;kAmb=true;}}
     const src=(COPART_PRACA&&COPART_PRACA[c.praca]&&COPART_PRACA[c.praca][kCop])||null;
     if(src){
       const key='D|'+c.praca+'|'+kCop; if(vistos.has(key))return; vistos.add(key);
       const get=(g,p)=>{const o=src[g]||{};return o[p]!==undefined?o[p]:o[PROC_ALT[p]];};
-      copCols.push({t:c.label,sub:c.praca,parcial:p=>get('parcial',p),total:p=>get('total',p)});
+      copCols.push({t:c.label,sub:c.praca+(kAmb?' · ambulatorial':''),parcial:p=>get('parcial',p),total:p=>get('total',p)});
     } else if(segDe(c)!=='Adesão'&&COP_IDX[c.plano]!==undefined){
       // sem tabela do Adesão carregada, melhor não mostrar nada do que mostrar a do PME
       const i=COP_IDX[c.plano];const key='T|'+i; if(vistos.has(key))return; vistos.add(key);

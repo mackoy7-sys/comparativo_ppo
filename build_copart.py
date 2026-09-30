@@ -295,6 +295,27 @@ def main():
     for pr in out:
         for p in out[pr]:
             out[pr][p].pop('_prio',None); out[pr][p].pop('_n',None)
+    # --- correcao do RS (CCG) ---------------------------------------------
+    # No RS os quadros "parcial" e "total" vem EMPILHADOS, nao lado a lado como
+    # no resto do pais; o parse_box() le colunas vizinhas e por isso carimbava o
+    # quadro de baixo nas duas faixas (e a coluna do meio em todos os produtos).
+    # Enquanto o parser nao souber ler quadro empilhado, o RS vem da tabela
+    # conferida a mao contra o PDF. Detalhe e travas em corrige_copart_rs.py.
+    try:
+        import corrige_copart_rs as _rs
+        n = 0
+        for pr in _rs.PRACAS:
+            if pr not in out: continue
+            for pl, col in _rs.DESTINO[pr].items():
+                # chave do Empresarial so entra se o quadro do PME trouxe o produto;
+                # a do Individual (' . PF') o DESTINO ja lista por praca
+                if not pl.endswith(' \u00b7 PF') and pl.split(' \u00b7 ')[0] not in out[pr]:
+                    continue
+                out[pr][pl] = _rs.bloco(col); n += 1
+        print('correcao RS aplicada: %d blocos' % n)
+    except Exception as e:
+        print('!! correcao RS NAO aplicada: %s' % e)
+
     json.dump(out,open('/tmp/copart_parsed.json','w'),ensure_ascii=False,indent=1)
     cob=sum(len(v) for v in out.values()); alvo=sum(len(v) for v in mapa.values())
     print(f'\npraças: {len(out)}/{len(mapa)} | produtos: {cob}/{alvo} (herdados: {herd})')
