@@ -68,6 +68,17 @@ UF_NOME = {"acre":"AC","alagoas":"AL","amapa":"AP","amazonas":"AM","bahia":"BA",
   "rio grande do sul":"RS","rondonia":"RO","roraima":"RR","santa catarina":"SC","sao paulo":"SP",
   "sergipe":"SE","tocantins":"TO"}
 
+# Cidade que MAIS DE UMA operadora comercializa: a aba lista as duas (e está
+# certa), mas o roteamento do Cotador precisa de UMA praça — `setdefault` abaixo
+# resolve pela primeira que aparecer, que é arbitrário. Aqui fica a decisão
+# comercial, explícita, para sobreviver a um rebuild.
+#
+#   ibirite|MG — a aba traz Ibirité em "NDI Minas · Divinópolis" E em
+#   "Hapvida - Minas Gerais · Belo Horizonte". Caía em Divinópolis, a ~100 km,
+#   enquanto os vizinhos (Betim, Contagem, Sarzedo, Mário Campos, São Joaquim
+#   de Bicas) já iam para BH. Decisão da Diretoria em 30/09/2026: vende por BH.
+OVERRIDE = {"ibirite|MG": "Belo Horizonte - MG"}
+
 cidades, obs, sem_praca = {}, {}, []
 for bloco in re.finditer(r'<div class="ac-op">(.*?)(?=<div class="ac-op">|$)', pane, re.S):
     b = bloco.group(1)
@@ -97,6 +108,15 @@ for bloco in re.finditer(r'<div class="ac-op">(.*?)(?=<div class="ac-op">|$)', p
             cidades.setdefault(chave, praca)
             if nota:
                 obs[chave] = nota.group(1)
+
+for chave, praca in OVERRIDE.items():
+    if chave not in cidades:
+        raise SystemExit("OVERRIDE para cidade que a aba não lista: %s" % chave)
+    if praca not in pracas:
+        raise SystemExit("OVERRIDE aponta para praça sem tabela: %s" % praca)
+    if cidades[chave] != praca:
+        print(f"override: {chave}  {cidades[chave]} -> {praca}")
+        cidades[chave] = praca
 
 SAIDA.write_text(json.dumps({"cidades": cidades, "obs": obs}, ensure_ascii=False,
                             separators=(",", ":")), encoding="utf-8")
