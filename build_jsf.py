@@ -34,6 +34,7 @@ SRC = "/Users/marcoscorrea/comparativo-ppo"
 AQUI = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(AQUI, "dist")
 NOME = "Cotador HapOn_JSF"
+MARCA = "HapOn_JSF"          # assinatura no folder
 SENHA = sys.argv[sys.argv.index("--senha") + 1] if "--senha" in sys.argv else "haponjsf"
 DADOS = ["catalog.json", "rede.json", "copart.json", "odonto.json", "rede_full.json"]
 ITER = 200_000
@@ -65,6 +66,18 @@ def main():
     assert h.count(">Cotador HapOn<") == 1, "marca do cabeçalho não encontrada"
     h = h.replace(">Cotador HapOn<", ">%s<" % NOME, 1)
     h = h.replace("uso interno comercial", "uso comercial autorizado")
+    # o selo do cabeçalho também é do time interno
+    cab = '<div class="upd">Vendas Digital · '
+    assert h.count(cab) == 1, "selo do cabeçalho não encontrado"
+    h = h.replace(cab, '<div class="upd">%s · ' % MARCA)
+    # o folder assina no canto superior direito; "Vendas Digital" é o time
+    # interno, e quem entrega este folder ao cliente é o parceiro.
+    assert h.count("· Vendas Digital'") == 3, "assinatura do folder não encontrada"
+    h = h.replace("· Vendas Digital'", "· %s'" % MARCA)
+    # e no rodapé do folder, junto da data de emissão
+    rod = "Emitido em ${hoje}.</div>`;"
+    assert h.count(rod) == 1, "rodapé do folder não encontrado"
+    h = h.replace(rod, "Emitido em ${hoje} · %s.</div>`;" % MARCA)
 
     # ---- 2. fora o histórico ----------------------------------------------
     a, b = h.index("/*HIST_INI*/"), h.index("/*HIST_FIM*/") + len("/*HIST_FIM*/")
