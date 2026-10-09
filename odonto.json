@@ -12,6 +12,10 @@
    "Ambulatorial": {
     "cheio": 19.25,
     "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 75.84,
+    "promo": 24.5
    }
   }
  },
@@ -190,6 +194,10 @@
  "Joinville - SC": {
   "Individual": {
    "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
     "cheio": 19.25,
     "promo": 3.85
    }
@@ -388,6 +396,10 @@
    "Ambulatorial": {
     "cheio": 19.25,
     "promo": 3.85
+   },
+   "Hospitalar": {
+    "cheio": 19.25,
+    "promo": 3.85
    }
   }
  },
@@ -442,6 +454,10 @@
  "Teresina - PI": {
   "Individual": {
    "Ambulatorial": {
+    "cheio": 19.25,
+    "promo": 3.85
+   },
+   "Hospitalar": {
     "cheio": 19.25,
     "promo": 3.85
    }
