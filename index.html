@@ -1722,7 +1722,10 @@ async function gerarFolder(){
   const ppoAny=sel.some(isPPO);
   /* pedido de 23/09: os quadros do material NotreDame entram ANTES da rede,
      e só quando há produto NotreDame Saúde na proposta. */
-  const ndHtml=ppoAny?folderNotreDame()+folderLabs(sel):'';
+  const ndHtml=ppoAny?folderNotreDame():'';
+  /* laboratórios DEPOIS dos hospitais (pedido do usuário em 16/10): o cliente
+     olha primeiro onde interna e faz pronto-socorro, depois onde coleta exame. */
+  const labHtml=ppoAny?folderLabs(sel):'';
   const hapAny=sel.some(c=>c.operadora==='Hapvida'&&!isPPO(c)); // só produtos Hapvida contam — concorrentes não tiram a exclusividade PPO
   const mixed=ppoAny&&hapAny;
   let fdLogo,fdSub,fcls;
@@ -1745,6 +1748,7 @@ async function gerarFolder(){
     ${carHtml}
     ${ndHtml}
     ${redeHtml}
+    ${labHtml}
     <div class="fd-foot">Mensalidade = soma de (vidas × preço por faixa etária) por plano. Planos Hapvida com coparticipação parcial; concorrentes em geral sem coparticipação — o valor é apenas a mensalidade, sem o custo de uso. Rede: unidades de internação, pronto-socorro e maternidade credenciadas na praça cotada, conforme a rede vigente (mesma base do painel Rede Full); pode haver unidades não listadas e a rede é sujeita a alteração. Valores referenciais, sujeitos a condições contratuais e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato. Emitido em ${hoje}.</div>`;
   // o folder é o momento em que a cotação virou algo entregue ao cliente
   try{HIST.salvar(rows,tv);}catch(e){}
@@ -2104,11 +2108,26 @@ function folderNotreDame(){
    As 5 colunas de produto são sempre as 5 do material, não só as cotadas — é
    transcrição de quadro comercial, igual a "Diferenciais" logo acima, e o
    vendedor usa para comparar com o que não foi cotado. */
+/* plano do cotador -> coluna do material de laboratório. Casa por `plano` e
+   não por `label`: o label ganhou a variante "(Adesão)" e quebraria o de-para. */
+const LAB_PLANO={'600':0,'700':1,'900':2,'900 Care':3,'Infinity':4};
 function folderLabs(sel){
   const praca=(sel.find(isPPO)||{}).praca||'SP / RMSP';
   const meta=LAB_PRACA[praca]; if(!meta)return '';
-  const lista=LAB[meta.uf]||[]; if(!lista.length)return '';
+  let lista=LAB[meta.uf]||[]; if(!lista.length)return '';
+  /* Só as colunas dos produtos COTADOS (pedido do usuário em 16/10). Antes
+     saíam as 5 do material; numa proposta de 3 produtos, 2 colunas eram de
+     plano que o cliente não está vendo. Dedupe mantendo a ordem do material,
+     porque o mesmo produto pode estar em duas opções (Enf e Apto). */
+  const idx=[...new Set(sel.filter(isPPO).map(c=>LAB_PLANO[c.plano])
+              .filter(i=>i!==undefined))].sort((a,b)=>a-b);
+  if(!idx.length)return '';
+  /* Com a coluna filtrada, linha sem NENHUM ✓ nos produtos cotados vira ruído
+     — some. Com as 5 colunas isso não se fazia, porque a tabela era a
+     transcrição do material; agora ela é a visão da proposta. */
+  const cobre=r=>idx.some(i=>r[2]&(1<<i));
   const cid=new Set(meta.c);
+  lista=lista.filter(cobre);
   const naPraca=lista.filter(r=>cid.has(r[0]));
   /* Mesmo critério da seção de rede hospitalar (REDE_FULL.meta.min_praca): o
      resto do estado só entra quando a praça tem POUCO laboratório próprio.
@@ -2117,25 +2136,25 @@ function folderLabs(sel){
      Santos tem 4 e Americana 3: aí a lista do estado é o que salva a página. */
   const MIN_LAB=15;
   const noEstado=(naPraca.length<MIN_LAB)?lista.filter(r=>!cid.has(r[0])):[];
-  const ncol=1+LAB_COLS.length;
+  const ncol=1+idx.length;
   const marca=(m,i)=>(m&(1<<i))?'<td>✓</td>':'<td class="na">–</td>';
   const secao=(titulo,ls)=>{
     if(!ls.length)return '';
     let html=`<tr class="grp"><td colspan="${ncol}">${_esc(titulo)}</td></tr>`,cur=null;
     ls.forEach(r=>{
       if(r[0]!==cur){cur=r[0];html+=`<tr class="cid"><td colspan="${ncol}">${_esc(_tc(r[0]))}</td></tr>`;}
-      html+=`<tr><td>${_esc(_tc(r[1]))}</td>`+LAB_COLS.map((_,i)=>marca(r[2],i)).join('')+'</tr>';
+      html+=`<tr><td>${_esc(_tc(r[1]))}</td>`+idx.map(i=>marca(r[2],i)).join('')+'</tr>';
     });
     return html;
   };
   const body=secao(praca,naPraca)+secao(naPraca.length?'Demais cidades do estado':'Rede do estado',noEstado);
   const n=naPraca.length+noEstado.length;
-  const th=LAB_COLS.map(c=>`<th>${c}</th>`).join('');
+  const th=idx.map(i=>`<th>${LAB_COLS[i]}</th>`).join('');
   return `<div class="fd-sec">Laboratórios — destaques da rede (${n} unidade${n>1?'s':''})</div>
     <div class="fd-note">Rede própria e credenciada de laboratórios do material NotreDame Saúde
       (${meta.uf==='SP'?'Região Metropolitana de São Paulo e interior':'Rio de Janeiro'}),
       vigência ${LAB_VIG}. As cidades de <b>${_esc(praca)}</b> vêm primeiro.
-      Legenda: <b>✓</b> credenciado para o produto · <b>–</b> não credenciado.
+      Só os produtos desta proposta. Legenda: <b>✓</b> credenciado para o produto · <b>–</b> não credenciado.
       As informações estão sujeitas a alteração; consulte os canais oficiais da operadora.</div>
     <table class="fd-nd fd-lab"><thead><tr><th>Laboratório</th>${th}</tr></thead><tbody>${body}</tbody></table>`;
 }
