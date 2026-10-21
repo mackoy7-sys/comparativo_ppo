@@ -1222,8 +1222,24 @@ function buildMatrix(){
   document.getElementById('matrix').innerHTML=html;
 }
 function planOptGroups(opKey){
+  /* A lista separava só por segmento, e as duas marcas vinham misturadas: o
+     vendedor via "Smart Prime" e "Diamante" na mesma sequência sem saber que uma
+     é rede própria (Hapvida) e a outra é NotreDame Saúde, com rede credenciada e
+     reembolso. Agora o cabeçalho do grupo diz as duas coisas.
+     Só vale para a Hapvida — numa coluna de concorrente a marca é a operadora. */
+  const lista=plansOf(opKey);
+  /* o sufixo só entra onde há as DUAS marcas — na maioria das praças só existe
+     Hapvida, e ali "Empresarial · Hapvida" seria palavra sem informação */
+  const duas=lista.some(c=>c.operadora==='Hapvida'&&isPPO(c))
+          && lista.some(c=>c.operadora==='Hapvida'&&!isPPO(c));
   const seen=[],groups={},order=[];
-  plansOf(opKey).forEach(c=>{const t=segDe(c);const k=t+'|'+c.label;if(seen.includes(k))return;seen.push(k);if(!groups[t]){groups[t]=[];order.push(t);}groups[t].push(c.label);});
+  lista.forEach(c=>{
+    const t=segDe(c), k=t+'|'+c.label;
+    if(seen.includes(k))return; seen.push(k);
+    const g=(duas&&c.operadora==='Hapvida')?(t+' · '+(isPPO(c)?'NotreDame Saúde':'Hapvida')):t;
+    if(!groups[g]){groups[g]=[];order.push(g);}
+    groups[g].push(c.label);
+  });
   return order.map(t=>({tipo:t,labels:groups[t]}));
 }
 function slotBlock(ci,si,x,v){
