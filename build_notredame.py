@@ -146,6 +146,100 @@ REEMB_NOTAS = (
     "condições gerais, que devem ser lidas antes da contratação — www.notredame.com.br"
 )
 
+
+# ============================ LINHA METAIS (21/10/2026) ============================
+# Transcricao das duas pecas que a Diretoria enviou em 20/10: o quadro de
+# diferenciais e os exemplos de reembolso (TNDI) da linha nova.
+MET_DIF_COLS = ["Prata", "Prata Max", "Ouro", "Ouro Max", "Diamante", "Diamante Max"]
+MET_DIF = [
+    ["Assistência em viagem", "Nacional", "Nacional",
+     "Nacional + Internacional USD/€ 60.000", "Nacional + Internacional USD/€ 60.000",
+     "Nacional + Internacional USD/€ 100.000", "Nacional + Internacional USD/€ 300.000"],
+    ["Check-up Titulares ¹", "-", "-", "-", "-", "Sim", "Sim"],
+    ["Check-up Dependentes ¹", "-", "-", "-", "-", "-", "Sim"],
+    ["Concierge de Saúde", "-", "-", "-", "-", "Sim", "Sim"],
+    ["Coleta domiciliar ²", "-", "-", "Sim", "Sim", "Sim", "Sim"],
+    ["Reembolso de consultas e exames", "Até 7 dias úteis", "Até 7 dias úteis",
+     "Até 5 dias úteis", "Até 5 dias úteis", "Até 3 dias úteis", "Até 3 dias úteis"],
+    ["Reembolso de procedimentos", "30 dias (corridos)", "30 dias (corridos)",
+     "10 dias úteis", "10 dias úteis", "10 dias úteis", "10 dias úteis"],
+    ["Reembolso no exterior ³", "Sim", "Sim", "Sim", "Sim", "Sim", "Sim"],
+    ["Retaguarda hospitalar Sírio-Libanês", "-", "-", "-", "-", "Sim", "Sim"],
+    ["Retaguarda hospitalar Albert Einstein", "-", "-", "-", "-", "-", "Sim"],
+    ["Orientação médica por telefone", "Sim", "Sim", "Sim", "Sim", "Sim", "Sim"],
+    ["Médico na Tela — consulta médica por vídeo", "Sim", "Sim", "Sim", "Sim", "Sim", "Sim"],
+    ["Psicólogo na Tela — atendimento psicológico online", "Sim", "Sim", "Sim", "Sim", "Sim", "Sim"],
+    ["Programa de imunização — Vacinas ²", "-", "-", "Sim", "Sim", "Sim", "Sim"],
+    ["Transplante (Extra Rol ANS) ¹", "-", "-", "Coração e Pulmão", "Coração e Pulmão",
+     "Coração, Pulmão e Pâncreas", "Coração, Pulmão e Pâncreas"],
+    ["Cirurgia Refrativa - Miopia", "Conforme Rol ANS", "Conforme Rol ANS",
+     "Acima do grau -3,0 ⁴", "Acima do grau -3,0 ⁴", "Sem limite de grau", "Sem limite de grau"],
+    ["RPG com justificativa médica ⁴", "12 sessões", "12 sessões", "30 sessões",
+     "30 sessões", "40 sessões", "40 sessões"],
+    ["Hidroterapia ⁴", "-", "10 sessões", "30 sessões", "30 sessões", "40 sessões", "40 sessões"],
+    ["Escleroterapia de veias ⁴", "-", "-", "18 sessões", "18 sessões", "25 sessões", "25 sessões"],
+]
+MET_DIF_NOTAS = (
+    "1) Somente nos prestadores indicados pela NotreDame Saúde. | 2) Coleta e Vacina "
+    "Domiciliar são serviços oferecidos por prestadores indicados pela NotreDame Saúde; "
+    "cobertura de vacinas conforme Calendário do Ministério da Saúde. | 3) Reembolso "
+    "limitado ao valor do plano contratado, conforme regras e condições gerais. | "
+    "4) Atendimento na rede de prestadores indicada ou por reembolso, conforme a praça."
+)
+
+# O nivel de reembolso e propriedade do PRODUTO, nao escolha do vendedor:
+# Prata/Prata Max reembolsam so consultas; Ouro/Ouro Max, consultas e honorarios
+# medicos; Diamante/Diamante Max, total. O material traz Ouro e Ouro Max na
+# MESMA coluna — os valores sao iguais nos dois.
+MET_REEMB_COLS = [
+    ["Prata", "parcial · consultas"],
+    ["Prata Max", "parcial · consultas"],
+    ["Ouro / Ouro Max", "parcial · consultas e honorários"],
+    ["Diamante", "total"],
+    ["Diamante Max", "total"],
+]
+MET_REEMB = [
+    {"l": "Consulta", "v": ["90,00", "110,00", "150,00", "250,00", "500,00"]},
+    {"g": "Honorários médicos"},
+    {"l": "Adenoidectomia", "v": ["-", "-", "664,28", "996,42", "1.826,78"]},
+    {"l": "Apendicectomia", "v": ["-", "-", "1.687,35", "2.531,03", "4.640,22"]},
+    {"l": "Artrodese da coluna com instrumentação por segmento",
+     "v": ["-", "-", "3.332,26", "4.998,40", "9.163,73"]},
+    {"l": "Colecistectomia sem colangiografia", "v": ["-", "-", "2.004,98", "3.007,48", "5.513,71"]},
+    {"l": "Colecistectomia sem colangiografia por videolaparoscopia",
+     "v": ["-", "-", "3.070,56", "4.423,06", "7.804,32"]},
+    {"l": "Hérnia de disco cervical - tratamento cirúrgico",
+     "v": ["-", "-", "3.237,81", "4.856,71", "8.903,96"]},
+    {"l": "Hérnia de disco tóraco-lombar - tratamento cirúrgico",
+     "v": ["-", "-", "2.459,14", "3.688,70", "6.762,62"]},
+    {"l": "Histerectomia total - qualquer via", "v": ["-", "-", "2.844,82", "4.267,23", "7.823,25"]},
+    {"l": "Parto (cesariana)", "v": ["-", "-", "2.420,18", "3.630,26", "6.655,48"]},
+    {"l": "Parto (via vaginal)", "v": ["-", "-", "2.060,03", "3.090,04", "5.665,07"]},
+    {"l": "Revascularização do miocárdio", "v": ["-", "-", "4.326,03", "6.489,04", "11.896,57"]},
+    {"g": "Exames e terapias"},
+    {"l": "Consulta ambulatorial por nutricionista", "v": ["-", "-", "-", "101,49", "126,87"]},
+    {"l": "RX - Tórax", "v": ["-", "-", "-", "115,16", "140,53"]},
+    {"l": "TC - Coluna cervical ou dorsal ou lombossacra", "v": ["-", "-", "-", "419,34", "451,79"]},
+    {"l": "TC - Crânio", "v": ["-", "-", "-", "482,98", "524,45"]},
+    {"l": "US - Transvaginal", "v": ["-", "-", "-", "313,51", "380,41"]},
+    {"l": "Hemograma", "v": ["-", "-", "-", "9,76", "9,90"]},
+    {"l": "Mamografia digital bilateral", "v": ["-", "-", "-", "423,32", "502,49"]},
+    {"l": "Endoscopia digestiva alta", "v": ["-", "-", "-", "628,15", "698,82"]},
+    {"l": "RM - Coluna cervical ou dorsal ou lombar", "v": ["-", "-", "-", "912,36", "959,87"]},
+    {"l": "TC - Tórax", "v": ["-", "-", "-", "533,56", "575,03"]},
+    {"l": "Acupuntura por sessão", "v": ["-", "-", "-", "150,99", "174,74"]},
+    {"l": "Sessão de psicoterapia individual", "v": ["-", "-", "-", "316,69", "395,87"]},
+    {"l": "Sessão individual ambulatorial de fonoaudiologia", "v": ["-", "-", "-", "101,49", "126,87"]},
+]
+MET_REEMB_NOTAS = (
+    "Valores expressos em reais (R$), conforme a TNDI (Tabela NotreDame Intermédica). "
+    "O nível de reembolso é característica do produto: Prata e Prata Max reembolsam "
+    "consultas; Ouro e Ouro Max, consultas e honorários médicos; Diamante e Diamante Max, "
+    "reembolso total. Os limites máximos reembolsáveis, em valor ou quantidade, observam o "
+    "contrato e as diretrizes de utilização do Rol da ANS, que pode ser atualizado. "
+    "Leia as condições gerais antes da contratação — www.notredame.com.br"
+)
+
 INI, FIM = "/*ND_INI*/", "/*ND_FIM*/"
 
 
@@ -158,7 +252,13 @@ def bloco():
         + "ND_DIF_NOTAS=" + j(DIF_NOTAS) + ","
         + "ND_REEMB_COLS=" + j(REEMB_COLS) + ","
         + "ND_REEMB=" + j(REEMB) + ","
-        + "ND_REEMB_NOTAS=" + j(REEMB_NOTAS) + ";"
+        + "ND_REEMB_NOTAS=" + j(REEMB_NOTAS) + ","
+        + "ND_MET_DIF_COLS=" + j(MET_DIF_COLS) + ","
+        + "ND_MET_DIF=" + j(MET_DIF) + ","
+        + "ND_MET_DIF_NOTAS=" + j(MET_DIF_NOTAS) + ","
+        + "ND_MET_REEMB_COLS=" + j(MET_REEMB_COLS) + ","
+        + "ND_MET_REEMB=" + j(MET_REEMB) + ","
+        + "ND_MET_REEMB_NOTAS=" + j(MET_REEMB_NOTAS) + ";"
         + FIM
     )
 
