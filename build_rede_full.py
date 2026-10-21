@@ -93,6 +93,19 @@ FIXOS = {
     "900":                  lambda a, c: "P9A",
     "900 Care":             lambda a, c: "P9CA",
     "Infinity":             lambda a, c: "I1A",
+    # Linha Metais (NDI SP/RJ, PME) — carga de 21/10/2026 do Dash Rede Full.
+    # Ate aqui o folder de Prata/Ouro/Diamante saia SEM secao de rede: a chave
+    # nao existia e o rfKey() devolvia null. As chaves abaixo sao as mesmas do
+    # PLANS de ~/rede-full/build_rede.py (lote 15).
+    # Prata e Prata Max tem as duas acomodacoes; Ouro e Diamante so apartamento
+    # -- e o catalogo so os vende em apartamento, entao a cara de enfermaria
+    # nunca e pedida.
+    "Prata":                lambda a, c: "PTA" if _apto(a) else "PTE",
+    "Prata Max":            lambda a, c: "PTMA" if _apto(a) else "PTME",
+    "Ouro":                 lambda a, c: "ORA",
+    "Ouro Max":             lambda a, c: "ORMA",
+    "Diamante":             lambda a, c: "DIA",
+    "Diamante Max":         lambda a, c: "DIMA",
     "Smart Prime":          lambda a, c: "SPRA" if _apto(a) else "SPRE",
     "Smart UP":             lambda a, c: "SUP",
     "Smart Flex":           lambda a, c: "SFX",

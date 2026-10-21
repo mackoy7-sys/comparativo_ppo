@@ -223,8 +223,15 @@ def main():
     shutil.copy2(CAT, bak)
     for e, campo, n in muda:
         e[campo] = {b: n["precos"][b] for b in BANDS}
+    # o id e o que o selectedPlans() usa para saber que dois planos da cotacao
+    # sao diferentes; entrada sem id colide com as outras sem id e some da
+    # lista de cards e do folder (foi o que aconteceu com a linha Metais).
+    pid = max(e["id"] for e in cat)
     for n in criar:
-        cat.append({k: v for k, v in n.items() if k not in ("fonte", "cod")})
+        pid += 1
+        nova = {k: v for k, v in n.items() if k not in ("fonte", "cod")}
+        nova["id"] = pid
+        cat.append(nova)
     json.dump(cat, open(CAT, "w"), ensure_ascii=False)
     print("\ngravado: %d campos atualizados, %d entradas criadas\nbackup: %s"
           % (len(muda), len(criar), bak))

@@ -159,12 +159,17 @@ def main():
     shutil.copy2(CAT, bak)
     for e, n in muda:
         e["precos"] = {b: n["precos"][b] for b in BANDS}
+    # a copia nao pode herdar o id da base (dois planos com o mesmo id), mas
+    # tambem nao pode ficar SEM id: o selectedPlans() deduplica por id, e as
+    # entradas sem id colidem entre si e somem da cotacao. Numera na sequencia.
+    pid = max(e["id"] for e in cat)
     for k, n in criar:
         base = idx[(k[0], k[1], k[2], "Parcial")]
         nova = copy.deepcopy(base)
         nova["coparticipacao"] = k[3]
         nova["precos"] = {b: n["precos"][b] for b in BANDS}
-        nova.pop("id", None)
+        pid += 1
+        nova["id"] = pid
         cat.append(nova)
     json.dump(cat, open(CAT, "w"), ensure_ascii=False)
     print("\ngravado: %d atualizadas, %d criadas\nbackup: %s" % (len(muda), len(criar), bak))
