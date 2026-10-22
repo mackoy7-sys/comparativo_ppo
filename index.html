@@ -1139,12 +1139,24 @@ function odontoFam(c){return c.acomodacao==='Ambulatorial'?'Ambulatorial':'Hospi
    Individual usa ODONTO PROTEÇÃO (R$ 3,85) e o PME 30-99 usa +ODONTO PREMIUM
    NACIONAL cód 9732 (R$ 14,87 promo / R$ 75,84). Por isso a chave é
    praça x TIPO x família — nunca aplicar o valor do PF no PME. */
+/* No EMPRESARIAL o valor dental muda por PORTE, e nao por praça: a tabela cobra
+   R$ 23,25 por vida até 29 vidas e R$ 14,87 de 30 a 99 (Uberaba, R$ 19,63) —
+   é desconto de campanha, não de região. No Individual não há porte. */
+function odontoPorte(c){return (c.vmax&&c.vmax<=29)?'1-29':'30-99';}
+function odontoTab(c){ // o quadro da tabela para este plano, ou null
+  const t=(ODONTO[c.praca]||{})[c.tipo]||{};
+  return ((c.tipo==='Empresarial')?((t[odontoPorte(c)]||{})[odontoFam(c)])
+                                  :t[odontoFam(c)])||null;
+}
 function odontoVal(c){ // R$ por vida/mês (VALOR PROMO)
   if(!temOdonto(c))return 0;
-  const d=((ODONTO[c.praca]||{})[c.tipo]||{})[odontoFam(c)];
-  return d&&d.promo?d.promo:0;
+  const d=odontoTab(c);
+  return (d&&typeof d.promo==='number')?d.promo:0;
 }
-function odontoFalta(c){return temOdonto(c)&&!odontoVal(c);}  // praça sem valor carregado
+/* R$ 0,00 é PREÇO, não ausência: nas praças NDI o odonto sai de graça junto do
+   plano médico. Antes isso caía no mesmo balde de "praça sem valor carregado"
+   e o cotador acusava "Mensalidade incompleta" numa cotação que estava certa. */
+function odontoFalta(c){return temOdonto(c)&&!(odontoTab(c)&&typeof odontoTab(c).promo==='number');}
 function vidasCob(c){const v=vidasDe(c);return BANDS.reduce((s,b)=>s+(v[b]||0),0);}
 function planMed(c){const v=vidasDe(c);return BANDS.reduce((s,b)=>s+(v[b]||0)*(c.precos[b]||0),0);}
 function planOdo(c){return odontoVal(c)*vidasCob(c);}
