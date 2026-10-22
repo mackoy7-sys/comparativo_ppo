@@ -484,6 +484,7 @@
         <span id="cidadeMsg" class="cep-msg"></span>
       </div>
       <div class="ctx-fill"></div>
+      <button class="btn clear" onclick="limparTudo()" title="zera a cotação inteira: praça, CEP, vidas, planos e filtros">Limpar</button>
       <button class="btn clear" onclick="novaCotacao()">Nova cotação</button>
     </div>
     <div id="pracaPicker" class="panel praca-picker" style="display:none">
@@ -1229,6 +1230,10 @@ function refreshTot(){const h=totCol(vidasHMO),p=totCol(vidasPPO);
   const d=document.getElementById('totVidasSplit');
   if(d) d.innerHTML = (h&&p)?`<span style="font-size:11.5px;color:var(--muted)">HMO ${h} · PPO ${p}</span>`:'';}
 function zerar(){BANDS.forEach(b=>{vidasHMO[b]=0;vidasPPO[b]=0;});document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);refreshTot();recompute();}
+/* Limpar (22/10): zera a cotação INTEIRA — praça, CEP, vidas, planos e filtros.
+   Recarga limpa da página: é o único reset que garante estado pristino em todos os
+   controles (porte/MEI/copart/reembolso/modo misto), e nada persiste em storage. */
+function limparTudo(){location.href=location.pathname;}
 function novaCotacao(){BANDS.forEach(b=>{vidasHMO[b]=0;vidasPPO[b]=0;});document.querySelectorAll('#vidasGrid [data-b]').forEach(i=>i.value=0);buildCols();refreshTot();recompute();}
 function buildOpChips(){
   const el=document.getElementById('opChipsCalc');if(!el)return;
