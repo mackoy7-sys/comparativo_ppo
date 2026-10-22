@@ -1164,6 +1164,9 @@ function resolved(ci,si){const col=matrixCols[ci];if(!col)return null;const x=co
    médica"). odonto.json traz esse valor por praça x família de tabela. */
 let ODONTO={};
 function temOdonto(c){return /\+ Odonto/.test((c&&c.label)||'');}
+/* 22/10: nas praças NDI o odonto sai a R$ 0,00 junto do médico — é CORTESIA, não ausência.
+   Mostrar "R$ 0,00" parecia erro; vira "Incluso". Produto sem odonto vira "não incluso". */
+function odoIncluso(c){return temOdonto(c)&&!odontoFalta(c)&&(odontoVal(c)||0)===0;}
 function odontoFam(c){return c.acomodacao==='Ambulatorial'?'Ambulatorial':'Hospitalar';}
 /* O odonto casado com a Médica ¹ MUDA conforme a tabela: em Teresina o
    Individual usa ODONTO PROTEÇÃO (R$ 3,85) e o PME 30-99 usa +ODONTO PREMIUM
@@ -1586,7 +1589,9 @@ function openDetail(id,tipo){
     body+=`<tr><td>Plano de saúde</td><td>${vidasCob(c)}</td><td></td><td>R$ ${fmt(planMed(c))}</td></tr>`;
     body+=odontoFalta(c)
       ? `<tr><td colspan="4" style="color:#a32d2d">⚠ Valor do plano odontológico não carregado para ${c.praca}</td></tr>`
-      : `<tr><td>Plano odontológico</td><td>${vidasCob(c)}</td><td>R$ ${fmt(odontoVal(c))}</td><td>R$ ${fmt(planOdo(c))}</td></tr>`;
+      : (odoIncluso(c)
+        ? `<tr><td>Plano odontológico</td><td>${vidasCob(c)}</td><td>Incluso</td><td>Incluso</td></tr>`
+        : `<tr><td>Plano odontológico</td><td>${vidasCob(c)}</td><td>R$ ${fmt(odontoVal(c))}</td><td>R$ ${fmt(planOdo(c))}</td></tr>`);
   }
   body+=`<tr class="tot"><td>Total</td><td>${totVidas()}</td><td></td><td>R$ ${fmt(planTotal(c))}</td></tr></tbody></table>`;
   document.getElementById('detailBody').innerHTML=body;
@@ -1665,7 +1670,9 @@ async function gerarFolder(){
   const odoSub=r=>{
     if(!temOdonto(r.c))return '';
     if(odontoFalta(r.c))return `<div class="fd-hi-sub warn">⚠ Valor do plano odontológico não carregado para ${r.c.praca} (${SEG_ODO[segDe(r.c)]}) — o total acima cobre apenas a assistência médica.</div>`;
-    return `<div class="fd-hi-sub">Plano de saúde <b>R$ ${fmt(planMed(r.c))}</b> · Plano odontológico <b>R$ ${fmt(planOdo(r.c))}</b> (R$ ${fmt(odontoVal(r.c))}/vida × ${vidasCob(r.c)})</div>`;
+    return odoIncluso(r.c)
+      ? `<div class="fd-hi-sub">Plano de saúde <b>R$ ${fmt(planMed(r.c))}</b> · Plano odontológico <b>Incluso</b> (cortesia nesta praça)</div>`
+      : `<div class="fd-hi-sub">Plano de saúde <b>R$ ${fmt(planMed(r.c))}</b> · Plano odontológico <b>R$ ${fmt(planOdo(r.c))}</b> (R$ ${fmt(odontoVal(r.c))}/vida × ${vidasCob(r.c)})</div>`;
   };
   let hi;
   if(hib){
@@ -1694,7 +1701,7 @@ async function gerarFolder(){
   const priceBody=BANDS.map(b=>`<tr class="${vidas[b]>0?'used':''}"><td>${b}${vidas[b]>0?` <span style="color:#5f5e5a;font-weight:400">(${vidas[b]} vida${vidas[b]>1?'s':''})</span>`:''}</td>`+cols.map(c=>{const q=(vidasDe(c)[b]||0);return `<td>R$ ${fmt(c.precos[b]||0)}${split&&q>0?` <span style="font-size:9.5px;color:#666">(${q})</span>`:''}</td>`;}).join('')+`</tr>`).join('');
   const temOdo=cols.some(temOdonto);
   const linhaOdo=temOdo?`<tr><td>Plano de saúde</td>`+cols.map(c=>`<td>R$ ${fmt(planMed(c))}</td>`).join('')+`</tr>`
-    +`<tr><td>Plano odontológico</td>`+cols.map(c=>`<td>${temOdonto(c)?(odontoFalta(c)?'—':'R$ '+fmt(planOdo(c))):'—'}</td>`).join('')+`</tr>`:'';
+    +`<tr><td>Plano odontológico</td>`+cols.map(c=>`<td>${temOdonto(c)?(odontoFalta(c)?'—':(odoIncluso(c)?'Incluso':'R$ '+fmt(planOdo(c)))):'<span style="color:#94a3b8">não incluso</span>'}</td>`).join('')+`</tr>`:'';
   const priceQt=`<tr class="grp"><td colspan="${cols.length+1}">${hib?`Cada plano sobre as vidas da sua coluna — contrato misto de ${tv} vida(s)`:`Mensalidade para a distribuição de vidas informada (${tv} vida(s))`}</td></tr>`+linhaOdo+`<tr class="best"><td>${hib?'Subtotal do plano':'Total mensal'}</td>`+cols.map(c=>`<td>R$ ${fmt(planTotal(c))}</td>`).join('')+`</tr>`
     +(hib?`<tr class="best"><td colspan="${cols.length+1}" style="text-align:right">Total do contrato (${tv} vidas)${cbs.length>1?' — combinação mais econômica':''}: R$ ${fmt(cbs[0].total)}</td></tr>`:'');
   const priceTbl=`<table class="fd-tbl"><thead><tr><th>Faixa etária</th>${colHead}</tr></thead><tbody>${priceBody}${priceQt}</tbody></table>`;
@@ -2157,11 +2164,6 @@ function folderNotreDame(cols){
   const temMet=lista.some(c=>isMetais(c));
   const temTrad=lista.some(c=>isPPO(c)&&!isMetais(c));
   const cel=v=>(v==='-'||v==='--')?'<td class="na">–</td>':`<td>${v}</td>`;
-  /* 22/10: cada quadro sai só com as COLUNAS dos produtos cotados (mesma decisão dos
-     laboratórios em 16/10) — de-para por `plano` + tipo de reembolso (RC = parcial);
-     900 Care usa a coluna do Premium 900, a referência do material. Linha que fica
-     toda "–" nas colunas cotadas sai; grupo sem nenhuma linha sai junto. Sem de-para
-     (cotação vazia ou plano desconhecido), o quadro volta ao material completo. */
   const uniq=a=>[...new Set(a)].sort((x,y)=>x-y);
   const parc=c=>(reembTipoDe(c)||'').toLowerCase().startsWith('parc');
   const DIF_IDX={'600':0,'700':1,'900':2,'900 Care':2,'Infinity':3};
@@ -2174,34 +2176,61 @@ function folderNotreDame(cols){
   const selMetRe=uniq(met.map(c=>MET_RE_IDX[c.plano]).filter(i=>i!=null));
   const pick=(arr,idx)=>idx.length?idx.map(i=>arr[i]):arr;
   const vazia=v=>v==='-'||v==='--'||v===''||v==null;
-  const quadro=(titDif,dcols,dlin,dnotas,titRe,rcols,rlin,rnotas,rotRe,di,ri)=>{
-    const dc=pick(dcols,di), rc=pick(rcols,ri);
-    const dl=dlin.map(l=>[l[0]].concat(pick(l.slice(1),di))).filter(l=>!l.slice(1).every(vazia));
-    let rl=rlin.map(r=>r.g?r:{l:r.l,v:pick(r.v,ri)}).filter(r=>r.g||!r.v.every(vazia));
+  const supStrip=s=>String(s).replace(/[¹²³⁴⁵⁶⁷⁸⁹]/g,'').replace(/\s+/g,' ').trim();
+  const tabDif=(tit,dc,dl,notas)=>`<div class="fd-sec">${tit}</div>
+      <table class="fd-nd"><thead><tr><th>Coberturas</th>${dc.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${dl.map(l=>`<tr><td>${l[0]}</td>${l.slice(1).map(cel).join('')}</tr>`).join('')}</tbody></table>
+      <div class="fd-note" style="font-size:8.6px;line-height:1.45">${notas}</div>`;
+  const tabRe=(tit,rc,rlin,notas,rot)=>{
+    let rl=rlin.map(r=>r.g?r:{l:r.l,v:r.v}).filter(r=>r.g||!r.v.every(vazia));
     rl=rl.filter((r,i)=>!r.g||(rl[i+1]&&!rl[i+1].g));
-    const th=dc.map(c=>`<th>${c}</th>`).join('');
-    const dif=dl.map(l=>`<tr><td>${l[0]}</td>${l.slice(1).map(cel).join('')}</tr>`).join('');
-    const rth=rc.map(c=>`<th>${c[0]}<small>${c[1]}</small></th>`).join('');
-    const re=rl.map(r=>r.g
-      ? `<tr class="grp"><td colspan="${rc.length+1}">${r.g}</td></tr>`
-      : `<tr><td>${r.l}</td>${r.v.map(cel).join('')}</tr>`).join('');
-    return `<div class="fd-sec">${titDif}</div>
-      <table class="fd-nd"><thead><tr><th>Coberturas</th>${th}</tr></thead><tbody>${dif}</tbody></table>
-      <div class="fd-note" style="font-size:8.6px;line-height:1.45">${dnotas}</div>
-      <div class="fd-sec">${titRe}</div>
-      <table class="fd-nd"><thead><tr><th>${rotRe}</th>${rth}</tr></thead><tbody>${re}</tbody></table>
-      <div class="fd-note" style="font-size:8.6px;line-height:1.45">${rnotas}</div>`;
+    return `<div class="fd-sec">${tit}</div>
+      <table class="fd-nd"><thead><tr><th>${rot}</th>${rc.map(c=>`<th>${c[0]}<small>${c[1]}</small></th>`).join('')}</tr></thead>
+      <tbody>${rl.map(r=>r.g?`<tr class="grp"><td colspan="${rc.length+1}">${r.g}</td></tr>`:`<tr><td>${r.l}</td>${r.v.map(cel).join('')}</tr>`).join('')}</tbody></table>
+      <div class="fd-note" style="font-size:8.6px;line-height:1.45">${notas}</div>`;
   };
+  const filtraDif=(dlin,idx)=>dlin.map(l=>[l[0]].concat(pick(l.slice(1),idx))).filter(l=>!l.slice(1).every(vazia));
+  const filtraRe=(rlin,idx)=>rlin.map(r=>r.g?r:{l:r.l,v:pick(r.v,idx)});
   const dois=temMet&&temTrad;
   let out='';
-  if(temMet)out+=quadro(dois?'Diferenciais — Linha Metais':'Diferenciais',
-    ND_MET_DIF_COLS,ND_MET_DIF,ND_MET_DIF_NOTAS,
-    dois?'Exemplos de reembolso — Linha Metais':'Exemplos de reembolso',
-    ND_MET_REEMB_COLS,ND_MET_REEMB,ND_MET_REEMB_NOTAS,'Descrição TNDI',selMetDif,selMetRe);
-  if(temTrad||!temMet)out+=quadro(dois?'Diferenciais — Linha Tradicional':'Diferenciais',
-    ND_DIF_COLS,ND_DIF,ND_DIF_NOTAS,
-    dois?'Exemplos de reembolso — Linha Tradicional':'Exemplos de reembolso',
-    ND_REEMB_COLS,ND_REEMB,ND_REEMB_NOTAS,'Descrição TUSS',selTradDif,selTradRe);
+  if(dois){
+    /* 22/10: Diferenciais em UM quadro só (pedido do usuário) — colunas Metais + Tradicional
+       lado a lado; linhas casadas por de-para curado (grafia, notas de rodapé e sinônimos dos
+       dois materiais). Exemplos de reembolso seguem separados: as listas de procedimentos
+       (TNDI × TUSS) são diferentes de verdade. */
+    const can=s=>supStrip(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[–—]/g,'-').trim();
+    const DEPARA={'reembolso de consultas e exames':'reembolso de consultas e exames simples',
+      'reembolso de procedimentos':'reembolso demais procedimentos',
+      'retaguarda hospitalar sirio-libanes':'retaguarda hospital sirio libanes',
+      'retaguarda hospitalar albert einstein':'retaguarda hospital albert einstein',
+      'orientacao medica por telefone':'aconselhamento medico telefonico',
+      'transplante (extra rol ans)':'transplantes (extra-rol)'};
+    const key=s=>{const k=can(s);return DEPARA[k]||k;};
+    const dcM=pick(ND_MET_DIF_COLS,selMetDif), dcT=pick(ND_DIF_COLS,selTradDif);
+    const nM=dcM.length, nT=dcT.length;
+    const mapa=new Map();
+    ND_DIF.forEach(l=>mapa.set(key(l[0]),{lab:supStrip(l[0]),t:pick(l.slice(1),selTradDif),m:null}));
+    ND_MET_DIF.forEach(l=>{const k=key(l[0]),mv=pick(l.slice(1),selMetDif);
+      const r=mapa.get(k); if(r){r.m=mv;if(!r.lab)r.lab=supStrip(l[0]);}
+      else mapa.set(k,{lab:supStrip(l[0]),t:null,m:mv});});
+    const linhas=[...mapa.values()]
+      .map(r=>[r.lab].concat(r.m||Array(nM).fill('-')).concat(r.t||Array(nT).fill('-')))
+      .filter(l=>!l.slice(1).every(vazia));
+    out+=tabDif('Diferenciais',dcM.concat(dcT),linhas,
+      '<b>Notas — Linha Metais:</b> '+ND_MET_DIF_NOTAS+'<br><b>Notas — Linha Tradicional:</b> '+ND_DIF_NOTAS);
+    out+=tabRe('Exemplos de reembolso — Linha Metais',pick(ND_MET_REEMB_COLS,selMetRe),
+      filtraRe(ND_MET_REEMB,selMetRe),ND_MET_REEMB_NOTAS,'Descrição TNDI');
+    out+=tabRe('Exemplos de reembolso — Linha Tradicional',pick(ND_REEMB_COLS,selTradRe),
+      filtraRe(ND_REEMB,selTradRe),ND_REEMB_NOTAS,'Descrição TUSS');
+    return out;
+  }
+  if(temMet){
+    out+=tabDif('Diferenciais',pick(ND_MET_DIF_COLS,selMetDif),filtraDif(ND_MET_DIF,selMetDif),ND_MET_DIF_NOTAS);
+    out+=tabRe('Exemplos de reembolso',pick(ND_MET_REEMB_COLS,selMetRe),filtraRe(ND_MET_REEMB,selMetRe),ND_MET_REEMB_NOTAS,'Descrição TNDI');
+  }else{
+    out+=tabDif('Diferenciais',pick(ND_DIF_COLS,selTradDif),filtraDif(ND_DIF,selTradDif),ND_DIF_NOTAS);
+    out+=tabRe('Exemplos de reembolso',pick(ND_REEMB_COLS,selTradRe),filtraRe(ND_REEMB,selTradRe),ND_REEMB_NOTAS,'Descrição TUSS');
+  }
   return out;
 }
 
