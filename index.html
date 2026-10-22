@@ -845,8 +845,16 @@ function cidadeIndice(){
   return CIDADE_IX;
 }
 let cidadeSel=-1;
+/* O sufixo " - UF" sai da busca ANTES de normalizar. Sem isso, _n() trocava o
+   hífen por espaço e "Fortaleza - CE" virava a consulta "fortaleza ce", que não
+   casa com nada — o índice guarda só "fortaleza". Resultado (reportado em
+   21/10 com print): o vendedor digitava "Fortaleza - CE", levava "cidade não
+   encontrada no catálogo" e a praça ficava parada na anterior. Pior: "Cidade -
+   UF" é exatamente o texto que o próprio cotador escreve no campo depois de uma
+   escolha bem-sucedida, então bastava reconferir o campo para ele se negar. */
 function cidadeMatches(){
-  const q=_n(document.getElementById('cidadeInput').value||'');
+  const q=_n((document.getElementById('cidadeInput').value||'')
+             .replace(/\s*-\s*[A-Za-z]{2}\s*$/,''));
   const ix=cidadeIndice();
   if(!q) return ix.slice(0,60);
   /* começa-com antes de contém: digitando "san", Santos vem antes de Feira de Santana */
@@ -872,7 +880,20 @@ function cidadeConfere(){
   const txt=(inp.value||'').trim();
   if(!txt){inp.classList.remove('pend'); if(m){m.className='cep-msg';m.innerHTML='';} return;}
   const alvo=_n(txt.replace(/\s*-\s*[A-Z]{2}$/,''));
-  if(cidadeIndice().some(x=>x.busca===alvo&&x.praca===pracaSel)){inp.classList.remove('pend');return;}
+  /* Cidade que JÁ pertence à praça em uso (reportado em 21/10: digitar
+     "Guarulhos" com SP / RMSP selecionada não mexia em nada). A praça está
+     certa — a RMSP cobre os 39 municípios —, mas sair daqui calado, sem
+     normalizar o texto e sem confirmar, é indistinguível de "ignorou o que eu
+     digitei". Agora confirma igual ao clique na lista. */
+  const dentro=cidadeIndice().find(x=>x.busca===alvo&&x.praca===pracaSel);
+  if(dentro){
+    inp.classList.remove('pend');
+    inp.value=dentro.nome+' - '+dentro.uf;
+    if(m){m.className='cep-msg ok';
+      m.innerHTML=dentro.propria?('praça <b>'+dentro.praca+'</b>')
+                                :(dentro.nome+' → praça <b>'+dentro.praca+'</b>');}
+    return;
+  }
   const ms=cidadeMatches();
   const exatos=ms.filter(x=>x.busca===alvo);
   if(exatos.length===1||ms.length===1){inp.classList.remove('pend');cidadeEscolhe(ms.indexOf(exatos[0]||ms[0]));return;}
