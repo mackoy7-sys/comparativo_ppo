@@ -773,12 +773,20 @@ function buildFilialChips(){
   const el=document.getElementById('filialChips'); if(!el) return;
   el.innerHTML=FILIAIS.map(f=>{const n=PRACAS.filter(p=>pracaRegiao(p)===f).length;
     return `<div class="chip ${filialSel===f?'active':''}" data-fil="${f}">${f} <small style="opacity:.6">(${n})</small></div>`;}).join('');
-  el.querySelectorAll('[data-fil]').forEach(e=>e.onclick=()=>{limparCEP();setFilial(e.dataset.fil);});
+  el.querySelectorAll('[data-fil]').forEach(e=>e.onclick=()=>setFilial(e.dataset.fil));
 }
+/* Clicar na FILIAL apenas FILTRA a lista de praças — não troca a praça cotada.
+   Antes ele puxava pracaSel para a primeira praça da região (`list[0]`), e o
+   reconcileSel apagava em seguida o plano escolhido, porque ele não existe na
+   praça nova. Quem clicava "Sudeste" para procurar outra praça perdia a cotação
+   inteira e caía numa praça que não tinha escolhido — o "efeito limpar"
+   reportado em 21/10. Medido: Fortaleza + Nosso Plano/Enfermaria virava
+   SP / RMSP com o plano em branco e o campo de cidade vazio.
+   Agora a praça só muda quando se clica numa PRAÇA. Enquanto a região listada
+   for outra, nenhum chip de praça fica aceso — e o resumo segue mostrando a
+   praça em uso, que é a informação que importa para não cotar errado. */
 function setFilial(f){ if(filialSel===f) return; filialSel=f;
-  const list=pracasDaFilial();
-  if(!list.includes(pracaSel)){ pracaSel=list[0]||pracaSel; reconcileSel(); }
-  buildFilialChips(); buildPracaChips(); recompute();
+  buildFilialChips(); buildPracaChips();
 }
 function buildPracaChips(){
   const el=document.getElementById('pracaChips'); if(!el) return;
