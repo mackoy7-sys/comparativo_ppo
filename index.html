@@ -62,6 +62,27 @@
   .btn.solid{background:var(--navy);color:#fff;border-color:var(--navy)} .btn.solid:hover{background:var(--hap);border-color:var(--hap);color:#fff}
   /* matrix */
   .matrix-wrap{overflow-x:auto}
+  /* ----- Hospital x planos ----- */
+  .hx-head{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:4px 0 10px;background:#fbfcfe}
+  .hx-head h3{margin:0 0 3px;font-size:16px;color:var(--navy)}
+  .hx-head div{font-size:12.5px;color:var(--muted)}
+  .hx-fora{margin-top:6px;color:#8a6d1f;background:#fdf6e3;border:1px solid #ecd9a4;border-radius:7px;padding:6px 9px}
+  .hx-nota{font-size:12px;color:var(--muted);margin:8px 0}
+  .hx-praca{margin:14px 0 6px;font-weight:700;font-size:13.5px;color:var(--navy);
+            border-left:3px solid var(--hap);padding-left:8px}
+  /* a tabela tem até 10 colunas de faixa: rola na horizontal em vez de
+     espremer, e o min-width:0 do pai evita que ela estoure o painel no mobile */
+  .hx-wrap{overflow-x:auto;min-width:0;border:1px solid var(--line);border-radius:10px}
+  table.hx-tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:720px}
+  table.hx-tbl th,table.hx-tbl td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+  table.hx-tbl thead th{background:#f7f9fc;color:var(--navy);font-weight:700;position:sticky;top:0}
+  table.hx-tbl td.num,table.hx-tbl th.num{text-align:right;font-variant-numeric:tabular-nums}
+  table.hx-tbl tbody tr:hover{background:#fffaf4}
+  table.hx-tbl .hx-serv{font-weight:700;color:var(--hap);font-size:11.5px}
+  #pane-hosp .cid-sug{left:0;right:auto;min-width:320px}
+  .hx-chk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);
+          white-space:nowrap;padding:8px 0}
+  .hx-chk input{width:15px;height:15px;accent-color:var(--hap)}
   table.matrix{width:100%;border-collapse:separate;border-spacing:6px;table-layout:fixed;min-width:680px}
   table.matrix th.rowlabel{width:120px;text-align:right;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;padding-right:8px;background:none}
   table.matrix .ophead{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--navy);border-radius:8px;padding:7px 12px;color:#fff}
@@ -448,6 +469,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="calc" onclick="switchTab('calc')">Calculadora de cotação</button>
     <button class="tab" data-tab="rede" onclick="switchTab('rede')">Rede de atendimento</button>
+    <button class="tab" data-tab="hosp" onclick="switchTab('hosp')">Hospital × planos</button>
     <button class="tab" data-tab="area" onclick="switchTab('area')">Área de comercialização</button>
     <button class="tab" data-tab="hist" onclick="switchTab('hist')">Cotações salvas</button>
   </div>
@@ -578,6 +600,59 @@
 
 
   <!-- ============ TAB ÁREA DE COMERCIALIZAÇÃO ============ -->
+  <!-- ============ TAB HOSPITAL x PLANOS ============
+       Pedido de 04/11: escolher um hospital e ver em QUAIS PLANOS ele está e
+       QUANTO custam. É a pergunta do cliente invertida — ele não pergunta
+       "o que o Advance 700 cobre", pergunta "meu médico é do Einstein, qual
+       plano me atende lá". -->
+  <div class="tabpane" id="pane-hosp">
+    <div class="panel">
+      <div class="subh-row">
+        <div>
+          <h2>Hospital × planos</h2>
+          <div class="desc" style="margin-bottom:0">Escolha o hospital e veja em que planos ele está credenciado e quanto custam. Informando a idade, sai só a faixa daquela pessoa.</div>
+        </div>
+      </div>
+      <div class="rede-filters" style="margin-bottom:10px">
+        <div class="fgroup cid-grp" style="flex:1;position:relative">
+          <label>Hospital</label>
+          <input class="search" id="hospInput" placeholder="digite o nome do hospital…" autocomplete="off"
+                 oninput="hospSugestoes()" onfocus="hospSugestoes()" onkeydown="hospTecla(event)">
+          <div id="hospSug" class="cid-sug" style="display:none"></div>
+        </div>
+        <div class="fgroup" style="max-width:230px">
+          <label>Praça do cliente</label>
+          <select class="search" id="hospPraca" onchange="hospRender()"></select>
+        </div>
+        <div class="fgroup" style="max-width:170px">
+          <label>Segmento</label>
+          <select class="search" id="hospSeg" onchange="hospRender()">
+            <option value="">Todos</option>
+            <option value="Empresarial">Empresarial (PME)</option>
+            <option value="Individual">Individual / Familiar</option>
+            <option value="Adesão">Coletivo por Adesão</option>
+          </select>
+        </div>
+        <div class="fgroup" style="max-width:110px">
+          <label>Vidas (opc.)</label>
+          <input class="search" id="hospVidas" type="number" min="1" max="99" placeholder="ex.: 3"
+                 oninput="hospRender()">
+        </div>
+        <div class="fgroup" style="max-width:140px">
+          <label>Idade (opcional)</label>
+          <input class="search" id="hospIdade" type="number" min="0" max="120" placeholder="ex.: 34"
+                 oninput="hospRender()">
+        </div>
+        <div class="fgroup" style="max-width:120px"><label>&nbsp;</label>
+          <label class="hx-chk"><input type="checkbox" id="hospMei" onchange="hospRender()"> incluir MEI</label></div>
+        <div class="fgroup"><label>&nbsp;</label>
+          <button class="btn clear" onclick="hospLimpa()">Limpar</button></div>
+      </div>
+      <div class="rede-aviso" id="hospAviso">Carregando a rede — pode levar alguns segundos.</div>
+      <div id="hospResult"></div>
+    </div>
+  </div>
+
   <div class="tabpane" id="pane-area">
     <div class="panel">
       <h2>Área de Comercialização — Governança Comercial Varejo Brasil</h2>
@@ -693,9 +768,12 @@ function switchTab(t){
   document.getElementById('pane-calc').classList.toggle('active',t==='calc');
   document.getElementById('pane-rede').classList.toggle('active',t==='rede');
   document.getElementById('pane-area').classList.toggle('active',t==='area');
+  const phz=document.getElementById('pane-hosp');
+  if(phz)phz.classList.toggle('active',t==='hosp');
   const ph=document.getElementById('pane-hist');
   if(ph)ph.classList.toggle('active',t==='hist');
   if(t==='rede'){loadRede();}
+  if(t==='hosp'){hospPrepara();}
   if(t==='hist'){try{HIST.render();}catch(e){}}
 }
 
@@ -2343,6 +2421,245 @@ function _esc(t){return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 const _TC_MIN=new Set(['e','de','da','do','das','dos','em','no','na']);
 function _tc(t){return (t||'').toLowerCase().replace(/(^|[\s\/\-\(])([a-zà-ú]+)/g,
   (m,a,w)=>a+((a&&_TC_MIN.has(w))?w:w.charAt(0).toUpperCase()+w.slice(1)));}
+
+/* ===================== HOSPITAL x PLANOS (04/11/2026) =====================
+   O vendedor ouve "meu médico atende no Einstein" e precisa saber QUAL plano
+   leva o cliente até lá e quanto custa. Esta aba responde isso: hospital ->
+   planos -> preço.
+
+   O cruzamento usa as duas bases que o Cotador já carrega, sem inventar dado:
+
+     rede_full.json  unidades[].p  = {chave de plano -> bitmask de serviço}
+                     planos        = {praça|plano|acomodação|obst -> chave}
+     catalog.json    preço por praça x plano x acomodação
+
+   A praça que vale aqui é a DO CLIENTE, não a do hospital. Essa foi a lição do
+   Sírio-Libanês de Brasília: ele é coberto só pela chave do Infinity, que não
+   se vende em Brasília — quem chega lá é o cliente que comprou Infinity em São
+   Paulo. Recortar pelas praças da cidade do hospital, como o folder faz, dava
+   "nenhum plano" justamente no caso que mais interessa ao vendedor.
+
+   Então o seletor de praça é do vendedor (começa na praça da calculadora), e a
+   pergunta que a tela responde é: "vendendo em X, que planos levam meu cliente
+   a este hospital?". Isso também evita o paredão: sem o recorte por praça, um
+   pronto atendimento da Grande SP devolvia 1.297 linhas de quatro praças.
+
+   O rodapé diz em quantas OUTRAS praças o hospital também é atendido, para o
+   vendedor saber que existe resposta ao trocar a praça.                     */
+let HOSP_IX=null, HOSP_REV=null, HOSP_SEL=null, hospSelIdx=-1;
+
+function hospPracaSel(){
+  const el=document.getElementById('hospPraca'); if(!el)return null;
+  if(!el.options.length){
+    el.innerHTML=PRACAS.map(p=>`<option value="${_esc(p)}">${_esc(p)}</option>`).join('');
+    el.value=pracaSel||PRACAS[0];
+  }
+  return el.value;
+}
+function hospPrepara(){
+  hospPracaSel();
+  const av=document.getElementById('hospAviso');
+  if(REDE_FULL&&REDE_FULL.unidades){ if(av)av.style.display='none'; return; }
+  if(av){av.style.display='';av.textContent='Carregando a rede — pode levar alguns segundos.';}
+  ensureRedeFull().then(ok=>{
+    if(!av)return;
+    if(ok){av.style.display='none';}
+    else{av.textContent='Não consegui carregar a rede agora. Tente de novo em instantes.';}
+  });
+}
+
+/* chave de plano -> [[praça, plano, acomodação, obst], ...] (o inverso do mapa) */
+function hospRev(){
+  if(HOSP_REV)return HOSP_REV;
+  const r={};
+  for(const k in REDE_FULL.planos){
+    const [praca,plano,acom,obst]=k.split('|');
+    (r[REDE_FULL.planos[k]]=r[REDE_FULL.planos[k]]||[]).push([praca,plano,acom,obst]);
+  }
+  return HOSP_REV=r;
+}
+
+/* (uf,cidade) -> praças que atendem ali */
+let HOSP_CID=null;
+function hospPracasDaCidade(uf,cid){
+  if(!HOSP_CID){
+    HOSP_CID={};
+    for(const nome in REDE_FULL.pracas){const d=REDE_FULL.pracas[nome];
+      d.cidades.forEach(c=>{const k=d.uf+'|'+c;(HOSP_CID[k]=HOSP_CID[k]||[]).push(nome);});}
+  }
+  return HOSP_CID[uf+'|'+cid]||null;
+}
+
+function hospIndice(){
+  if(HOSP_IX)return HOSP_IX;
+  HOSP_IX=REDE_FULL.unidades.map((u,i)=>({i,busca:_n(u.n),nome:_tc(u.n),
+    cidade:_tc(u.c),uf:u.u,bairro:u.b?_tc(u.b):'',rede:u.r||''}))
+    .sort((a,b)=>a.nome.localeCompare(b.nome));
+  return HOSP_IX;
+}
+
+function hospMatches(){
+  if(!(REDE_FULL&&REDE_FULL.unidades))return [];
+  const q=_n(document.getElementById('hospInput').value||'');
+  const ix=hospIndice();
+  if(!q)return ix.slice(0,60);
+  const a=[],b=[];
+  ix.forEach(x=>{const i=x.busca.indexOf(q); if(i===0)a.push(x); else if(i>0)b.push(x);});
+  return a.concat(b).slice(0,60);
+}
+
+function hospSugestoes(){
+  const box=document.getElementById('hospSug'); if(!box)return;
+  if(!(REDE_FULL&&REDE_FULL.unidades)){hospPrepara();return;}
+  const ms=hospMatches(); hospSelIdx=-1;
+  if(!ms.length){box.innerHTML='<div class="vazio">Nenhum hospital com esse nome na rede.</div>';box.style.display='block';return;}
+  box.innerHTML=ms.map((x,i)=>`<div class="it" data-i="${i}" onclick="hospEscolhe(${i})"><b>${_esc(x.nome)}</b><small>${_esc(x.cidade)} - ${x.uf}${x.bairro?' · '+_esc(x.bairro):''}</small></div>`).join('');
+  box.style.display='block';
+}
+function hospFecha(){const b=document.getElementById('hospSug');if(b)b.style.display='none';hospSelIdx=-1;}
+function hospTecla(e){
+  const box=document.getElementById('hospSug');
+  const its=box?[...box.querySelectorAll('.it')]:[];
+  if(e.key==='Escape'){hospFecha();return;}
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    if(!its.length){hospSugestoes();return;} e.preventDefault();
+    hospSelIdx=(hospSelIdx+(e.key==='ArrowDown'?1:-1)+its.length)%its.length;
+    its.forEach((el,i)=>el.classList.toggle('sel',i===hospSelIdx));
+    its[hospSelIdx].scrollIntoView({block:'nearest'});return;
+  }
+  if(e.key==='Enter'){e.preventDefault();hospEscolhe(hospSelIdx>=0?hospSelIdx:0);}
+}
+function hospEscolhe(i){
+  const x=hospMatches()[i]; if(!x)return;
+  HOSP_SEL=x.i;
+  document.getElementById('hospInput').value=x.nome+' - '+x.cidade+'/'+x.uf;
+  hospFecha(); hospRender();
+}
+function hospLimpa(){
+  HOSP_SEL=null;
+  document.getElementById('hospInput').value='';
+  document.getElementById('hospIdade').value='';
+  document.getElementById('hospVidas').value='';
+  document.getElementById('hospSeg').value='';
+  document.getElementById('hospMei').checked=false;
+  document.getElementById('hospResult').innerHTML='';
+  hospFecha();
+}
+
+/* idade -> faixa etária da tabela. Fora de 0..120 vale como "não informada",
+   para um dígito errado não esconder a tabela inteira sem explicação. */
+function hospFaixa(){
+  const v=(document.getElementById('hospIdade')||{}).value;
+  if(v===''||v==null)return null;
+  const n=parseInt(v,10);
+  if(isNaN(n)||n<0||n>120)return null;
+  if(n>=59)return BANDS[9];
+  return BANDS[Math.min(9,Math.max(0,[18,23,28,33,38,43,48,53,58].findIndex(t=>n<=t)))];
+}
+
+function hospRender(){
+  const el=document.getElementById('hospResult'); if(!el)return;
+  if(HOSP_SEL==null||!(REDE_FULL&&REDE_FULL.unidades)){el.innerHTML='';return;}
+  const u=REDE_FULL.unidades[HOSP_SEL], rev=hospRev();
+  const praca=hospPracaSel();
+  const faixa=hospFaixa();
+
+  /* (praça|plano|acomodação|obst) -> serviços que ESTE hospital tem naquele
+     plano. O mesmo hospital pode internar num plano e só fazer PS noutro — é
+     o que a coluna "Atende" mostra. */
+  const cob={}, pracasQueAlcancam=new Set();
+  for(const k in u.p){
+    const m=u.p[k]; if(!(m&7))continue;
+    (rev[k]||[]).forEach(([pr,plano,acom,obst])=>{
+      pracasQueAlcancam.add(pr);
+      if(pr!==praca)return;
+      const kk=plano+'|'+acom+'|'+obst;
+      cob[kk]=(cob[kk]||0)|m;
+    });
+  }
+
+  /* cruza com o catálogo. A chave da Rede Full usa `plano`, não `label` — e um
+     mesmo `plano` tem vários labels ("+ Odonto", "(PF)", "(Adesão)"), que são
+     produtos diferentes e merecem linha própria. */
+  const seg=(document.getElementById('hospSeg')||{}).value||'';
+  const nv=parseInt((document.getElementById('hospVidas')||{}).value,10);
+  const temVidas=!isNaN(nv)&&nv>0;
+  const comMei=!!(document.getElementById('hospMei')||{}).checked;
+
+  /* O "+ Odonto" NÃO vira linha própria: é a mesma assistência médica com o
+     dental contratado junto. Nas praças NDI o preço médico é até idêntico
+     (o odonto sai a R$ 0,00), então duas linhas iguais só dobravam a tabela.
+     Vira uma COLUNA "Odonto", com o valor por vida — que é o que o cliente
+     pergunta depois de escolher o plano. */
+  const linhas=[], odoDe={};
+  CATALOG.forEach(c=>{
+    if(c.operadora!=='Hapvida')return;
+    if((c.praca||'SP / RMSP')!==praca)return;
+    const obst=/s\/ Obstetrícia/.test(c.label||'')?'SO':'CO';
+    const m=cob[c.plano+'|'+c.acomodacao+'|'+obst];
+    if(!m)return;
+    if(seg&&segDe(c)!==seg)return;
+    /* O MEI dobra a tabela com o mesmo produto a outro preço. Fica escondido
+       por padrão — quem vende MEI liga a caixa e vê as duas colunas. */
+    if(c.mei&&!comMei)return;
+    if(temVidas&&!(c.vmin==null&&c.vmax==null)&&(nv<(c.vmin||0)||nv>(c.vmax||1e9)))return;
+    const base=c.label.replace(' + Odonto','');
+    const k=[base,c.acomodacao,c.coparticipacao,c.vmin,c.vmax,!!c.mei,c.contratacao||'',segDe(c)].join('|');
+    if(temOdonto(c)){ odoDe[k]=odontoVal(c)||0; return; }
+    linhas.push({c,serv:rfCode(m&7),k});
+  });
+
+  const outras=[...pracasQueAlcancam].filter(p=>p!==praca&&PRACAS.includes(p)).sort();
+  const rodape=outras.length
+    ? `<div class="hx-nota">Este hospital também é alcançado por planos vendidos em
+       <b>${outras.map(_esc).join('</b>, <b>')}</b> — troque a praça acima para ver os preços de lá.</div>`
+    : '';
+
+  if(!linhas.length){
+    el.innerHTML=hospCab(u)+`<div class="rede-aviso" style="display:block">
+      Nenhum plano vendido em <b>${_esc(praca)}</b> leva o cliente a este hospital.</div>`+rodape;
+    return;
+  }
+
+  const ordem=e=>[e.c.label,e.c.acomodacao,e.c.coparticipacao,
+                  (e.c.vmin==null?999:e.c.vmin)].join('|');
+  const faixas=faixa?[faixa]:BANDS;
+  linhas.sort((a,b)=>ordem(a).localeCompare(ordem(b)));
+
+  let html=hospCab(u);
+  html+=`<div class="hx-nota">Vendendo em <b>${_esc(praca)}</b>: ${linhas.length} opção(ões) de plano levam a este hospital.
+    ${faixa?('Mostrando só a faixa <b>'+faixa+'</b>.'):'Informe a idade para ver só a faixa do cliente.'}
+    Legenda de <b>Atende</b>: H internação · PS pronto-socorro · MT maternidade.</div>`;
+  html+=`<div class="hx-wrap"><table class="hx-tbl"><thead><tr>
+    <th>Produto</th><th>Acomodação</th><th>Coparticipação</th><th>Porte</th>
+    <th>Contratação</th><th>Atende</th><th class="num">Odonto</th>`
+    +faixas.map(f=>`<th class="num">${f}</th>`).join('')+`</tr></thead><tbody>`;
+  linhas.forEach(({c,serv,k})=>{
+    const porte=(c.vmin==null&&c.vmax==null)?'—'
+      :(c.vmin===c.vmax?c.vmin+' vida':c.vmin+' a '+c.vmax+' vidas');
+    const contr=[SEG_LONGO[segDe(c)]||segDe(c), c.contratacao||'', c.mei?'MEI':'']
+      .filter(Boolean).join(' · ');
+    html+=`<tr><td>${_esc(c.label)}</td><td>${_esc(c.acomodacao)}</td>
+      <td>${_esc(segLabel(c.coparticipacao))}</td><td>${porte}</td>
+      <td>${_esc(contr)}</td><td class="hx-serv">${serv||'—'}</td>
+      <td class="num">${k in odoDe?(odoDe[k]?('R$ '+fmt(odoDe[k])):'incluso'):'—'}</td>`
+      +faixas.map(f=>`<td class="num">${c.precos[f]!=null?('R$ '+fmt(c.precos[f])):'—'}</td>`).join('')
+      +`</tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  html+=`<div class="hx-nota">Preço da assistência médica. Produto "+ Odonto" tem o dental cobrado à parte,
+    em contrato separado — a coluna <b>Odonto</b> traz o valor por vida/mês, e "incluso" é cortesia da praça.
+    Rede sujeita a alteração — confirme a vigência antes de passar ao cliente.</div>`+rodape;
+  el.innerHTML=html;
+}
+
+function hospCab(u){
+  return `<div class="hx-head"><h3>${_esc(_tc(u.n))}</h3>
+    <div>${_esc(_tc(u.c))} - ${u.u}${u.b?' · '+_esc(_tc(u.b)):''}${u.r?' · <b>'+_esc(u.r)+'</b>':''}</div>
+</div>`;
+}
+/* fecha a lista ao clicar fora, como no seletor de cidade */
+document.addEventListener('click',e=>{if(!e.target.closest('#pane-hosp .cid-grp'))hospFecha();});
 
 async function folderRedeFull(cols){
   if(!await ensureRedeFull())return '';

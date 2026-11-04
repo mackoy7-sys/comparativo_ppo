@@ -326,6 +326,13 @@
   .fd-nd tr.grp td{background:#eef1fa;color:var(--ndblue);font-weight:700;text-align:left;
     text-transform:uppercase;letter-spacing:.4px;font-size:8.6px}
   .fd-nd .na{color:#b9c0cc}
+  /* tabela de laboratório: a 1ª coluna é nome de lab (cabe menos que a coluna
+     de coberturas do quadro Diferenciais) e a linha de cidade é um nível
+     abaixo do título de seção — mais clara que tr.grp e sem concorrer com ele */
+  .fd-lab td:first-child,.fd-lab th:first-child{width:34%}
+  .fd-lab tr.cid td{background:#f0f3f9;color:#2b3a63;font-weight:700;text-align:left;
+    font-size:8.8px;letter-spacing:.3px;padding:3px 5px}
+  .fd-lab tbody tr.cid,.fd-lab tbody tr.grp{background:none}
   .fd-tbl{width:100%;border-collapse:collapse;font-size:13px}
   .fd-tbl th,.fd-tbl td{border:1px solid #d9dee7;padding:8px 10px;text-align:right}
   .fd-tbl th:first-child,.fd-tbl td:first-child{text-align:left}
