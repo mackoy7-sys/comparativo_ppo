@@ -95,6 +95,16 @@
             border-radius:8px;padding:8px 11px;margin:8px 0}
   .hx-link{background:none;border:0;padding:0;font:inherit;color:var(--hap);
            font-weight:700;text-decoration:underline;cursor:pointer}
+  .hx-est{border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin:10px 0;
+          background:#fbfcfe;max-height:290px;overflow-y:auto}
+  .hx-est h4{margin:0 0 9px;font-size:13px;color:var(--navy);font-weight:700}
+  .hx-grp{margin:0 0 9px}
+  .hx-grp>b{display:block;font-size:12.5px;color:var(--navy);margin-bottom:3px}
+  .hx-var{display:flex;flex-wrap:wrap;gap:3px 16px}
+  .hx-var label{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);
+                cursor:pointer;white-space:nowrap}
+  .hx-var input{width:14px;height:14px;accent-color:var(--hap);flex:0 0 auto}
+  .hx-acoes{display:flex;gap:16px;padding-top:4px;border-top:1px solid var(--line)}
   #pane-hosp .cid-sug{left:0;right:auto;min-width:320px}
   .hx-chk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);
           white-space:nowrap;padding:8px 0}
@@ -2465,7 +2475,18 @@ function _tc(t){return (t||'').toLowerCase().replace(/(^|[\s\/\-\(])([a-zà-ú]+
 let HOSP_IX=null, HOSP_REV=null, HOSP_SEL=null, hospSelIdx=-1;
 /* transpor troca rolagem vertical por horizontal: sem recorte um pronto-socorro
    da Grande SP dá 188 colunas. Mostra as mais baratas e abre o resto a pedido. */
-const HOSP_LIM=15; let HOSP_TODAS=false;
+/* Quem escolhe as colunas é o vendedor: a aba lista a estrutura de planos que
+   chega ao hospital e ele marca os que quer comparar. Resolve o paredão de
+   colunas (188 num pronto-socorro da Grande SP) melhor que um corte automático.
+   HOSP_PICK=null significa "ainda não escolheu" — aí valem os HOSP_PAD mais
+   baratos, para a tela não abrir vazia. HOSP_LIN guarda o que está em jogo
+   agora, que é o que "marcar todos" precisa saber. */
+const HOSP_PAD=4; let HOSP_PICK=null, HOSP_LIN=[];
+function hospMarca(id,on){
+  if(HOSP_PICK===null)HOSP_PICK=new Set(HOSP_LIN.slice(0,HOSP_PAD).map(e=>e.c.id));
+  if(on)HOSP_PICK.add(id); else HOSP_PICK.delete(id); hospRender();
+}
+function hospMarcaTodos(on){ HOSP_PICK=new Set(on?HOSP_LIN.map(e=>e.c.id):[]); hospRender(); }
 /* A aba mostra só o portfólio pedido: seis famílias nominais mais a linha PPO.
    Casa por PREFIXO de `plano`, para a variante regional entrar junto com a
    família (Nosso Médico RMSP, Pleno Vale do Paraíba, Nosso Plano Municipal) —
@@ -2475,11 +2496,10 @@ const HOSP_FAM=['Nosso Médico','Nosso Plano','Smart UP','Pleno','Integrado','Ad
                 'Smart Prime','Smart Flex','Mix','Smart Rio'];
 function hospFamOk(c){const p=c.plano||'';
   return HOSP_FAM.some(f=>p.startsWith(f))||isPPO(c);}
-function hospTodas(){HOSP_TODAS=true;hospRender();}
 /* filtro que MUDA o conjunto de colunas rearma o corte; a idade não, porque só
    troca as linhas — quem abriu todas as colunas não quer perdê-las ao digitar
    a idade do cliente. */
-function hospFiltro(){HOSP_TODAS=false;hospRender();}
+function hospFiltro(){HOSP_PICK=null;hospRender();}
 
 function hospPracaSel(){
   const el=document.getElementById('hospPraca'); if(!el)return null;
@@ -2563,7 +2583,7 @@ function hospTecla(e){
   if(e.key==='Enter'){e.preventDefault();hospEscolhe(hospSelIdx>=0?hospSelIdx:0);}
 }
 function hospEscolhe(i){
-  HOSP_TODAS=false;
+  HOSP_PICK=null;
   const x=hospMatches()[i]; if(!x)return;
   HOSP_SEL=x.i;
   document.getElementById('hospInput').value=x.nome+' - '+x.cidade+'/'+x.uf;
@@ -2571,7 +2591,7 @@ function hospEscolhe(i){
 }
 function hospLimpa(){
   HOSP_SEL=null;
-  HOSP_TODAS=false;
+  HOSP_PICK=null;
   document.getElementById('hospInput').value='';
   document.getElementById('hospIdade').value='';
   document.getElementById('hospVidas').value='';
@@ -2590,6 +2610,17 @@ function hospFaixa(){
   if(isNaN(n)||n<0||n>120)return null;
   if(n>=59)return BANDS[9];
   return BANDS[Math.min(9,Math.max(0,[18,23,28,33,38,43,48,53,58].findIndex(t=>n<=t)))];
+}
+
+/* o que distingue duas versões do MESMO produto — vai na marcação e no
+   cabeçalho da coluna, senão duas colunas "Diamante Max" com preços
+   diferentes ficam inexplicáveis */
+function hospVar(c){
+  const porte=(c.vmin==null&&c.vmax==null)?'sem faixa de porte'
+    :(c.vmin===c.vmax?c.vmin+' vida':c.vmin+' a '+c.vmax+' vidas');
+  return [c.acomodacao, segLabel(c.coparticipacao), porte,
+          SEG_LONGO[segDe(c)]||segDe(c), c.contratacao||'', c.mei?'MEI':'']
+    .filter(Boolean).join(' · ');
 }
 
 function hospRender(){
@@ -2662,14 +2693,24 @@ function hospRender(){
      tiver — é a ordem em que o vendedor sobe a conversa, e a mesma do modelo. */
   const preco1=e=>{for(const f of BANDS){const v=e.c.precos[f];if(v!=null)return v;}return 1e9;};
   linhas.sort((a,b)=>preco1(a)-preco1(b)||a.c.label.localeCompare(b.c.label));
-  const demais=linhas.length-HOSP_LIM;
-  const corta=demais>0&&!HOSP_TODAS;
-  const cols=corta?linhas.slice(0,HOSP_LIM):linhas;
-  const aviso=corta
-    ? `<div class="hx-corte">São <b>${linhas.length}</b> produtos nesta praça que levam a este hospital —
-       a tabela mostra os <b>${HOSP_LIM} mais baratos</b>. Refine por segmento e vidas,
-       ou <button class="hx-link" onclick="hospTodas()">veja todos os ${linhas.length}</button>.</div>`
-    : '';
+  HOSP_LIN=linhas;
+  if(HOSP_PICK===null)HOSP_PICK=new Set(linhas.slice(0,HOSP_PAD).map(e=>e.c.id));
+  const cols=linhas.filter(e=>HOSP_PICK.has(e.c.id));
+
+  /* Estrutura: tudo o que chega a este hospital nesta praça, agrupado por
+     produto, com a marcação de quais entram na matriz. */
+  const porProd={};
+  linhas.forEach(e=>{(porProd[e.c.label]=porProd[e.c.label]||[]).push(e);});
+  let est=`<div class="hx-est"><h4>Estrutura de planos que levam a este hospital em
+    ${_esc(praca)} — <b>${cols.length}</b> de ${linhas.length} na tabela</h4>`;
+  Object.keys(porProd).sort().forEach(lb=>{
+    est+=`<div class="hx-grp"><b>${_esc(lb)}</b><div class="hx-var">`
+      +porProd[lb].map(e=>`<label><input type="checkbox" ${HOSP_PICK.has(e.c.id)?'checked':''}
+          onchange="hospMarca(${e.c.id},this.checked)"> ${_esc(hospVar(e.c))}</label>`).join('')
+      +`</div></div>`;
+  });
+  est+=`<div class="hx-acoes"><button class="hx-link" onclick="hospMarcaTodos(1)">marcar todos os
+    ${linhas.length}</button><button class="hx-link" onclick="hospMarcaTodos(0)">limpar seleção</button></div></div>`;
 
   let html=hospCab(u);
   html+=`<div class="hx-nota">Vendendo em <b>${_esc(praca)}</b>: ${linhas.length} opção(ões) de plano levam a este hospital.
@@ -2678,17 +2719,16 @@ function hospRender(){
   /* Matriz: uma COLUNA por produto, uma LINHA por faixa etária. O que
      identifica a coluna (acomodação, coparticipação, porte, contratação) vai
      no cabeçalho, porque o mesmo produto aparece em mais de uma versão. */
-  html+=aviso;
+  html+=est;
+  if(!cols.length){
+    el.innerHTML=html+`<div class="hx-corte">Nenhum plano marcado — marque ao menos um
+      na estrutura acima para ver os preços.</div>`+rodape;
+    return;
+  }
   html+=`<div class="hx-wrap"><table class="hx-tbl hx-mx"><thead><tr>
     <th class="hx-c1">Plano / Hospital</th>`
-    +cols.map(({c})=>{
-      const porte=(c.vmin==null&&c.vmax==null)?'sem faixa de porte'
-        :(c.vmin===c.vmax?c.vmin+' vida':c.vmin+' a '+c.vmax+' vidas');
-      const det=[c.acomodacao, segLabel(c.coparticipacao), porte,
-                 SEG_LONGO[segDe(c)]||segDe(c), c.contratacao||'', c.mei?'MEI':'']
-        .filter(Boolean).join(' · ');
-      return `<th class="hx-p"><b>${_esc(c.label)}</b><small>${_esc(det)}</small></th>`;
-    }).join('')+`</tr></thead><tbody>`;
+    +cols.map(({c})=>`<th class="hx-p"><b>${_esc(c.label)}</b>
+        <small>${_esc(hospVar(c))}</small></th>`).join('')+`</tr></thead><tbody>`;
   html+=`<tr class="hx-lh"><td class="hx-c1">${_esc(_tc(u.n))}</td>`
     +cols.map(({serv})=>`<td class="hx-v hx-serv">${serv||'—'}</td>`).join('')+`</tr>`;
   html+=`<tr><td class="hx-c1">Odonto</td>`
