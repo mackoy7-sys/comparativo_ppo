@@ -79,6 +79,22 @@
   table.hx-tbl td.num,table.hx-tbl th.num{text-align:right;font-variant-numeric:tabular-nums}
   table.hx-tbl tbody tr:hover{background:#fffaf4}
   table.hx-tbl .hx-serv{font-weight:700;color:var(--hap);font-size:11.5px}
+  /* matriz: produto na COLUNA, faixa etária na LINHA. A 1ª coluna gruda na
+     esquerda para o rótulo da faixa não sumir quando a tabela rola. */
+  table.hx-tbl.hx-mx th.hx-p{text-align:center;vertical-align:bottom}
+  table.hx-tbl.hx-mx th.hx-p small{display:block;font-weight:400;font-size:10.5px;
+            color:var(--muted);white-space:normal;max-width:180px;margin:2px auto 0;line-height:1.3}
+  table.hx-tbl .hx-v{text-align:center;font-variant-numeric:tabular-nums}
+  table.hx-tbl .hx-c1{position:sticky;left:0;background:#fff;font-weight:700;
+            color:var(--navy);box-shadow:1px 0 0 var(--line)}
+  table.hx-tbl thead th.hx-c1{background:#f7f9fc;z-index:2;text-align:left}
+  table.hx-tbl tr.hx-lh td,table.hx-tbl tr.hx-lh td.hx-c1{background:#fbfcfe}
+  table.hx-tbl tbody tr:hover td{background:#fffaf4}
+  table.hx-tbl tbody tr.hx-lh:hover td{background:#fbfcfe}
+  .hx-corte{font-size:12.5px;color:#8a6d1f;background:#fdf6e3;border:1px solid #ecd9a4;
+            border-radius:8px;padding:8px 11px;margin:8px 0}
+  .hx-link{background:none;border:0;padding:0;font:inherit;color:var(--hap);
+           font-weight:700;text-decoration:underline;cursor:pointer}
   #pane-hosp .cid-sug{left:0;right:auto;min-width:320px}
   .hx-chk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);
           white-space:nowrap;padding:8px 0}
@@ -610,7 +626,7 @@
       <div class="subh-row">
         <div>
           <h2>Hospital × planos</h2>
-          <div class="desc" style="margin-bottom:0">Escolha o hospital e veja em que planos ele está credenciado e quanto custam. Informando a idade, sai só a faixa daquela pessoa.</div>
+          <div class="desc" style="margin-bottom:0">Escolha o hospital e veja em que planos ele está credenciado e quanto custam. Informando a idade, sai só a faixa daquela pessoa. Mostra as famílias <b>Nosso Médico</b>, <b>Nosso Plano</b>, <b>Smart UP</b>, <b>Pleno</b>, <b>Integrado</b>, <b>Adapt</b>, <b>Smart Prime</b>, <b>Smart Flex</b>, <b>Mix</b>, <b>Smart Rio</b> e a <b>linha PPO</b> (Advance, Premium, Infinity e Metais).</div>
         </div>
       </div>
       <div class="rede-filters" style="margin-bottom:10px">
@@ -622,11 +638,11 @@
         </div>
         <div class="fgroup" style="max-width:230px">
           <label>Praça do cliente</label>
-          <select class="search" id="hospPraca" onchange="hospRender()"></select>
+          <select class="search" id="hospPraca" onchange="hospFiltro()"></select>
         </div>
         <div class="fgroup" style="max-width:170px">
           <label>Segmento</label>
-          <select class="search" id="hospSeg" onchange="hospRender()">
+          <select class="search" id="hospSeg" onchange="hospFiltro()">
             <option value="">Todos</option>
             <option value="Empresarial">Empresarial (PME)</option>
             <option value="Individual">Individual / Familiar</option>
@@ -636,7 +652,7 @@
         <div class="fgroup" style="max-width:110px">
           <label>Vidas (opc.)</label>
           <input class="search" id="hospVidas" type="number" min="1" max="99" placeholder="ex.: 3"
-                 oninput="hospRender()">
+                 oninput="hospFiltro()">
         </div>
         <div class="fgroup" style="max-width:140px">
           <label>Idade (opcional)</label>
@@ -644,7 +660,7 @@
                  oninput="hospRender()">
         </div>
         <div class="fgroup" style="max-width:120px"><label>&nbsp;</label>
-          <label class="hx-chk"><input type="checkbox" id="hospMei" onchange="hospRender()"> incluir MEI</label></div>
+          <label class="hx-chk"><input type="checkbox" id="hospMei" onchange="hospFiltro()"> incluir MEI</label></div>
         <div class="fgroup"><label>&nbsp;</label>
           <button class="btn clear" onclick="hospLimpa()">Limpar</button></div>
       </div>
@@ -2447,6 +2463,23 @@ function _tc(t){return (t||'').toLowerCase().replace(/(^|[\s\/\-\(])([a-zà-ú]+
    O rodapé diz em quantas OUTRAS praças o hospital também é atendido, para o
    vendedor saber que existe resposta ao trocar a praça.                     */
 let HOSP_IX=null, HOSP_REV=null, HOSP_SEL=null, hospSelIdx=-1;
+/* transpor troca rolagem vertical por horizontal: sem recorte um pronto-socorro
+   da Grande SP dá 188 colunas. Mostra as mais baratas e abre o resto a pedido. */
+const HOSP_LIM=15; let HOSP_TODAS=false;
+/* A aba mostra só o portfólio pedido: seis famílias nominais mais a linha PPO.
+   Casa por PREFIXO de `plano`, para a variante regional entrar junto com a
+   família (Nosso Médico RMSP, Pleno Vale do Paraíba, Nosso Plano Municipal) —
+   é o mesmo produto noutra praça. "Smart UP" é só ele: "Smart 200 UP" e
+   "Personal UP" são outros produtos e ficam de fora. */
+const HOSP_FAM=['Nosso Médico','Nosso Plano','Smart UP','Pleno','Integrado','Adapt',
+                'Smart Prime','Smart Flex','Mix','Smart Rio'];
+function hospFamOk(c){const p=c.plano||'';
+  return HOSP_FAM.some(f=>p.startsWith(f))||isPPO(c);}
+function hospTodas(){HOSP_TODAS=true;hospRender();}
+/* filtro que MUDA o conjunto de colunas rearma o corte; a idade não, porque só
+   troca as linhas — quem abriu todas as colunas não quer perdê-las ao digitar
+   a idade do cliente. */
+function hospFiltro(){HOSP_TODAS=false;hospRender();}
 
 function hospPracaSel(){
   const el=document.getElementById('hospPraca'); if(!el)return null;
@@ -2530,6 +2563,7 @@ function hospTecla(e){
   if(e.key==='Enter'){e.preventDefault();hospEscolhe(hospSelIdx>=0?hospSelIdx:0);}
 }
 function hospEscolhe(i){
+  HOSP_TODAS=false;
   const x=hospMatches()[i]; if(!x)return;
   HOSP_SEL=x.i;
   document.getElementById('hospInput').value=x.nome+' - '+x.cidade+'/'+x.uf;
@@ -2537,6 +2571,7 @@ function hospEscolhe(i){
 }
 function hospLimpa(){
   HOSP_SEL=null;
+  HOSP_TODAS=false;
   document.getElementById('hospInput').value='';
   document.getElementById('hospIdade').value='';
   document.getElementById('hospVidas').value='';
@@ -2594,6 +2629,7 @@ function hospRender(){
   const linhas=[], odoDe={};
   CATALOG.forEach(c=>{
     if(c.operadora!=='Hapvida')return;
+    if(!hospFamOk(c))return;
     if((c.praca||'SP / RMSP')!==praca)return;
     const obst=/s\/ Obstetrícia/.test(c.label||'')?'SO':'CO';
     const m=cob[c.plano+'|'+c.acomodacao+'|'+obst];
@@ -2621,34 +2657,51 @@ function hospRender(){
     return;
   }
 
-  const ordem=e=>[e.c.label,e.c.acomodacao,e.c.coparticipacao,
-                  (e.c.vmin==null?999:e.c.vmin)].join('|');
   const faixas=faixa?[faixa]:BANDS;
-  linhas.sort((a,b)=>ordem(a).localeCompare(ordem(b)));
+  /* colunas do mais barato ao mais caro, pelo primeiro preço que a tabela
+     tiver — é a ordem em que o vendedor sobe a conversa, e a mesma do modelo. */
+  const preco1=e=>{for(const f of BANDS){const v=e.c.precos[f];if(v!=null)return v;}return 1e9;};
+  linhas.sort((a,b)=>preco1(a)-preco1(b)||a.c.label.localeCompare(b.c.label));
+  const demais=linhas.length-HOSP_LIM;
+  const corta=demais>0&&!HOSP_TODAS;
+  const cols=corta?linhas.slice(0,HOSP_LIM):linhas;
+  const aviso=corta
+    ? `<div class="hx-corte">São <b>${linhas.length}</b> produtos nesta praça que levam a este hospital —
+       a tabela mostra os <b>${HOSP_LIM} mais baratos</b>. Refine por segmento e vidas,
+       ou <button class="hx-link" onclick="hospTodas()">veja todos os ${linhas.length}</button>.</div>`
+    : '';
 
   let html=hospCab(u);
   html+=`<div class="hx-nota">Vendendo em <b>${_esc(praca)}</b>: ${linhas.length} opção(ões) de plano levam a este hospital.
     ${faixa?('Mostrando só a faixa <b>'+faixa+'</b>.'):'Informe a idade para ver só a faixa do cliente.'}
     Legenda de <b>Atende</b>: H internação · PS pronto-socorro · MT maternidade.</div>`;
-  html+=`<div class="hx-wrap"><table class="hx-tbl"><thead><tr>
-    <th>Produto</th><th>Acomodação</th><th>Coparticipação</th><th>Porte</th>
-    <th>Contratação</th><th>Atende</th><th class="num">Odonto</th>`
-    +faixas.map(f=>`<th class="num">${f}</th>`).join('')+`</tr></thead><tbody>`;
-  linhas.forEach(({c,serv,k})=>{
-    const porte=(c.vmin==null&&c.vmax==null)?'—'
-      :(c.vmin===c.vmax?c.vmin+' vida':c.vmin+' a '+c.vmax+' vidas');
-    const contr=[SEG_LONGO[segDe(c)]||segDe(c), c.contratacao||'', c.mei?'MEI':'']
-      .filter(Boolean).join(' · ');
-    html+=`<tr><td>${_esc(c.label)}</td><td>${_esc(c.acomodacao)}</td>
-      <td>${_esc(segLabel(c.coparticipacao))}</td><td>${porte}</td>
-      <td>${_esc(contr)}</td><td class="hx-serv">${serv||'—'}</td>
-      <td class="num">${k in odoDe?(odoDe[k]?('R$ '+fmt(odoDe[k])):'incluso'):'—'}</td>`
-      +faixas.map(f=>`<td class="num">${c.precos[f]!=null?('R$ '+fmt(c.precos[f])):'—'}</td>`).join('')
+  /* Matriz: uma COLUNA por produto, uma LINHA por faixa etária. O que
+     identifica a coluna (acomodação, coparticipação, porte, contratação) vai
+     no cabeçalho, porque o mesmo produto aparece em mais de uma versão. */
+  html+=aviso;
+  html+=`<div class="hx-wrap"><table class="hx-tbl hx-mx"><thead><tr>
+    <th class="hx-c1">Plano / Hospital</th>`
+    +cols.map(({c})=>{
+      const porte=(c.vmin==null&&c.vmax==null)?'sem faixa de porte'
+        :(c.vmin===c.vmax?c.vmin+' vida':c.vmin+' a '+c.vmax+' vidas');
+      const det=[c.acomodacao, segLabel(c.coparticipacao), porte,
+                 SEG_LONGO[segDe(c)]||segDe(c), c.contratacao||'', c.mei?'MEI':'']
+        .filter(Boolean).join(' · ');
+      return `<th class="hx-p"><b>${_esc(c.label)}</b><small>${_esc(det)}</small></th>`;
+    }).join('')+`</tr></thead><tbody>`;
+  html+=`<tr class="hx-lh"><td class="hx-c1">${_esc(_tc(u.n))}</td>`
+    +cols.map(({serv})=>`<td class="hx-v hx-serv">${serv||'—'}</td>`).join('')+`</tr>`;
+  html+=`<tr><td class="hx-c1">Odonto</td>`
+    +cols.map(({k})=>`<td class="hx-v">${k in odoDe?(odoDe[k]?('R$ '+fmt(odoDe[k])):'incluso'):'—'}</td>`).join('')
+    +`</tr>`;
+  faixas.forEach(f=>{
+    html+=`<tr><td class="hx-c1">${f==='59 ou mais'?'59 anos ou mais':f+' anos'}</td>`
+      +cols.map(({c})=>`<td class="hx-v">${c.precos[f]!=null?('R$ '+fmt(c.precos[f])):'—'}</td>`).join('')
       +`</tr>`;
   });
   html+=`</tbody></table></div>`;
   html+=`<div class="hx-nota">Preço da assistência médica. Produto "+ Odonto" tem o dental cobrado à parte,
-    em contrato separado — a coluna <b>Odonto</b> traz o valor por vida/mês, e "incluso" é cortesia da praça.
+    em contrato separado — a linha <b>Odonto</b> traz o valor por vida/mês, e "incluso" é cortesia da praça.
     Rede sujeita a alteração — confirme a vigência antes de passar ao cliente.</div>`+rodape;
   el.innerHTML=html;
 }
