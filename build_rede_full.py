@@ -383,6 +383,14 @@ ZONA_DESTAQUES = {
     "CEMA Hospital - Taboao": "Grande SP",
 }
 
+# "Grande SP - Sul" nunca foi uma região da rede: é rótulo herdado do folder
+# antigo que só cobriu EMBU DAS ARTES (2 unidades, contra 36 da Grande SP). As
+# cidades coladas em Embu — Taboão da Serra, Itapecerica da Serra, Cotia — estão
+# todas em "Grande SP", então o rótulo só rendia um cabeçalho de seção órfão com
+# uma ou duas linhas no folder. Fundido em 04/11/2026 a pedido do usuário.
+REGIAO_FUNDE = {"Grande SP - Sul": "Grande SP"}
+
+
 def regiao_da_sede(pracas, unidades):
     """Região da cidade-sede de cada praça, para o folder abrir por ela.
 
@@ -456,7 +464,7 @@ def marca_regiao(unidades):
             if g: cont["cidade"] += 1
         if not g:
             g = "Interior"; cont["Interior (resto de SP)"] += 1
-        u["g"] = g
+        u["g"] = REGIAO_FUNDE.get(g, g)
     print("  região de SP: " + ", ".join(f"{v} por {k}" for k, v in cont.most_common()))
 
 

@@ -63,22 +63,14 @@
   /* matrix */
   .matrix-wrap{overflow-x:auto}
   /* ----- Hospital x planos ----- */
-  .hx-head{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:4px 0 10px;background:#fbfcfe}
-  .hx-head h3{margin:0 0 3px;font-size:16px;color:var(--navy)}
-  .hx-head div{font-size:12.5px;color:var(--muted)}
-  .hx-fora{margin-top:6px;color:#8a6d1f;background:#fdf6e3;border:1px solid #ecd9a4;border-radius:7px;padding:6px 9px}
-  .hx-nota{font-size:12px;color:var(--muted);margin:8px 0}
-  .hx-praca{margin:14px 0 6px;font-weight:700;font-size:13.5px;color:var(--navy);
-            border-left:3px solid var(--hap);padding-left:8px}
-  /* a tabela tem até 10 colunas de faixa: rola na horizontal em vez de
-     espremer, e o min-width:0 do pai evita que ela estoure o painel no mobile */
+  /* a tabela de preços rola na horizontal em vez de espremer; o min-width:0
+     do pai evita que ela estoure o painel no mobile */
   .hx-wrap{overflow-x:auto;min-width:0;border:1px solid var(--line);border-radius:10px}
   table.hx-tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:720px}
   table.hx-tbl th,table.hx-tbl td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
   table.hx-tbl thead th{background:#f7f9fc;color:var(--navy);font-weight:700;position:sticky;top:0}
   table.hx-tbl td.num,table.hx-tbl th.num{text-align:right;font-variant-numeric:tabular-nums}
   table.hx-tbl tbody tr:hover{background:#fffaf4}
-  table.hx-tbl .hx-serv{font-weight:700;color:var(--hap);font-size:11.5px}
   /* matriz: produto na COLUNA, faixa etária na LINHA. A 1ª coluna gruda na
      esquerda para o rótulo da faixa não sumir quando a tabela rola. */
   table.hx-tbl.hx-mx th.hx-p{text-align:center;vertical-align:bottom}
@@ -91,24 +83,55 @@
   table.hx-tbl tr.hx-lh td,table.hx-tbl tr.hx-lh td.hx-c1{background:#fbfcfe}
   table.hx-tbl tbody tr:hover td{background:#fffaf4}
   table.hx-tbl tbody tr.hx-lh:hover td{background:#fbfcfe}
-  .hx-corte{font-size:12.5px;color:#8a6d1f;background:#fdf6e3;border:1px solid #ecd9a4;
-            border-radius:8px;padding:8px 11px;margin:8px 0}
-  .hx-link{background:none;border:0;padding:0;font:inherit;color:var(--hap);
-           font-weight:700;text-decoration:underline;cursor:pointer}
-  .hx-est{border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin:10px 0;
-          background:#fbfcfe;max-height:290px;overflow-y:auto}
-  .hx-est h4{margin:0 0 9px;font-size:13px;color:var(--navy);font-weight:700}
-  .hx-grp{margin:0 0 9px}
-  .hx-grp>b{display:block;font-size:12.5px;color:var(--navy);margin-bottom:3px}
-  .hx-var{display:flex;flex-wrap:wrap;gap:3px 16px}
-  .hx-var label{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);
-                cursor:pointer;white-space:nowrap}
-  .hx-var input{width:14px;height:14px;accent-color:var(--hap);flex:0 0 auto}
-  .hx-acoes{display:flex;gap:16px;padding-top:4px;border-top:1px solid var(--line)}
-  #pane-hosp .cid-sug{left:0;right:auto;min-width:320px}
-  .hx-chk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);
-          white-space:nowrap;padding:8px 0}
-  .hx-chk input{width:15px;height:15px;accent-color:var(--hap)}
+  /* cartões de opção da aba Hospital × planos — mesmo desenho dos da
+     calculadora, mas com estado próprio da aba */
+  .hc-tit{margin:14px 0 7px;font-weight:700;font-size:13.5px;color:var(--navy)}
+  .hc-tit small{font-weight:400;color:var(--muted);margin-left:7px}
+  .hc-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .hc-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;min-width:0}
+  .hc-cab{background:var(--navy);color:#fff;font-weight:700;font-size:12px;letter-spacing:.4px;
+          padding:8px 10px;display:flex;justify-content:space-between;align-items:center}
+  .hc-cab span{background:var(--hap);border-radius:999px;padding:2px 9px;font-size:10.5px}
+  .hc-body{padding:9px 10px;display:flex;flex-direction:column;gap:6px}
+  .hc-body select{width:100%;min-width:0;padding:7px 8px;border:1px solid var(--line);
+                  border-radius:7px;font-size:12px;background:#fff;color:var(--navy)}
+  .hc-body select:disabled{background:#f4f6fa;color:#9aa4b8}
+  .hc-fix{font-size:11.5px;color:var(--navy);background:#f4f6fa;border-radius:7px;
+          padding:7px 9px;text-align:center;font-weight:600}
+  .hc-fix.vazio{color:#9aa4b8;font-weight:400}
+  .hc-fix.dif{background:#fdf6e3;color:#8a6d1f}
+  .hc-fix small{display:block;font-weight:400;font-size:10.5px;margin-top:2px;line-height:1.3}
+  .hc-val{font-size:11.5px;color:var(--muted);text-align:center;padding-top:2px}
+  .hc-val.has{color:var(--navy);font-weight:700}
+  .hc-val.warn{color:#8a6d1f}
+  .hc-cab span.nds{background:#fff;color:var(--ndblue)}
+  /* a busca do hospital abre a aba e tem peso de campo principal */
+  .hc-busca{margin:14px 0 0;padding:12px 14px;border:1px solid #ecd9a4;background:#fdfaf2;border-radius:10px}
+  .hc-busca label{display:block;font-weight:700;font-size:14px;color:var(--navy);margin-bottom:6px}
+  .hc-busca-row{display:flex;gap:8px;align-items:stretch}
+  .hc-busca-row input{flex:1;min-width:0;padding:11px 13px;font-size:15px;border:1px solid var(--line);
+                      border-radius:9px;background:#fff;color:var(--navy)}
+  .hc-busca-row .btn{white-space:nowrap;padding:0 20px}
+  .hc-sug{margin-top:10px;font-size:12.5px;color:var(--muted)}
+  .hc-ach{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 2px}
+  .hc-op{display:flex;flex-direction:column;align-items:flex-start;gap:1px;cursor:pointer;
+         border:1px solid var(--line);border-radius:9px;background:#fff;padding:8px 11px;
+         font:inherit;text-align:left;min-width:0}
+  .hc-op:hover{border-color:var(--hap);background:#fffaf4}
+  .hc-op.sel{border-color:var(--hap);background:#fff3e6;box-shadow:inset 0 0 0 1px var(--hap)}
+  .hc-op.sel b::before{content:"✓ ";color:var(--hap)}
+  .hc-ach-bar{display:flex;align-items:center;gap:12px;margin:10px 0;flex-wrap:wrap}
+  .hc-ach-bar .btn:disabled{opacity:.45;cursor:default;background:#c9ced9;border-color:#c9ced9}
+  .hc-ach-cont{font-size:12.5px;color:var(--muted);font-weight:600}
+  .hc-limite{font-size:12px;color:#8a6d1f}
+  .hc-op b{font-size:12.5px;color:var(--navy)}
+  .hc-op small{font-size:11px;color:var(--muted)}
+  .hc-op-serv{font-size:11px;font-weight:700;color:var(--hap);margin-top:2px}
+  .hc-busca-dica{font-size:11.5px;color:var(--muted);margin-top:5px}
+  .hc-sel{min-width:160px}
+  .hc-vidas{width:72px}
+  @media(max-width:860px){.hc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:520px){.hc-grid{grid-template-columns:1fr}}
   table.matrix{width:100%;border-collapse:separate;border-spacing:6px;table-layout:fixed;min-width:680px}
   table.matrix th.rowlabel{width:120px;text-align:right;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;padding-right:8px;background:none}
   table.matrix .ophead{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--navy);border-radius:8px;padding:7px 12px;color:#fff}
@@ -627,55 +650,71 @@
 
   <!-- ============ TAB ÁREA DE COMERCIALIZAÇÃO ============ -->
   <!-- ============ TAB HOSPITAL x PLANOS ============
-       Pedido de 04/11: escolher um hospital e ver em QUAIS PLANOS ele está e
-       QUANTO custam. É a pergunta do cliente invertida — ele não pergunta
-       "o que o Advance 700 cobre", pergunta "meu médico é do Einstein, qual
-       plano me atende lá". -->
+       Reescrita de 04/11 (2ª versão). A 1ª inventava UI própria; esta reusa o
+       que o vendedor já conhece do Cotador: os cartões de opção, a barra de
+       chips do canal e a TABELA DO FOLDER. Fluxo: canal → até 4 produtos →
+       rede de atendimento deles. A busca de hospital filtra as linhas; sem
+       busca, sai a rede inteira, como no folder de hoje. -->
   <div class="tabpane" id="pane-hosp">
     <div class="panel">
       <div class="subh-row">
         <div>
-          <h2>Hospital × planos</h2>
-          <div class="desc" style="margin-bottom:0">Escolha o hospital e veja em que planos ele está credenciado e quanto custam. Informando a idade, sai só a faixa daquela pessoa. Mostra as famílias <b>Nosso Médico</b>, <b>Nosso Plano</b>, <b>Smart UP</b>, <b>Pleno</b>, <b>Integrado</b>, <b>Adapt</b>, <b>Smart Prime</b>, <b>Smart Flex</b>, <b>Mix</b>, <b>Smart Rio</b> e a <b>linha PPO</b> (Advance, Premium, Infinity e Metais).</div>
+          <div class="subh" style="margin-bottom:0">Hospital × planos</div>
+          <div class="cot-hint" style="margin:2px 0 0">Escolha até quatro produtos e veja a rede deles, como no folder.
+            Busque um hospital para filtrar as unidades; sem busca, sai a rede inteira.
+            Mostra as famílias <b>Nosso Médico</b>, <b>Nosso Plano</b>, <b>Smart UP</b>, <b>Pleno</b>,
+            <b>Integrado</b>, <b>Adapt</b>, <b>Smart Prime</b>, <b>Smart Flex</b>, <b>Mix</b>, <b>Smart Rio</b>
+            e a <b>linha PPO</b> (Advance, Premium, Infinity e Metais).</div>
         </div>
       </div>
-      <div class="rede-filters" style="margin-bottom:10px">
-        <div class="fgroup cid-grp" style="flex:1;position:relative">
-          <label>Hospital</label>
-          <input class="search" id="hospInput" placeholder="digite o nome do hospital…" autocomplete="off"
-                 oninput="hospSugestoes()" onfocus="hospSugestoes()" onkeydown="hospTecla(event)">
-          <div id="hospSug" class="cid-sug" style="display:none"></div>
+
+      <!-- canal de vendas: estado PRÓPRIO da aba, para mexer aqui não alterar
+           a cotação que o vendedor deixou montada na calculadora -->
+      <div class="panel filt-bar" style="margin:10px 0 0">
+        <div class="fblock"><span class="mei-lbl">Praça</span>
+          <select class="search hc-sel" id="hcPraca" onchange="hcPracaMuda()"></select></div>
+        <div class="fblock"><span class="mei-lbl">Produto</span><div class="chips" id="hcProdChips"></div></div>
+        <div class="fblock"><span class="mei-lbl">Contrato</span><div class="chips" id="hcMeiChips"></div></div>
+        <div class="fblock"><span class="mei-lbl" title="Modalidade de contratação das tabelas PME de 30 a 99 vidas">PME 30-99</span>
+          <div class="chips" id="hcContratChips"></div></div>
+        <div class="fblock"><span class="mei-lbl">Vidas</span>
+          <input class="search hc-vidas" id="hcVidas" type="number" min="1" max="99" value="3" oninput="hcRender()"></div>
+        <div class="fblock"><span class="mei-lbl">Acomodação</span>
+          <select class="search hc-sel" id="hcAcomPad" onchange="hcPadraoMuda()"></select></div>
+        <div class="fblock"><span class="mei-lbl">Coparticipação</span>
+          <select class="search hc-sel" id="hcSegPad" onchange="hcPadraoMuda()"></select></div>
+      </div>
+
+      <!-- a busca do hospital vem ANTES da escolha dos planos: é por ela que a
+           conversa começa ("meu médico é do Einstein"), e os planos vêm depois -->
+      <div class="hc-busca">
+        <label for="hcBusca">Qual hospital o cliente quer?</label>
+        <div class="hc-busca-row">
+          <input class="search" id="hcBusca" autocomplete="off"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();hcBuscar();}"
+                 oninput="hcBuscaVazia()"
+                 placeholder="digite parte do nome e clique em Buscar">
+          <button class="btn" onclick="hcBuscar()">Buscar</button>
         </div>
-        <div class="fgroup" style="max-width:230px">
-          <label>Praça do cliente</label>
-          <select class="search" id="hospPraca" onchange="hospFiltro()"></select>
-        </div>
+        <div class="hc-busca-dica">Filtra as unidades da rede dos produtos escolhidos abaixo.
+          Vazio, mostra a rede inteira.</div>
+      </div>
+
+      <div class="hc-ops" id="hcOps"></div>
+
+      <div class="rede-filters" style="margin:12px 0 0">
         <div class="fgroup" style="max-width:170px">
-          <label>Segmento</label>
-          <select class="search" id="hospSeg" onchange="hospFiltro()">
-            <option value="">Todos</option>
-            <option value="Empresarial">Empresarial (PME)</option>
-            <option value="Individual">Individual / Familiar</option>
-            <option value="Adesão">Coletivo por Adesão</option>
-          </select>
-        </div>
-        <div class="fgroup" style="max-width:110px">
-          <label>Vidas (opc.)</label>
-          <input class="search" id="hospVidas" type="number" min="1" max="99" placeholder="ex.: 3"
-                 oninput="hospFiltro()">
-        </div>
-        <div class="fgroup" style="max-width:140px">
           <label>Idade (opcional)</label>
-          <input class="search" id="hospIdade" type="number" min="0" max="120" placeholder="ex.: 34"
-                 oninput="hospRender()">
+          <input class="search" id="hcIdade" type="number" min="0" max="120" placeholder="ex.: 34" oninput="hcRender()">
         </div>
-        <div class="fgroup" style="max-width:120px"><label>&nbsp;</label>
-          <label class="hx-chk"><input type="checkbox" id="hospMei" onchange="hospFiltro()"> incluir MEI</label></div>
         <div class="fgroup"><label>&nbsp;</label>
-          <button class="btn clear" onclick="hospLimpa()">Limpar</button></div>
+          <button class="btn" onclick="hcPDF()">Gerar PDF</button></div>
+        <div class="fgroup"><label>&nbsp;</label>
+          <button class="btn clear" onclick="hcLimpa()">Limpar</button></div>
       </div>
-      <div class="rede-aviso" id="hospAviso">Carregando a rede — pode levar alguns segundos.</div>
-      <div id="hospResult"></div>
+
+      <div class="rede-aviso" id="hcAviso">Carregando a rede — pode levar alguns segundos.</div>
+      <div id="hcResult"></div>
     </div>
   </div>
 
@@ -799,7 +838,7 @@ function switchTab(t){
   const ph=document.getElementById('pane-hist');
   if(ph)ph.classList.toggle('active',t==='hist');
   if(t==='rede'){loadRede();}
-  if(t==='hosp'){hospPrepara();}
+  if(t==='hosp'){hcPrepara();}
   if(t==='hist'){try{HIST.render();}catch(e){}}
 }
 
@@ -2448,314 +2487,431 @@ const _TC_MIN=new Set(['e','de','da','do','das','dos','em','no','na']);
 function _tc(t){return (t||'').toLowerCase().replace(/(^|[\s\/\-\(])([a-zà-ú]+)/g,
   (m,a,w)=>a+((a&&_TC_MIN.has(w))?w:w.charAt(0).toUpperCase()+w.slice(1)));}
 
-/* ===================== HOSPITAL x PLANOS (04/11/2026) =====================
-   O vendedor ouve "meu médico atende no Einstein" e precisa saber QUAL plano
-   leva o cliente até lá e quanto custa. Esta aba responde isso: hospital ->
-   planos -> preço.
+/* ===================== HOSPITAL x PLANOS — 2ª versão (04/11/2026) =========
+   A 1ª versão inventava UI própria (matriz de versões, lista de caixas) e não
+   ficou boa: virou problema de apresentação o que é de FILTRO. Num pronto-
+   atendimento da Grande SP havia 182 "colunas" — mas só 19 produtos. O que
+   multiplicava era acomodação × coparticipação × porte × contratação.
 
-   O cruzamento usa as duas bases que o Cotador já carrega, sem inventar dado:
+   Esta versão reusa o que o vendedor já conhece do Cotador: a barra de chips
+   do canal, os cartões de opção (Plano → Acomodação → Segmentação) e a TABELA
+   DO FOLDER. Escolhe até 4 produtos; sai a rede de atendimento deles, como no
+   folder de hoje. A busca de hospital filtra as unidades; vazia, mostra tudo.
 
-     rede_full.json  unidades[].p  = {chave de plano -> bitmask de serviço}
-                     planos        = {praça|plano|acomodação|obst -> chave}
-     catalog.json    preço por praça x plano x acomodação
+   O estado é PRÓPRIO da aba (hcSeg/hcMei/hcContrat/HC_SLOTS): mexer aqui não
+   pode alterar a cotação que o vendedor deixou montada na calculadora. */
+const HC_FAM=['Nosso Médico','Nosso Plano','Smart UP','Pleno','Integrado','Adapt',
+              'Smart Prime','Smart Flex','Mix','Smart Rio'];
+function hcFamOk(c){const p=c.plano||'';
+  return HC_FAM.some(f=>p.startsWith(f))||isPPO(c);}
 
-   A praça que vale aqui é a DO CLIENTE, não a do hospital. Essa foi a lição do
-   Sírio-Libanês de Brasília: ele é coberto só pela chave do Infinity, que não
-   se vende em Brasília — quem chega lá é o cliente que comprou Infinity em São
-   Paulo. Recortar pelas praças da cidade do hospital, como o folder faz, dava
-   "nenhum plano" justamente no caso que mais interessa ao vendedor.
-
-   Então o seletor de praça é do vendedor (começa na praça da calculadora), e a
-   pergunta que a tela responde é: "vendendo em X, que planos levam meu cliente
-   a este hospital?". Isso também evita o paredão: sem o recorte por praça, um
-   pronto atendimento da Grande SP devolvia 1.297 linhas de quatro praças.
-
-   O rodapé diz em quantas OUTRAS praças o hospital também é atendido, para o
-   vendedor saber que existe resposta ao trocar a praça.                     */
-let HOSP_IX=null, HOSP_REV=null, HOSP_SEL=null, hospSelIdx=-1;
-/* transpor troca rolagem vertical por horizontal: sem recorte um pronto-socorro
-   da Grande SP dá 188 colunas. Mostra as mais baratas e abre o resto a pedido. */
-/* Quem escolhe as colunas é o vendedor: a aba lista a estrutura de planos que
-   chega ao hospital e ele marca os que quer comparar. Resolve o paredão de
-   colunas (188 num pronto-socorro da Grande SP) melhor que um corte automático.
-   HOSP_PICK=null significa "ainda não escolheu" — aí valem os HOSP_PAD mais
-   baratos, para a tela não abrir vazia. HOSP_LIN guarda o que está em jogo
-   agora, que é o que "marcar todos" precisa saber. */
-const HOSP_PAD=4; let HOSP_PICK=null, HOSP_LIN=[];
-function hospMarca(id,on){
-  if(HOSP_PICK===null)HOSP_PICK=new Set(HOSP_LIN.slice(0,HOSP_PAD).map(e=>e.c.id));
-  if(on)HOSP_PICK.add(id); else HOSP_PICK.delete(id); hospRender();
+const HC_N=4;
+const hcVazio=()=>Array.from({length:HC_N},()=>({plano:null,acom:null,seg:null}));
+let HC_SLOTS=hcVazio();
+let hcSeg='Empresarial', hcMei=true, hcContrat='Compulsório', hcPraca=null;
+/* Acomodação e coparticipação valem para as QUATRO opções de uma vez. São
+   filtro, não dimensão de comparação: deixá-las por cartão fazia o vendedor
+   comparar apartamento/parcial com enfermaria/completa sem perceber, e dobrava
+   a lista do hospital (24 entradas para 12 produtos). Abrem em Apartamento e
+   Parcial, que é o que o time mais vende. */
+let hcAcomPad='Apartamento', hcSegPad='Parcial';
+/* Produto que não tem a combinação escolhida (Nosso Médico só existe em
+   enfermaria) não some: cai no que existe para ELE. Esconder o produto seria
+   pior que mostrá-lo noutra acomodação. */
+function hcVarPadrao(lb){
+  const acs=hcAcoms(lb);
+  const ac=acs.includes(hcAcomPad)?hcAcomPad:acs[0]||null;
+  const sgs=ac?hcSegs(lb,ac):[];
+  const sg=sgs.includes(hcSegPad)?hcSegPad:sgs[0]||null;
+  return {acom:ac,seg:sg};
 }
-function hospMarcaTodos(on){ HOSP_PICK=new Set(on?HOSP_LIN.map(e=>e.c.id):[]); hospRender(); }
-/* A aba mostra só o portfólio pedido: seis famílias nominais mais a linha PPO.
-   Casa por PREFIXO de `plano`, para a variante regional entrar junto com a
-   família (Nosso Médico RMSP, Pleno Vale do Paraíba, Nosso Plano Municipal) —
-   é o mesmo produto noutra praça. "Smart UP" é só ele: "Smart 200 UP" e
-   "Personal UP" são outros produtos e ficam de fora. */
-const HOSP_FAM=['Nosso Médico','Nosso Plano','Smart UP','Pleno','Integrado','Adapt',
-                'Smart Prime','Smart Flex','Mix','Smart Rio'];
-function hospFamOk(c){const p=c.plano||'';
-  return HOSP_FAM.some(f=>p.startsWith(f))||isPPO(c);}
-/* filtro que MUDA o conjunto de colunas rearma o corte; a idade não, porque só
-   troca as linhas — quem abriu todas as colunas não quer perdê-las ao digitar
-   a idade do cliente. */
-function hospFiltro(){HOSP_PICK=null;hospRender();}
-
-function hospPracaSel(){
-  const el=document.getElementById('hospPraca'); if(!el)return null;
-  if(!el.options.length){
-    el.innerHTML=PRACAS.map(p=>`<option value="${_esc(p)}">${_esc(p)}</option>`).join('');
-    el.value=pracaSel||PRACAS[0];
-  }
-  return el.value;
+function hcPadraoMuda(){
+  hcAcomPad=document.getElementById('hcAcomPad').value;
+  hcSegPad=document.getElementById('hcSegPad').value;
+  HC_SLOTS=HC_SLOTS.map(x=>x.plano?Object.assign({plano:x.plano},hcVarPadrao(x.plano)):x);
+  HC_MARC=new Set();
+  hcRender();
 }
-function hospPrepara(){
-  hospPracaSel();
-  const av=document.getElementById('hospAviso');
-  if(REDE_FULL&&REDE_FULL.unidades){ if(av)av.style.display='none'; return; }
-  if(av){av.style.display='';av.textContent='Carregando a rede — pode levar alguns segundos.';}
-  ensureRedeFull().then(ok=>{
-    if(!av)return;
-    if(ok){av.style.display='none';}
-    else{av.textContent='Não consegui carregar a rede agora. Tente de novo em instantes.';}
+/* A busca só vale quando o vendedor manda (botão ou Enter). Antes filtrava a
+   cada tecla e, numa rede de 168 unidades, redesenhava a tabela inteira a cada
+   letra — e "EINSTEN" no meio da digitação já zerava a lista. Esvaziar o campo
+   restaura a rede na hora, senão a tabela ficaria filtrada por um texto que
+   não está mais ali. */
+let HC_BUSCA='', HC_SUG=[], HC_OPC=[], HC_MARC=new Set();
+function hcBuscar(){HC_BUSCA=(document.getElementById('hcBusca')||{}).value||'';HC_MARC=new Set();hcRender();}
+function hcBuscaVazia(){if(!((document.getElementById('hcBusca')||{}).value||'').trim()&&HC_BUSCA){HC_BUSCA='';hcRender();}}
+function hcUsaSug(i){const v=HC_SUG[i];if(v==null)return;
+  const el=document.getElementById('hcBusca'); if(el)el.value=v; HC_BUSCA=v; hcRender();}
+
+/* A busca vem antes dos planos na tela, então tem de responder ANTES deles:
+   acha o hospital na praça e diz QUAIS produtos chegam nele. Sem isto, buscar
+   "sabara" sem ter escolhido plano devolvia só "escolha um produto" — a busca
+   ficava decorativa. */
+function hcAchaUnidades(q){
+  const alvo=_n(q||''); if(!alvo)return [];
+  const base=hcBase(); if(!base.length||!(REDE_FULL&&REDE_FULL.unidades))return [];
+  const pr=rfPraca(base[0]); const cid=pr?new Set(pr.cidades):null;
+  return REDE_FULL.unidades.filter(u=>(!cid||cid.has(u.c))
+    &&(_n(u.n).includes(alvo)||_n(u.b||'').includes(alvo)));
+}
+/* produtos da praça/canal que atendem ALGUMA das unidades achadas, um por
+   combinação plano × acomodação × segmentação — a mesma unidade que o cartão */
+/* A LISTA mostra todas as variações — inclusive porque a cobertura muda com a
+   acomodação (a chave da Rede Full usa acomodação), então "Ouro Max enfermaria"
+   e "Ouro Max apartamento" podem atender o hospital de formas diferentes. A
+   uniformidade de Apartamento/Parcial vale só no QUADRO COMPARATIVO. */
+function hcPlanosQueAtendem(uns){
+  const m=new Map();
+  hcBase().forEach(c=>{
+    const k=rfKey(c); if(!k)return;
+    let serv=0; uns.forEach(u=>{serv|=(u.p[k]||0)&7;});
+    if(!serv)return;
+    const id=c.label+'|'+c.acomodacao+'|'+c.coparticipacao;
+    if(m.has(id)) m.get(id).serv|=serv;
+    else m.set(id,{plano:c.label,acom:c.acomodacao,seg:c.coparticipacao,serv,
+                   preco:(c.precos&&c.precos[BANDS[0]])||0});
   });
+  return [...m.values()].sort((a,b)=>a.preco-b.preco||a.plano.localeCompare(b.plano));
 }
-
-/* chave de plano -> [[praça, plano, acomodação, obst], ...] (o inverso do mapa) */
-function hospRev(){
-  if(HOSP_REV)return HOSP_REV;
-  const r={};
-  for(const k in REDE_FULL.planos){
-    const [praca,plano,acom,obst]=k.split('|');
-    (r[REDE_FULL.planos[k]]=r[REDE_FULL.planos[k]]||[]).push([praca,plano,acom,obst]);
+/* Marcação múltipla, teto de HC_N. Antes cada clique caía numa vaga livre e o
+   5º sobrescrevia o último em silêncio — o vendedor escolhia às cegas. Agora
+   marca o que quer, vê quantos marcou e manda analisar de uma vez.
+   A chave é plano|acomodação|segmentação, não o índice: a lista é remontada a
+   cada render e índice não sobrevive a isso. */
+function hcChaveOp(o){return o.plano+'|'+o.acom+'|'+o.seg;}
+/* O comparativo é uniforme, então duas variações do MESMO produto virariam
+   duas colunas iguais. Teto e contagem valem por produto; marcar a outra
+   variação do que já está marcado não gasta vaga. */
+function hcProdutosMarcados(){return new Set([...HC_MARC].map(k=>k.split('|')[0]));}
+function hcBarra(){
+  const n=hcProdutosMarcados().size;
+  return `<div class="hc-ach-bar">
+    <button class="btn solid hap hc-aplicar" ${n?'':'disabled'} onclick="hcAplicar()">${
+      n?('Processar '+n+' produto'+(n>1?'s':'')):('Marque até '+HC_N+' produtos')}</button>
+    <span class="hc-ach-cont">${n} de ${HC_N} marcado${n===1?'':'s'}</span>
+    <span class="hc-limite" style="display:none">Máximo de ${HC_N} produtos — desmarque um para trocar.</span>
+  </div>`;
+}
+function hcToggle(i,el){
+  const o=HC_OPC[i]; if(!o)return;
+  const k=hcChaveOp(o);
+  if(HC_MARC.has(k)) HC_MARC.delete(k);
+  else{
+    const prods=hcProdutosMarcados();
+    if(!prods.has(o.plano)&&prods.size>=HC_N){
+      document.querySelectorAll('#hcResult .hc-limite').forEach(e=>e.style.display='inline');
+      return;}
+    HC_MARC.add(k);
   }
-  return HOSP_REV=r;
+  if(el)el.classList.toggle('sel',HC_MARC.has(k));
+  hcBotaoAplicar();
+}
+/* atualiza só o botão: remontar a lista a cada marcação redesenharia junto a
+   rede de 168 linhas */
+function hcBotaoAplicar(){
+  document.querySelectorAll('#hcResult .hc-limite').forEach(e=>e.style.display='none');
+  const n=hcProdutosMarcados().size;
+  document.querySelectorAll('#hcResult .hc-aplicar').forEach(b=>{
+    b.disabled=!n;
+    b.textContent=n?`Processar ${n} produto${n>1?'s':''}`:`Marque até ${HC_N} produtos`;});
+  document.querySelectorAll('#hcResult .hc-ach-cont').forEach(e=>{
+    e.textContent=`${n} de ${HC_N} marcado${n===1?'':'s'}`;});
+}
+function hcAplicar(){
+  /* dedupe por PRODUTO e aplica a acomodação/coparticipação do canal — é o que
+     mantém as quatro colunas comparáveis entre si */
+  const vistos=new Set(), esc=[];
+  HC_OPC.forEach(o=>{
+    if(!HC_MARC.has(hcChaveOp(o))||vistos.has(o.plano)||esc.length>=HC_N)return;
+    vistos.add(o.plano); esc.push(o.plano);
+  });
+  if(!esc.length)return;
+  HC_SLOTS=hcVazio();
+  esc.forEach((lb,i)=>{HC_SLOTS[i]=Object.assign({plano:lb},hcVarPadrao(lb));});
+  HC_MARC=new Set();
+  hcRender();
+}
+function hcAchados(q){
+  const uns=hcAchaUnidades(q);
+  if(!uns.length)return '';
+  const nomes=[...new Set(uns.map(u=>_tc(u.n)))];
+  HC_OPC=hcPlanosQueAtendem(uns);
+  let h=`<div class="fd-sec">${nomes.length>1?nomes.length+' unidades encontradas':_esc(nomes[0])}</div>
+    <div class="fd-note">${_esc(nomes.slice(0,6).join(' · '))}${nomes.length>6?' e mais '+(nomes.length-6):''} —
+      em <b>${_esc(hcPracaSel())}</b>. Marque até ${HC_N} produtos e clique em <b>Processar</b>. No quadro comparativo todos saem em <b>${_esc(hcAcomPad.toLowerCase())} · ${_esc(segLabel(hcSegPad).toLowerCase())}</b>, como escolhido no canal acima.</div>`;
+  if(!HC_OPC.length)
+    return h+`<div class="rede-aviso" style="display:block">Nenhum produto de
+      <b>${_esc(hcPracaSel())}</b> neste canal atende esta unidade. Troque a praça ou o segmento.</div>`;
+  /* a barra sai ACIMA e ABAIXO da lista: com 24 cartões, botão só no fim
+     obrigava a rolar tudo para achar a ação */
+  const barra=hcBarra();
+  h+=barra+`<div class="hc-ach">`+HC_OPC.map((o,i)=>
+    `<button class="hc-op ${HC_MARC.has(hcChaveOp(o))?'sel':''}" onclick="hcToggle(${i},this)">
+       <b>${_esc(o.plano)}</b>
+       <small>${_esc(o.acom)} · ${_esc(segLabel(o.seg))}</small>
+       <span class="hc-op-serv">${rfCode(o.serv)}</span></button>`).join('')+`</div>`+barra;
+  return h;
 }
 
-/* (uf,cidade) -> praças que atendem ali */
-let HOSP_CID=null;
-function hospPracasDaCidade(uf,cid){
-  if(!HOSP_CID){
-    HOSP_CID={};
-    for(const nome in REDE_FULL.pracas){const d=REDE_FULL.pracas[nome];
-      d.cidades.forEach(c=>{const k=d.uf+'|'+c;(HOSP_CID[k]=HOSP_CID[k]||[]).push(nome);});}
+/* Busca sem resultado quase sempre é erro de digitação ("EINSTEN"). Em vez de
+   só avisar, oferece as unidades que os produtos escolhidos cobrem e que
+   começam parecido. */
+function hcSugestoes(cols,q){
+  const alvo=_n(q); if(alvo.length<3)return '';
+  const pref=alvo.slice(0,4);
+  const chaves=cols.map(rfKey).filter(Boolean); if(!chaves.length)return '';
+  const pr=rfPraca(cols[0]); const cid=pr?new Set(pr.cidades):null;
+  const vistos=new Set(); HC_SUG=[];
+  for(const u of REDE_FULL.unidades){
+    if(HC_SUG.length>=6)break;
+    if(cid&&!cid.has(u.c))continue;
+    if(!chaves.some(k=>(u.p[k]||0)&7))continue;
+    if(!_n(u.n).includes(pref))continue;
+    const nome=_tc(u.n); if(vistos.has(nome))continue;
+    vistos.add(nome); HC_SUG.push(nome);
   }
-  return HOSP_CID[uf+'|'+cid]||null;
+  return HC_SUG.length
+    ? `<div class="hc-sug">Você quis dizer: `
+      +HC_SUG.map((x,i)=>`<button class="hx-link" onclick="hcUsaSug(${i})">${_esc(x)}</button>`).join(' · ')
+      +`</div>`
+    : '';
 }
 
-function hospIndice(){
-  if(HOSP_IX)return HOSP_IX;
-  HOSP_IX=REDE_FULL.unidades.map((u,i)=>({i,busca:_n(u.n),nome:_tc(u.n),
-    cidade:_tc(u.c),uf:u.u,bairro:u.b?_tc(u.b):'',rede:u.r||''}))
-    .sort((a,b)=>a.nome.localeCompare(b.nome));
-  return HOSP_IX;
+function hcPracaSel(){return hcPraca||(typeof pracaSel!=='undefined'&&pracaSel)||'SP / RMSP';}
+function hcVidasN(){const n=parseInt((document.getElementById('hcVidas')||{}).value,10);
+  return (isNaN(n)||n<1)?1:n;}
+
+/* o que existe nesta praça, neste segmento, nas famílias da aba */
+function hcBase(){const pr=hcPracaSel();
+  return CATALOG.filter(c=>c.operadora==='Hapvida'&&hcFamOk(c)
+    &&(c.praca||'SP / RMSP')===pr&&segDe(c)===hcSeg);}
+function hcPlanos(){const s=[];hcBase().forEach(c=>{if(!s.includes(c.label))s.push(c.label);});
+  return s.sort((a,b)=>a.localeCompare(b));}
+function hcAcoms(lb){const s=[];hcBase().forEach(c=>{if(c.label===lb&&!s.includes(c.acomodacao))s.push(c.acomodacao);});return s;}
+function hcSegs(lb,ac){const s=[];hcBase().forEach(c=>{
+  if(c.label===lb&&c.acomodacao===ac&&!s.includes(c.coparticipacao))s.push(c.coparticipacao);});return s;}
+
+/* Resolve o cartão numa ENTRADA do catálogo como a calculadora faz: entre as
+   tabelas que cobrem as vidas, a de porte MAIS ESPECÍFICO, preferindo a do
+   canal escolhido. Sem isso, a linha legada "sem porte" convive com a de
+   "2 a 29" (mesmo preço) e o produto aparecia duas vezes. */
+function hcResolve(x){
+  if(!(x&&x.plano&&x.acom&&x.seg))return null;
+  const v=hcVidasN();
+  const todas=hcBase().filter(c=>c.label===x.plano&&c.acomodacao===x.acom&&c.coparticipacao===x.seg);
+  const cabe=todas.filter(c=>(c.vmin==null&&c.vmax==null)
+    ||(v>=(c.vmin||0)&&v<=(c.vmax==null?1e9:c.vmax)));
+  if(!cabe.length)return null;
+  const pref=(arr,f)=>{const y=arr.filter(f);return y.length?y:arr;};
+  let r=pref(cabe,c=>!!c.mei===!!hcMei);
+  r=pref(r,c=>!c.contratacao||c.contratacao===hcContrat);
+  const amp=c=>(c.vmin==null&&c.vmax==null)?1e9:((c.vmax==null?1e9:c.vmax)-(c.vmin||0));
+  return r.slice().sort((a,b)=>amp(a)-amp(b))[0];
+}
+function hcCols(){return HC_SLOTS.map(hcResolve).filter(Boolean);}
+
+/* ---- controles ---- */
+function hcPracaMuda(){hcPraca=document.getElementById('hcPraca').value;HC_SLOTS=hcVazio();HC_MARC=new Set();hcRender();}
+function hcPlano(i,v){
+  HC_SLOTS[i]=v?Object.assign({plano:v},hcVarPadrao(v)):{plano:null,acom:null,seg:null};
+  hcRender();}
+function hcLimpa(){HC_SLOTS=hcVazio();HC_BUSCA='';HC_MARC=new Set();
+  ['hcBusca','hcIdade'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  hcRender();}
+
+function hcSelsPadrao(){
+  const base=hcBase();
+  const acs=[...new Set(base.map(c=>c.acomodacao))];
+  if(acs.length&&!acs.includes(hcAcomPad))hcAcomPad=acs.includes('Apartamento')?'Apartamento':acs[0];
+  const sgs=[...new Set(base.filter(c=>c.acomodacao===hcAcomPad).map(c=>c.coparticipacao))];
+  if(sgs.length&&!sgs.includes(hcSegPad))hcSegPad=sgs.includes('Parcial')?'Parcial':sgs[0];
+  const põe=(id,opts,atual,rot)=>{const el=document.getElementById(id); if(!el)return;
+    el.innerHTML=opts.map(o=>`<option value="${_esc(o)}" ${o===atual?'selected':''}>${_esc(rot?rot(o):o)}</option>`).join('');};
+  põe('hcAcomPad',acs,hcAcomPad);
+  põe('hcSegPad',sgs,hcSegPad,segLabel);
 }
 
-function hospMatches(){
-  if(!(REDE_FULL&&REDE_FULL.unidades))return [];
-  const q=_n(document.getElementById('hospInput').value||'');
-  const ix=hospIndice();
-  if(!q)return ix.slice(0,60);
-  const a=[],b=[];
-  ix.forEach(x=>{const i=x.busca.indexOf(q); if(i===0)a.push(x); else if(i>0)b.push(x);});
-  return a.concat(b).slice(0,60);
+function hcChips(){
+  const g=(id,opts,atual,fn)=>{const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=opts.map(([v,t])=>`<div class="chip ${atual===v?'active':''}" data-v="${v}">${t}</div>`).join('');
+    el.querySelectorAll('[data-v]').forEach(e=>e.onclick=()=>fn(e.dataset.v));};
+  /* trocar o segmento muda a lista de planos — a escolha anterior não
+     sobrevive, e manter cartões de outro segmento daria preço de outra tabela */
+  g('hcProdChips',[['Empresarial','Empresarial'],['Individual','Individual'],['Adesão','Coletivo por Adesão']],
+    hcSeg,v=>{hcSeg=v;HC_SLOTS=hcVazio();HC_MARC=new Set();hcRender();});
+  g('hcMeiChips',[['nao','Não-MEI'],['sim','MEI']],hcMei?'sim':'nao',v=>{hcMei=(v==='sim');HC_MARC=new Set();hcRender();});
+  g('hcContratChips',[['Compulsório','Compulsório'],['Adesão','Adesão']],hcContrat,v=>{hcContrat=v;HC_MARC=new Set();hcRender();});
 }
 
-function hospSugestoes(){
-  const box=document.getElementById('hospSug'); if(!box)return;
-  if(!(REDE_FULL&&REDE_FULL.unidades)){hospPrepara();return;}
-  const ms=hospMatches(); hospSelIdx=-1;
-  if(!ms.length){box.innerHTML='<div class="vazio">Nenhum hospital com esse nome na rede.</div>';box.style.display='block';return;}
-  box.innerHTML=ms.map((x,i)=>`<div class="it" data-i="${i}" onclick="hospEscolhe(${i})"><b>${_esc(x.nome)}</b><small>${_esc(x.cidade)} - ${x.uf}${x.bairro?' · '+_esc(x.bairro):''}</small></div>`).join('');
-  box.style.display='block';
-}
-function hospFecha(){const b=document.getElementById('hospSug');if(b)b.style.display='none';hospSelIdx=-1;}
-function hospTecla(e){
-  const box=document.getElementById('hospSug');
-  const its=box?[...box.querySelectorAll('.it')]:[];
-  if(e.key==='Escape'){hospFecha();return;}
-  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
-    if(!its.length){hospSugestoes();return;} e.preventDefault();
-    hospSelIdx=(hospSelIdx+(e.key==='ArrowDown'?1:-1)+its.length)%its.length;
-    its.forEach((el,i)=>el.classList.toggle('sel',i===hospSelIdx));
-    its[hospSelIdx].scrollIntoView({block:'nearest'});return;
-  }
-  if(e.key==='Enter'){e.preventDefault();hospEscolhe(hospSelIdx>=0?hospSelIdx:0);}
-}
-function hospEscolhe(i){
-  HOSP_PICK=null;
-  const x=hospMatches()[i]; if(!x)return;
-  HOSP_SEL=x.i;
-  document.getElementById('hospInput').value=x.nome+' - '+x.cidade+'/'+x.uf;
-  hospFecha(); hospRender();
-}
-function hospLimpa(){
-  HOSP_SEL=null;
-  HOSP_PICK=null;
-  document.getElementById('hospInput').value='';
-  document.getElementById('hospIdade').value='';
-  document.getElementById('hospVidas').value='';
-  document.getElementById('hospSeg').value='';
-  document.getElementById('hospMei').checked=false;
-  document.getElementById('hospResult').innerHTML='';
-  hospFecha();
+function hcCards(){
+  const el=document.getElementById('hcOps'); if(!el)return;
+  const planos=hcPlanos();
+  el.innerHTML=`<div class="hc-tit">Produtos para comparar <small>até ${HC_N}, lado a lado</small></div>
+    <div class="hc-grid">`+HC_SLOTS.map((x,i)=>{
+      const c=hcResolve(x);
+      const porte=c?((c.vmin==null&&c.vmax==null)?'tabela única'
+        :(c.vmin===c.vmax?c.vmin+' vida':c.vmin+' a '+c.vmax+' vidas')):'';
+      let val='escolha o plano', cls='';
+      if(x.plano&&x.acom&&x.seg){ if(c){val=porte;cls='has';}
+        else {val='sem tabela para '+hcVidasN()+' vida(s)';cls='warn';} }
+      /* A marca vem do PRODUTO: a linha PPO (Advance, Premium, Infinity e os
+         Metais) é NotreDame Saúde, não Hapvida. Mesmo critério do folder
+         (`opDisp`), para a tela e o PDF nunca discordarem. */
+      const nds=isPPO({operadora:'Hapvida',label:x.plano||''});
+      const marca=x.plano?(nds?'NotreDame Saúde':'Hapvida'):'';
+      return `<div class="hc-card"><div class="hc-cab">OPÇÃO ${i+1}`
+        +(marca?`<span class="${nds?'nds':''}">${marca}</span>`:'')+`</div>
+        <div class="hc-body">
+        <select onchange="hcPlano(${i},this.value)"><option value="">— Plano —</option>`
+        +planos.map(l=>`<option ${x.plano===l?'selected':''}>${_esc(l)}</option>`).join('')+`</select>`
+        /* acomodação e coparticipação NÃO são escolha do cartão: vêm do canal,
+           iguais nas quatro opções. Aqui só se mostra o que foi resolvido —
+           e o aviso quando o produto não tem a combinação escolhida. */
+        +(x.plano
+          ? `<div class="hc-fix ${(x.acom!==hcAcomPad||x.seg!==hcSegPad)?'dif':''}">
+               ${_esc(x.acom||'—')} · ${_esc(x.seg?segLabel(x.seg):'—')}
+               ${(x.acom!==hcAcomPad||x.seg!==hcSegPad)?'<small>este produto não tem '
+                 +_esc(hcAcomPad.toLowerCase())+' · '+_esc(segLabel(hcSegPad).toLowerCase())+'</small>':''}
+             </div>`
+          : `<div class="hc-fix vazio">${_esc(hcAcomPad)} · ${_esc(segLabel(hcSegPad))}</div>`)
+        +`<div class="hc-val ${cls}">${_esc(val)}</div></div></div>`;
+    }).join('')+`</div>`;
 }
 
-/* idade -> faixa etária da tabela. Fora de 0..120 vale como "não informada",
-   para um dígito errado não esconder a tabela inteira sem explicação. */
-function hospFaixa(){
-  const v=(document.getElementById('hospIdade')||{}).value;
+/* idade -> faixa da tabela; fora de 0..120 vale como "não informada", para um
+   dígito errado não esconder a tabela inteira sem explicação */
+function hcFaixa(){
+  const v=(document.getElementById('hcIdade')||{}).value;
   if(v===''||v==null)return null;
-  const n=parseInt(v,10);
-  if(isNaN(n)||n<0||n>120)return null;
+  const n=parseInt(v,10); if(isNaN(n)||n<0||n>120)return null;
   if(n>=59)return BANDS[9];
   return BANDS[Math.min(9,Math.max(0,[18,23,28,33,38,43,48,53,58].findIndex(t=>n<=t)))];
 }
 
-/* o que distingue duas versões do MESMO produto — vai na marcação e no
-   cabeçalho da coluna, senão duas colunas "Diamante Max" com preços
-   diferentes ficam inexplicáveis */
-function hospVar(c){
-  const porte=(c.vmin==null&&c.vmax==null)?'sem faixa de porte'
-    :(c.vmin===c.vmax?c.vmin+' vida':c.vmin+' a '+c.vmax+' vidas');
-  return [c.acomodacao, segLabel(c.coparticipacao), porte,
-          SEG_LONGO[segDe(c)]||segDe(c), c.contratacao||'', c.mei?'MEI':'']
-    .filter(Boolean).join(' · ');
-}
-
-function hospRender(){
-  const el=document.getElementById('hospResult'); if(!el)return;
-  if(HOSP_SEL==null||!(REDE_FULL&&REDE_FULL.unidades)){el.innerHTML='';return;}
-  const u=REDE_FULL.unidades[HOSP_SEL], rev=hospRev();
-  const praca=hospPracaSel();
-  const faixa=hospFaixa();
-
-  /* (praça|plano|acomodação|obst) -> serviços que ESTE hospital tem naquele
-     plano. O mesmo hospital pode internar num plano e só fazer PS noutro — é
-     o que a coluna "Atende" mostra. */
-  const cob={}, pracasQueAlcancam=new Set();
-  for(const k in u.p){
-    const m=u.p[k]; if(!(m&7))continue;
-    (rev[k]||[]).forEach(([pr,plano,acom,obst])=>{
-      pracasQueAlcancam.add(pr);
-      if(pr!==praca)return;
-      const kk=plano+'|'+acom+'|'+obst;
-      cob[kk]=(cob[kk]||0)|m;
-    });
-  }
-
-  /* cruza com o catálogo. A chave da Rede Full usa `plano`, não `label` — e um
-     mesmo `plano` tem vários labels ("+ Odonto", "(PF)", "(Adesão)"), que são
-     produtos diferentes e merecem linha própria. */
-  const seg=(document.getElementById('hospSeg')||{}).value||'';
-  const nv=parseInt((document.getElementById('hospVidas')||{}).value,10);
-  const temVidas=!isNaN(nv)&&nv>0;
-  const comMei=!!(document.getElementById('hospMei')||{}).checked;
-
-  /* O "+ Odonto" NÃO vira linha própria: é a mesma assistência médica com o
-     dental contratado junto. Nas praças NDI o preço médico é até idêntico
-     (o odonto sai a R$ 0,00), então duas linhas iguais só dobravam a tabela.
-     Vira uma COLUNA "Odonto", com o valor por vida — que é o que o cliente
-     pergunta depois de escolher o plano. */
-  const linhas=[], odoDe={};
-  CATALOG.forEach(c=>{
-    if(c.operadora!=='Hapvida')return;
-    if(!hospFamOk(c))return;
-    if((c.praca||'SP / RMSP')!==praca)return;
-    const obst=/s\/ Obstetrícia/.test(c.label||'')?'SO':'CO';
-    const m=cob[c.plano+'|'+c.acomodacao+'|'+obst];
-    if(!m)return;
-    if(seg&&segDe(c)!==seg)return;
-    /* O MEI dobra a tabela com o mesmo produto a outro preço. Fica escondido
-       por padrão — quem vende MEI liga a caixa e vê as duas colunas. */
-    if(c.mei&&!comMei)return;
-    if(temVidas&&!(c.vmin==null&&c.vmax==null)&&(nv<(c.vmin||0)||nv>(c.vmax||1e9)))return;
-    const base=c.label.replace(' + Odonto','');
-    const k=[base,c.acomodacao,c.coparticipacao,c.vmin,c.vmax,!!c.mei,c.contratacao||'',segDe(c)].join('|');
-    if(temOdonto(c)){ odoDe[k]=odontoVal(c)||0; return; }
-    linhas.push({c,serv:rfCode(m&7),k});
-  });
-
-  const outras=[...pracasQueAlcancam].filter(p=>p!==praca&&PRACAS.includes(p)).sort();
-  const rodape=outras.length
-    ? `<div class="hx-nota">Este hospital também é alcançado por planos vendidos em
-       <b>${outras.map(_esc).join('</b>, <b>')}</b> — troque a praça acima para ver os preços de lá.</div>`
-    : '';
-
-  if(!linhas.length){
-    el.innerHTML=hospCab(u)+`<div class="rede-aviso" style="display:block">
-      Nenhum plano vendido em <b>${_esc(praca)}</b> leva o cliente a este hospital.</div>`+rodape;
-    return;
-  }
-
-  const faixas=faixa?[faixa]:BANDS;
-  /* colunas do mais barato ao mais caro, pelo primeiro preço que a tabela
-     tiver — é a ordem em que o vendedor sobe a conversa, e a mesma do modelo. */
-  const preco1=e=>{for(const f of BANDS){const v=e.c.precos[f];if(v!=null)return v;}return 1e9;};
-  linhas.sort((a,b)=>preco1(a)-preco1(b)||a.c.label.localeCompare(b.c.label));
-  HOSP_LIN=linhas;
-  if(HOSP_PICK===null)HOSP_PICK=new Set(linhas.slice(0,HOSP_PAD).map(e=>e.c.id));
-  const cols=linhas.filter(e=>HOSP_PICK.has(e.c.id));
-
-  /* Estrutura: tudo o que chega a este hospital nesta praça, agrupado por
-     produto, com a marcação de quais entram na matriz. */
-  const porProd={};
-  linhas.forEach(e=>{(porProd[e.c.label]=porProd[e.c.label]||[]).push(e);});
-  let est=`<div class="hx-est"><h4>Estrutura de planos que levam a este hospital em
-    ${_esc(praca)} — <b>${cols.length}</b> de ${linhas.length} na tabela</h4>`;
-  Object.keys(porProd).sort().forEach(lb=>{
-    est+=`<div class="hx-grp"><b>${_esc(lb)}</b><div class="hx-var">`
-      +porProd[lb].map(e=>`<label><input type="checkbox" ${HOSP_PICK.has(e.c.id)?'checked':''}
-          onchange="hospMarca(${e.c.id},this.checked)"> ${_esc(hospVar(e.c))}</label>`).join('')
-      +`</div></div>`;
-  });
-  est+=`<div class="hx-acoes"><button class="hx-link" onclick="hospMarcaTodos(1)">marcar todos os
-    ${linhas.length}</button><button class="hx-link" onclick="hospMarcaTodos(0)">limpar seleção</button></div></div>`;
-
-  let html=hospCab(u);
-  html+=`<div class="hx-nota">Vendendo em <b>${_esc(praca)}</b>: ${linhas.length} opção(ões) de plano levam a este hospital.
-    ${faixa?('Mostrando só a faixa <b>'+faixa+'</b>.'):'Informe a idade para ver só a faixa do cliente.'}
-    Legenda de <b>Atende</b>: H internação · PS pronto-socorro · MT maternidade.</div>`;
-  /* Matriz: uma COLUNA por produto, uma LINHA por faixa etária. O que
-     identifica a coluna (acomodação, coparticipação, porte, contratação) vai
-     no cabeçalho, porque o mesmo produto aparece em mais de uma versão. */
-  html+=est;
-  if(!cols.length){
-    el.innerHTML=html+`<div class="hx-corte">Nenhum plano marcado — marque ao menos um
-      na estrutura acima para ver os preços.</div>`+rodape;
-    return;
-  }
-  html+=`<div class="hx-wrap"><table class="hx-tbl hx-mx"><thead><tr>
-    <th class="hx-c1">Plano / Hospital</th>`
-    +cols.map(({c})=>`<th class="hx-p"><b>${_esc(c.label)}</b>
-        <small>${_esc(hospVar(c))}</small></th>`).join('')+`</tr></thead><tbody>`;
-  html+=`<tr class="hx-lh"><td class="hx-c1">${_esc(_tc(u.n))}</td>`
-    +cols.map(({serv})=>`<td class="hx-v hx-serv">${serv||'—'}</td>`).join('')+`</tr>`;
-  html+=`<tr><td class="hx-c1">Odonto</td>`
-    +cols.map(({k})=>`<td class="hx-v">${k in odoDe?(odoDe[k]?('R$ '+fmt(odoDe[k])):'incluso'):'—'}</td>`).join('')
+function hcPrecos(cols,print){
+  const faixa=hcFaixa(), faixas=faixa?[faixa]:BANDS;
+  let h=`<div class="fd-sec">Mensalidade por vida</div>
+    <div class="fd-note">${_esc(hcPracaSel())} · ${_esc(SEG_LONGO[hcSeg]||hcSeg)} ·
+      ${hcVidasN()} vida${hcVidasN()>1?'s':''} · ${hcMei?'MEI':'Não-MEI'}.
+      ${faixa?('Mostrando só a faixa <b>'+faixa+'</b>.'):'Informe a idade para ver só a faixa do cliente.'}
+      Produto "+ Odonto" tem o dental cobrado à parte — a linha <b>Odonto</b> traz o valor por
+      vida/mês, e "incluso" é cortesia da praça.</div>`;
+  /* no PDF a tabela usa as classes do folder, que já imprimem bem */
+  h+=(print?`<table class="fd-tbl"><thead><tr><th>Faixa etária</th>`
+          :`<div class="hx-wrap"><table class="hx-tbl hx-mx"><thead><tr><th class="hx-c1">Faixa etária</th>`)
+    +cols.map(c=>(print
+        ?`<th>${_esc(c.label)}<br><small>${_esc(c.acomodacao)} · ${_esc(segLabel(c.coparticipacao))}</small></th>`
+        :`<th class="hx-p"><b>${_esc(c.label)}</b>
+           <small>${_esc(c.acomodacao)} · ${_esc(segLabel(c.coparticipacao))}</small></th>`)).join('')
+    +`</tr></thead><tbody>`;
+  const c1=print?'':' class="hx-c1"', cv=print?'':' class="hx-v"';
+  h+=`<tr${print?'':' class="hx-lh"'}><td${c1}>Odonto</td>`
+    +cols.map(c=>`<td${cv}>${temOdonto(c)?(odontoVal(c)?('R$ '+fmt(odontoVal(c))):'incluso'):'—'}</td>`).join('')
     +`</tr>`;
   faixas.forEach(f=>{
-    html+=`<tr><td class="hx-c1">${f==='59 ou mais'?'59 anos ou mais':f+' anos'}</td>`
-      +cols.map(({c})=>`<td class="hx-v">${c.precos[f]!=null?('R$ '+fmt(c.precos[f])):'—'}</td>`).join('')
-      +`</tr>`;
-  });
-  html+=`</tbody></table></div>`;
-  html+=`<div class="hx-nota">Preço da assistência médica. Produto "+ Odonto" tem o dental cobrado à parte,
-    em contrato separado — a linha <b>Odonto</b> traz o valor por vida/mês, e "incluso" é cortesia da praça.
-    Rede sujeita a alteração — confirme a vigência antes de passar ao cliente.</div>`+rodape;
-  el.innerHTML=html;
+    h+=`<tr><td${c1}>${f==='59 ou mais'?'59 anos ou mais':f+' anos'}</td>`
+      +cols.map(c=>`<td${cv}>${c.precos[f]!=null?('R$ '+fmt(c.precos[f])):'—'}</td>`).join('')+`</tr>`;});
+  return h+(print?`</tbody></table>`:`</tbody></table></div>`);
 }
 
-function hospCab(u){
-  return `<div class="hx-head"><h3>${_esc(_tc(u.n))}</h3>
-    <div>${_esc(_tc(u.c))} - ${u.u}${u.b?' · '+_esc(_tc(u.b)):''}${u.r?' · <b>'+_esc(u.r)+'</b>':''}</div>
-</div>`;
+async function hcRender(){
+  hcChips(); hcSelsPadrao(); hcCards();
+  const el=document.getElementById('hcResult'), av=document.getElementById('hcAviso');
+  if(!el)return;
+  const cols=hcCols();
+  if(!await ensureRedeFull()){
+    av.style.display='block'; av.innerHTML='Carregando a rede — pode levar alguns segundos.'; return;
+  }
+  if(!cols.length){
+    /* sem produto escolhido a busca ainda responde: diz quais planos chegam
+       naquele hospital, e o clique preenche uma das opções */
+    const ach=HC_BUSCA?hcAchados(HC_BUSCA):'';
+    av.style.display='block';
+    av.innerHTML=HC_BUSCA
+      ? (ach?'Estes planos atendem o hospital buscado — marque até '+HC_N+' produtos e clique em Processar.'
+            :'Nenhuma unidade com <b>'+_esc(HC_BUSCA)+'</b> em '+_esc(hcPracaSel())+'.')
+      : 'Busque um hospital acima, ou escolha um produto, para ver a rede de atendimento e os preços.';
+    el.innerHTML=ach||(HC_BUSCA?hcSugestoes(hcBase().slice(0,40),HC_BUSCA):'');
+    return;
+  }
+  av.style.display='none';
+  const busca=HC_BUSCA;
+  const rede=await folderRedeFull(cols,busca);
+  /* hospital existe na praça mas nenhum produto escolhido o cobre: em vez de
+     só dizer "não bate", mostra quem cobre */
+  const semRede=busca&&!/fd-rede/.test(rede);
+  const outros=semRede?hcAchados(busca):'';
+  /* quando há alternativa para oferecer, o aviso do folder ("apague a busca")
+     contradiz a lista logo abaixo — então ele dá lugar a uma frase que leva
+     até ela */
+  const semCobertura=outros
+    ? `<div class="rede-aviso" style="display:block">Nenhum dos produtos escolhidos leva o cliente a
+       <b>${_esc(busca)}</b>. Estes levam:</div>`
+    : rede;
+  el.innerHTML=hcPrecos(cols)+(semRede?semCobertura:rede)+outros
+    +(semRede&&!outros?hcSugestoes(cols,busca):'');
 }
-/* fecha a lista ao clicar fora, como no seletor de cidade */
-document.addEventListener('click',e=>{if(!e.target.closest('#pane-hosp .cid-grp'))hospFecha();});
 
-async function folderRedeFull(cols){
+/* PDF: usa a MESMA máquina do folder — monta em #folder, que o @media print
+   mostra no lugar da página, e chama window.print(). A marca do cabeçalho segue
+   os produtos escolhidos: só PPO = NotreDame Saúde, misto = as duas. */
+async function hcPDF(){
+  const cols=hcCols();
+  if(!cols.length){alert('Escolha ao menos um produto antes de gerar o PDF.');return;}
+  if(!await ensureRedeFull()){alert('A rede ainda está carregando — tente de novo em alguns segundos.');return;}
+  const busca=HC_BUSCA;
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const ppoAny=cols.some(isPPO), ppoTodos=cols.every(isPPO);
+  let fdLogo=LOGO_SVG, fdSub='Hapvida · Vendas Digital', fcls='';
+  if(ppoTodos){ fdLogo=NOTRE_LOGO_SVG; fdSub='NotreDame Saúde · Vendas Digital'; fcls='ppo'; }
+  else if(ppoAny){ fdLogo=`<span class="dual">${LOGO_SVG}${NOTRE_LOGO_SVG}</span>`;
+                   fdSub='Hapvida · NotreDame Saúde · Vendas Digital'; fcls='mixed'; }
+  const f=document.getElementById('folder'); if(!f)return;
+  f.className=fcls;
+  f.innerHTML=`<div class="fd-head"><div><h1>Rede de atendimento</h1>
+      <div class="fsub">${_esc(hcPracaSel())} · ${_esc(SEG_LONGO[hcSeg]||hcSeg)} · ${hcVidasN()} vida(s)</div></div>
+    <div class="fbrand">${fdLogo}<div style="font-size:11px;font-weight:600;margin-top:4px;opacity:.95">${fdSub}</div></div></div>
+    <div class="fd-meta">
+      <div><b>Produtos:</b> ${cols.map(c=>_esc(c.label)+' ('+_esc(c.acomodacao)+' · '+_esc(segLabel(c.coparticipacao))+')').join(' | ')}</div>
+      <div><b>Contratação:</b> ${hcMei?'MEI':'Não-MEI'}${cols.some(c=>c.contratacao)?(' · PME 30-99 '+hcContrat):''}</div>
+      ${busca?`<div><b>Hospital buscado:</b> ${_esc(busca)}</div>`:''}
+      <div><b>Data:</b> ${hoje}</div></div>
+    ${hcPrecos(cols,true)}
+    ${await folderRedeFull(cols,busca)}
+    <div class="fd-foot">Mensalidade por vida, conforme a faixa etária e a tabela vigente. Produto "+ Odonto"
+      tem o plano odontológico cobrado à parte, em contrato separado. Rede: unidades de internação, pronto-socorro
+      e maternidade credenciadas na praça, conforme a rede vigente (mesma base do painel Rede Full); pode haver
+      unidades não listadas e a rede é sujeita a alteração. Valores referenciais, sujeitos a condições contratuais
+      e vigência de tabela; não vinculam à prestação do serviço, que se dá apenas na assinatura do contrato.
+      Emitido em ${hoje}.</div>`;
+  const t0=document.title;
+  document.title='Rede - '+hcPracaSel().replace(/[\\/]/g,'-');
+  /* os logos são data-URI: sem o decode() saem em branco no PDF. Mas o
+     decode() NÃO resolve enquanto a aba está em segundo plano — fica pendente,
+     e sem o limite abaixo o botão montaria o PDF e nunca abriria a impressão.
+     Medido: com o painel do navegador oculto, as duas logos ficaram penduradas
+     até a aba voltar a aparecer. 1,2 s basta para uma data-URI já carregada. */
+  const pronta=i=>Promise.race([i.decode().catch(()=>{}),
+                                new Promise(r=>setTimeout(r,1200))]);
+  try{await Promise.all([...f.querySelectorAll('img')].map(pronta));}catch(e){}
+  window.print();
+  setTimeout(()=>{document.title=t0; f.innerHTML=''; f.className='';},600);
+}
+
+function hcPrepara(){
+  const sel=document.getElementById('hcPraca');
+  if(sel&&!sel.options.length){
+    if(!hcPraca)hcPraca=hcPracaSel();
+    sel.innerHTML=PRACAS.map(p=>`<option ${p===hcPraca?'selected':''}>${_esc(p)}</option>`).join('');
+  }
+  hcRender();
+}
+
+/* `busca` é opcional e só a aba Hospital × planos usa: filtra as unidades pelo
+   nome. O folder chama sem ela e continua listando a rede inteira. */
+async function folderRedeFull(cols,busca){
   if(!await ensureRedeFull())return '';
+  const alvo=busca?_n(busca):'';
   const hc=cols.map(c=>({c,k:rfKey(c)})).filter(x=>x.k);
   if(!hc.length)return '';
   const pr=rfPraca(hc[0].c); if(!pr)return '';
@@ -2763,7 +2919,11 @@ async function folderRedeFull(cols){
   const temp=u=>u.u===uf&&hc.some(x=>(u.p[x.k]||0)&7);
   let naPraca=REDE_FULL.unidades.filter(u=>temp(u)&&cid.has(u.c));
   let noEstado=(naPraca.length<MIN)?REDE_FULL.unidades.filter(u=>temp(u)&&!cid.has(u.c)):[];
-  if(!naPraca.length&&!noEstado.length)return '';
+  if(alvo){const bate=u=>_n(u.n).includes(alvo)||_n(u.b||'').includes(alvo);
+    naPraca=naPraca.filter(bate); noEstado=noEstado.filter(bate);}
+  if(!naPraca.length&&!noEstado.length)
+    return alvo?`<div class="rede-aviso" style="display:block">Nenhuma unidade da rede destes
+      produtos bate com <b>${_esc(busca)}</b> — apague a busca para ver a rede inteira.</div>`:'';
   /* Em SP o folder abre por ZONA — Centro, Zona Sul, Zona Oeste, Zona Norte,
      Zona Leste, ABCD, Grande SP, Grande SP - Sul, Interior e depois as demais
      em ordem alfabética. É como era o folder antigo, e `cmpRegiao` já carrega
@@ -2858,7 +3018,7 @@ function ensureRede(){
    Região que não estiver nesta lista vai para o fim, em ordem alfabética —
    assim uma região nova entra sem quebrar nada. */
 const REDE_REG_ORDEM=['São Paulo - Centro','São Paulo - Zona Sul','São Paulo - Zona Oeste',
-  'São Paulo - Zona Norte','São Paulo - Zona Leste','ABCD','Grande SP','Grande SP - Sul','Interior'];
+  'São Paulo - Zona Norte','São Paulo - Zona Leste','ABCD','Grande SP','Interior'];
 function _regRank(r){const i=REDE_REG_ORDEM.indexOf(r||'');return i<0?REDE_REG_ORDEM.length:i;}
 function cmpRegiao(a,b){return _regRank(a)-_regRank(b)||(a||'').localeCompare(b||'');}
 
