@@ -77,7 +77,12 @@ UF_NOME = {"acre":"AC","alagoas":"AL","amapa":"AP","amazonas":"AM","bahia":"BA",
 #   "Hapvida - Minas Gerais · Belo Horizonte". Caía em Divinópolis, a ~100 km,
 #   enquanto os vizinhos (Betim, Contagem, Sarzedo, Mário Campos, São Joaquim
 #   de Bicas) já iam para BH. Decisão da Diretoria em 30/09/2026: vende por BH.
-OVERRIDE = {"ibirite|MG": "Belo Horizonte - MG"}
+#   santa barbara doeste|SP — a aba traz Santa Bárbara D'Oeste em "Limeira" E
+#   em "Americana" (grafias diferentes: D’oeste e D´Oeste, mesma cidade). Caía
+#   em Limeira pela ordem dos blocos. Reportado pelo usuário em 06/11/2026:
+#   quem comercializa é Americana.
+OVERRIDE = {"ibirite|MG": "Belo Horizonte - MG",
+            "santa barbara doeste|SP": "Americana - SP"}
 
 cidades, obs, sem_praca = {}, {}, []
 for bloco in re.finditer(r'<div class="ac-op">(.*?)(?=<div class="ac-op">|$)', pane, re.S):
@@ -120,6 +125,29 @@ for chave, praca in OVERRIDE.items():
 
 SAIDA.write_text(json.dumps({"cidades": cidades, "obs": obs}, ensure_ascii=False,
                             separators=(",", ":")), encoding="utf-8")
+
+# O index.html carrega o mapa EMBUTIDO (CIDADES_PRACA), não lê o cidades.json em
+# tempo de execução. Gerar só o JSON deixava a correção sem efeito na tela — foi
+# o que aconteceu com santa barbara doeste em 06/11/2026. Então a injeção faz
+# parte do mesmo passo, e não há como um ficar velho e o outro novo.
+INI, FIM = "/*CIDADES_INI*/", "/*CIDADES_FIM*/"
+a = html.find(INI)
+b = html.find(FIM, a)
+assert a > 0 and b > a, "não achei o bloco CIDADES_INI/FIM no index.html"
+bloco = (INI + "const CIDADES_PRACA="
+         + json.dumps(cidades, ensure_ascii=False, separators=(",", ":"))
+         + ",CIDADES_OBS="
+         + json.dumps(obs, ensure_ascii=False, separators=(",", ":"))
+         + ";" + FIM)
+novo = html[:a] + bloco + html[b + len(FIM):]
+# confere lendo de volta o que ficou no arquivo, não o que eu acho que escrevi
+import ast
+conf = novo[novo.find(INI) + len(INI):novo.find(FIM)]
+j1 = conf[conf.find("{"):conf.find(",CIDADES_OBS=")]
+j2 = conf[conf.find(",CIDADES_OBS=") + len(",CIDADES_OBS="):].rstrip(";")
+assert json.loads(j1) == cidades and json.loads(j2) == obs, "o bloco gravado não bate"
+FONTE.write_text(novo, encoding="utf-8")
+print(f"index.html: bloco CIDADES atualizado ({len(cidades)} cidades)")
 print(f"cidades mapeadas: {len(cidades)}  (com observação: {len(obs)})")
 print(f"praças alcançadas: {len(set(cidades.values()))} de {len(pracas)}")
 if sem_praca:
