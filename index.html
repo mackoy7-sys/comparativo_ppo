@@ -1560,8 +1560,16 @@ function buildMeiChips(){
   const semMei=CATALOG.length&&!pracaTemMEI();
   const inerte=CATALOG.length&&!meiRelevante();
   const tip='Em '+pracaSel+' não existe tabela promocional MEI separada — a mesma tabela atende os dois contratos. Pode cotar normalmente, o valor é o mesmo. A tabela MEI própria existe só nas praças de SP e do Rio.';
+  /* A nota de `semMei` tem PRECEDÊNCIA sobre a de `inerte`. Quando a praça não
+     tem tabela MEI própria as duas condições são verdadeiras ao mesmo tempo
+     (sem entrada MEI, nenhum plano visível é afetado pelo filtro), e o
+     "não se aplica" engolia a frase útil. Um vendedor em Porto Alegre leu
+     "não se aplica" como "não vende para MEI" e veio perguntar — é o oposto:
+     vende, e pelo mesmo preço. O "não se aplica" fica só para o outro motivo,
+     o de o SEGMENTO escolhido não ter plano afetado pelo filtro. */
   el.innerHTML=opts.map(([v,l])=>`<div class="chip ${inerte?'inerte':(meiMode===v?'active':'')}" data-mei="${v}">${l}</div>`).join('')
-    +(inerte?notaInerte():(semMei?`<span class="mei-nota" title="${tip}">Tabela única — serve para MEI e Não-MEI</span>`:''));
+    +(semMei?`<span class="mei-nota" title="${tip}">Tabela única — serve para MEI e Não-MEI</span>`
+            :(inerte?notaInerte():''));
   if(!inerte) el.querySelectorAll('[data-mei]').forEach(e=>e.onclick=()=>setMei(e.dataset.mei==='true'));
 }
 function setMei(v){
